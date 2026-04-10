@@ -1,0 +1,2729 @@
+# Project Context
+
+Last updated: 2026-04-09
+
+## Local working rules
+
+- Browser automation for this project should run headlessly by default.
+- Do not open visible Chrome / Playwright windows unless the user explicitly asks to watch the interaction live.
+- If a video is needed, prefer background frame capture plus `mp4` assembly over visible desktop/browser recording.
+- If the user says "from scratch", the drawing image itself is the only source of truth for points; do not replay old point lists or legacy OCR outputs.
+
+## Product direction
+
+- The old OCR / callout-extraction project was intentionally dropped.
+- The repository is now for an annotation-first drawing workspace.
+- Main idea: the AI agent and the human should operate on the same session, same viewport, same markers, same history.
+
+## Current architecture
+
+- `apps/web`
+  - Next.js workspace UI
+  - home screen for session creation and recent sessions
+  - session workspace with drawing canvas, viewport controls, marker list, selected-marker editor, and recent actions
+- `services/inference`
+  - FastAPI API
+  - in-memory session store
+  - local raster-image upload
+  - command-driven mutations: viewport, marker create/move/update/confirm/reject/delete
+- `packages/shared-types`
+  - shared contracts for `AnnotationSession`, `DocumentAsset`, `Viewport`, `Marker`, `ActionLogEntry`, and session commands
+
+## Current one-shot state
+
+- 2026-04-09: naming/signature cleanup review for `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`.
+  - safest no-logic-change candidates:
+    - `HistoryQueueContext` / `HistoryJumpContext` are typed from `historyStatusLabels` values instead of explicit semantic unions
+    - `MarkerReviewCandidateItem` + `selectedMarkerReview*` names are ambiguity-specific in practice and should likely be renamed to `AmbiguityReview*`
+    - `MarkerListItem` still mixes vague `tone` with separate `hasAmbiguityReview`; one clearer visual-state prop would read better
+    - `AmbiguityReviewPanel` signature is scalar-heavy and mixes queue/conflict/action props; small prop grouping or tighter names would be the safest cleanup
+
+- 2026-04-09: quick decomposition review for `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`.
+  - next safest candidates after the already extracted History block:
+    - `AmbiguityReviewCard`
+    - `AmbiguityReviewCandidateItem`
+    - `MarkerListItem`
+    - optional small `AmbiguityQueueControls`
+  - reason:
+    - these blocks are mostly presentational and already consume stable derived view-model data from the parent
+    - they do not need to own session mutation logic; parent can keep callbacks and queue state
+  - avoid decomposing canvas marker overlays next:
+    - marker dot + floating label currently depend on shared scale / inline-editor / conflict-highlight math and are less safe for a quick split
+
+- 2026-04-07: the root candidate-first pipeline was strengthened instead of doing more manual clicking.
+- 2026-04-09: ambiguity review is now surfaced directly in the workspace UI.
+  - `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx` now shows a dedicated `AI review` block for a selected marker with status `ai_review`.
+  - the block pulls reason text from marker-linked `pipelineConflicts` (`association_ambiguity`, `candidate_ambiguity`) and lists up to 4 nearby or directly linked pending candidates.
+  - each alternative can either focus the candidate on canvas or move the current marker to that candidate position immediately.
+  - this was intentionally implemented without backend/API changes; it reuses existing session data already present in the client payload.
+  - the left marker list now also marks ambiguous `ai_review` points with a dedicated review badge and the same warm highlight color family, so спорные markers are visible before opening the right inspector.
+  - the left marker rail now has a quick-review mode for ambiguity markers:
+    - toggle `только review N` filters the left list down to ambiguous `ai_review` markers only
+    - arrow buttons jump to previous/next ambiguous marker in sequence
+    - when the filter turns on, the UI auto-focuses the first ambiguous marker if the current selection is outside that subset
+  - the marker header now also shows current ambiguity-queue progress:
+    - `Спорных осталось: N`
+    - when an ambiguity marker is selected, `Сейчас: i из N`
+    - compact warm progress bar reflects the current position inside the active ambiguity queue
+  - the same left rail now has a one-path ambiguity review flow:
+    - previous/next buttons move through the ambiguity queue
+    - the selected ambiguity marker now has `Подтвердить и дальше` in the right review card
+    - this confirms the current marker as human-reviewed and immediately jumps to the next ambiguous marker if one still exists
+    - the same review card now also has `Ложный и дальше`
+    - this removes the current ambiguous AI marker and immediately jumps to the next ambiguity marker instead of dropping the operator back into the full marker list
+    - when ambiguity markers drop to zero, the UI now auto-leaves the ambiguity-only mode and shows a short completion message that the ambiguous points are finished and the full list is restored
+  - the history panel now highlights ambiguity-review decisions without backend changes:
+    - recent marker IDs seen in the ambiguity queue are remembered client-side for the current page session
+    - `marker_confirmed` on such markers gets a green `ambiguity: подтверждено` history badge
+    - `marker_deleted` on such markers gets a red `ambiguity: ложный` history badge
+  - the same history panel no longer shows raw `JSON.stringify(payload)` output:
+    - `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx` now formats recent actions into short human titles like `Точка подтверждена`, `Точка удалена`, `Авторазметка завершена`
+    - detail lines now show only useful context from payload (`label`, `pointType`, `status`, `x/y`, document size, auto-annotate counts) instead of raw JSON
+    - actor chips are also normalized to human wording (`человек`, `ai`, `система`)
+    - ambiguity outcomes are now promoted into the main history copy itself, so these entries read as distinct events like `Спорная AI-точка подтверждена` and `Спорная AI-точка удалена как ложная`, not just generic marker actions with a side badge
+    - the history modal now also has a local `только ambiguity N` filter, so operators can review only ambiguity decisions without scanning the whole recent action list
+    - this filter has its own empty state (`Спорных решений в истории пока нет.`) and does not require backend/API changes
+    - the same history header now also shows a compact ambiguity-review summary (`подтверждено N`, `ложных M`) so the operator sees the current ambiguity outcome balance without scanning the list
+    - the ambiguity-only empty state was refined to explain the situation and next step: there are no ambiguity entries in the latest actions, and the user can switch the filter off to see the full history
+  - ambiguity review now has keyboard navigation in `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`:
+    - `←` / `A` moves to the previous ambiguous marker
+    - `→` / `D` moves to the next ambiguous marker
+    - `Enter` confirms the current ambiguous marker and advances
+    - `Delete` / `Backspace` marks the current ambiguous AI marker as false and advances
+    - shortcuts are intentionally disabled while focus is inside `input` / `textarea` / editable fields, so normal text editing is not hijacked
+    - the `AI review` card now also shows the shortcut hint inline, so operators do not need to memorize the key map
+  - when ambiguity review finishes, the UI now automatically opens `История` in `только ambiguity` mode so the result of the just-finished pass is immediately visible
+    - this auto-open is intentionally tied to the existing one-shot `ambiguityReviewCompleted` signal, not to raw `ambiguityReviewMarkers.length === 0`
+    - if `Сводка` was open, it is closed first so the user does not end up with two floating panels competing at once
+  - ambiguity navigation now tracks the current pass locally, so next/prev and ambiguity hotkeys do not send the user back to points already handled in the same pass
+    - `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx` now keeps a local set of already processed ambiguity marker ids for the current review run
+    - the ambiguity-only marker list, remaining counter, progress indicator, prev/next buttons, and `A/D` / arrow hotkeys are now based on the remaining unprocessed ambiguity queue instead of the raw active ambiguity set
+    - this is still a frontend-only behavior; backend session contracts and pipeline data were not changed
+  - ambiguity review now also supports a local `Пропустить` path for the current pass
+    - the `AI review` card has a neutral skip action, and shortcut `S` does the same from keyboard
+    - skipping does not confirm/delete the marker and does not write a backend action; it only removes that marker from the current pass queue
+    - the ambiguity header now also shows `Отложено: N`, so the operator sees how many спорных points were consciously deferred
+    - if the whole current pass was only skipped, the UI exposes `вернуть review N` to start a new pass over those deferred ambiguity markers without touching already confirmed/deleted ones
+  - the history modal now also merges local ambiguity skip events into the same recent feed
+    - skipped ambiguity markers appear as separate local history entries like `Спорная AI-точка отложена`
+    - the ambiguity-only history filter now shows confirmed, deleted, and skipped outcomes together
+    - the history summary chips now include `отложено N` alongside `подтверждено N` and `ложных N`
+    - this remains frontend-only and intentionally does not alter backend `actionLog`
+  - ambiguity review now also supports a local defer/skip branch with no backend changes:
+    - the `AI review` card now includes `Пропустить`
+    - `S` works as the matching shortcut for the same action
+    - skipped ambiguity markers are removed from the current local review pass, but they are not confirmed, deleted, or written into history
+    - remaining-count, progress, quick navigation, and ambiguity hotkeys now all respect this local skip state too, so the operator can finish the current pass without repeatedly returning to deferred points
+  - deferred ambiguity review is now treated as a separate follow-up pass, not as invisible leftovers:
+    - the marker rail already supports a dedicated `только отложенные N` mode over skipped ambiguity markers
+    - when the current ambiguity pass ends but deferred markers still exist, the completion state now says `Текущий проход завершён` instead of implying that all review work is done
+    - the same completion card now gives a direct `открыть отложенные N` action, so the operator can start the deferred pass immediately
+    - auto-opening `История` in `только ambiguity` mode now happens only when there are no deferred ambiguity markers left, so the UI does not pull the user away from unfinished skipped points
+  - the left ambiguity controls are now presented as an explicit queue switcher instead of two separate toggle buttons:
+    - the marker rail has a compact segmented control `все / review / отложенные`
+    - each segment shows its live count, so the operator sees the total ambiguity pool and both subqueues at a glance
+    - switching queue mode still reuses the same underlying logic (`all`, `current`, `deferred`) and keeps focus on the first valid marker in that queue when needed
+    - the deferred completion card now uses the same queue switcher logic, so `открыть отложенные N` and the header control stay consistent
+    - the small ambiguity summary above the switcher is now queue-aware too:
+      - in `все` mode it shows the full ambiguity pool plus the live `review` count
+      - in `review` / `отложенные` modes it shows which queue is active right now, so the progress and arrow navigation are no longer visually ambiguous
+  - the right `AI review` card is now queue-aware too:
+    - it explicitly shows whether the selected point is being processed in the main `Review-проход` or in an `Отложенный проход`
+    - the helper copy now states the current point's place inside that queue (`точка i из N`), so the operator does not need to correlate the card with the left rail manually
+    - when the full marker list is open, the card still explains that the point belongs to the working review queue, so confirm/delete actions remain predictable
+    - in deferred mode the action area now explicitly switches to a final-decision state:
+      - a short note explains that skip already happened earlier and this pass is only for final resolution
+      - the disabled neutral button now reads `Skip уже пройден` instead of looking like a still-available action
+      - the hotkey hint also names this state as an `Отложенный проход`, so the available actions are clear even from the keyboard help
+  - returning to deferred ambiguity markers now produces an explicit local history event:
+    - switching into the `отложенные` queue writes a local `restored` entry, so the UI records not only that a point was deferred, but also that the operator consciously returned to that follow-up pass
+    - this restore event is shown in the same ambiguity history feed as `ambiguity: возвращено`
+    - the ambiguity history summary now includes `возвращено N` alongside `подтверждено`, `ложных`, and `отложено`
+    - the restore formatter groups deferred-pass re-entry as a queue-level action, so the history reads as returning to the deferred review flow, not as an unexplained duplicate skip
+  - ambiguity history cards now also show a per-marker route when enough events exist for the same point:
+    - entries are linked by `markerId`, not just by time
+    - the card can now show a short route like `отложено -> возвращено -> подтверждено`
+    - the main history order is unchanged; this is extra context on each entry, not a regrouping of the feed
+    - the goal is to make the lifecycle of one ambiguous point readable at a glance without opening logs or comparing multiple cards manually
+  - ambiguity history cards now also support jumping back to the canvas:
+    - when the marker still exists in the current session, the card shows `к точке`
+    - clicking it closes the history modal and reuses the normal `selectMarker(..., { focus: true })` path, so the viewport centers on the point without separate navigation code
+    - the same jump path is now attached to the ambiguity route chips too, so the route line itself is actionable instead of being read-only text
+    - history jumps now also restore the right ambiguity context before focusing the marker:
+      - markers from the active review queue switch the left rail into `review`
+      - markers from the deferred pass switch it into `отложенные`
+      - markers that no longer belong to an active ambiguity queue fall back to `все`
+    - history cards now also show that jump target explicitly before the click:
+      - the jump action itself is now a compact combined control, with an embedded context badge (`review`, `отложенные`, or `все`) inside the `к точке` button
+      - this badge is derived from the current/deferred marker sets and mirrors what `jumpToHistoryMarker(...)` will actually do
+      - the old duplicate bottom `К точке` button was removed, so each history card now exposes one jump action instead of repeating the same navigation twice
+    - deleted markers intentionally do not get this action, because there is no live marker left to focus
+    - the same top meta row was compacted further for ambiguity entries:
+      - the old separate `ambiguity:*` badge and actor label are now merged into one colored meta-chip (`подтверждено · ai`, `отложено · человек`, etc.)
+      - non-ambiguity entries still keep the lightweight actor label on their own
+      - this keeps the color semantics intact while reducing chip count and line wrapping in long history lists
+  - the ambiguity route line now also highlights the current step for the open history card:
+    - the route chip whose decision matches the current entry (`отложено`, `возвращено`, `подтверждено`, `ложный`) gets a brighter highlight
+    - this keeps the whole route visible, but immediately shows which step the current card represents
+    - the route chips stay clickable, so the added emphasis does not remove the jump-back behavior
+    - the route line itself was also visually lightened:
+      - the separate `маршрут:` caption was removed from the card body and replaced with a lightweight timeline row
+      - route chips and arrows are slightly smaller now, so the route reads as inline history context instead of a heavy sub-block
+      - click behavior and current-step highlighting stay unchanged
+  - unfinished ambiguity history cards now also explain the next operator action:
+    - `отложено` cards say that the next step is to return the point to review and take a final decision
+    - `возвращено` cards say that the next step is to either confirm the point or mark it as false
+    - final states (`подтверждено`, `ложный`) intentionally do not get this block, so the history does not add noise after a resolved ambiguity case
+    - that helper was later visually compacted into a lighter inline hint row with a tiny `дальше` chip, so unresolved cards still explain the next action without nesting another heavy mini-card inside the history entry
+  - the history-card vertical rhythm was tightened as a final density pass:
+    - outer padding, route spacing, and detail spacing were reduced slightly
+    - detail text now uses a slightly smaller, denser line-height
+    - the intent is purely density: more history entries fit into the modal viewport without changing any interaction model
+  - the top ambiguity summary in `История` now separates historical outcomes from current unfinished work:
+    - the existing chips (`подтверждено`, `ложных`, `отложено`, `возвращено`) still describe what already happened
+    - a separate `что сейчас осталось` block now says how many ambiguity points still wait for a final decision in the current session
+    - if some of them are deferred, the hint also says how many were pushed into the separate deferred pass
+    - when no live ambiguity markers remain, the same block flips into a short closed-state message instead of pretending that the history summary is still an action queue
+    - the same block is now actionable:
+      - `открыть review N` jumps straight into the current ambiguity queue
+      - `открыть отложенные N` jumps straight into the deferred pass
+      - both actions close `История` first and then reuse the normal queue-switching logic, so navigation stays consistent with the left rail controls
+    - there is now also one primary CTA that chooses the best next entry automatically:
+      - it prefers the current `review` queue
+      - if `review` is empty, it falls back to the deferred pass
+      - this lets the operator resume the ambiguity workflow in one click without deciding between the two buttons first
+    - opening a queue from this history block now also forces focus onto the first live marker of that queue, so returning from `История` lands on a concrete ambiguity point instead of only switching list mode
+    - the primary CTA now also shows its target flow explicitly before the click via a small context badge (`review` or `отложенные`), so the user sees which queue the auto-choice has selected
+    - because that badge now carries the queue identity, the main CTA label itself was shortened to just `продолжить`, which removes duplicated wording inside the same control group
+    - the secondary actions in this block now render only for the alternative queue, so the UI no longer shows a second button that repeats the same target already chosen by the primary CTA
+    - those secondary actions were also shortened to compact queue labels (`review N`, `отложенные N`), so the whole action row now reads as one consistent queue switcher instead of mixing long command verbs with state badges
+    - the history modal itself now uses a sticky control header inside the scroll area:
+      - count line, ambiguity summary chips, `что сейчас осталось`, and the ambiguity filter stay pinned at the top while the event list scrolls below
+      - this keeps queue controls and current-session summary visible during long history review passes
+      - the modal body was converted to a fixed-height flex layout so the sticky section and the scrolling list remain stable together
+    - that sticky header now also has a compact-on-scroll state:
+      - after the user scrolls down, the count line and extra helper copy collapse away
+      - the `что сейчас осталось` block shrinks to its action row, while queue actions remain available
+      - this preserves control access but gives more vertical space back to the event list during long reviews
+    - the sticky header can now also be forced into compact mode manually:
+      - a small `компактно` toggle pins the collapsed header even before scrolling
+      - this gives the operator an explicit “more room for the log” mode instead of relying only on scroll position
+      - closing the history modal resets that manual compact pin, so each new open starts from the full header again
+    - the right side of that sticky header now also shows passive mode chips:
+      - current history scope (`ambiguity` vs `все`)
+      - current header density (`compact` vs `full`)
+      - current primary unresolved flow (`primary review` / `primary отложенные`) when ambiguity work still exists
+      - this makes the modal state readable at a glance without inferring it from button styling alone
+    - some of those mode chips are now interactive too:
+      - the scope chip (`ambiguity` / `все`) toggles the history filter directly
+      - the `primary review` / `primary отложенные` chip jumps straight into that primary unresolved queue
+      - `compact/full` stays informational because manual density control already has its own dedicated toggle
+    - the header now also shows a compact breadcrumb line like `журнал -> ambiguity -> review`
+      - it summarizes the current history scope plus the current primary ambiguity flow in one line
+      - its `ambiguity/все` segment now toggles the scope directly, and its `review/отложенные` segment jumps into that primary flow when one exists
+      - this makes the breadcrumb itself a lightweight navigation surface instead of pure text
+    - the sticky header now also exposes a direct work-return CTA:
+      - a `следующий кейс` button uses the same resume logic as the ambiguity summary block
+      - it prefers the live `review` queue and falls back to the deferred queue when needed
+      - this turns the history modal into an explicit return point back into unresolved ambiguity work, not just a read-only log
+      - a small queue chip now sits next to that CTA too, so the operator sees before clicking whether the next unresolved jump will go into `review` or `отложенные`
+      - that chip now also carries the remaining count for the chosen flow (`review 3`, `отложенные 2`), so the CTA communicates both direction and current workload size
+      - the header also exposes one context-aware alternate queue action:
+      - in the normal case it offers `в отложенные N` as a direct jump into the deferred tail
+      - if the operator is already inside the deferred pass while a live main queue still exists, that same slot flips into `в review N`
+      - this keeps the row compact while still giving an explicit way to jump into the non-default queue
+    - history action wording was also normalized:
+      - the old mixed verbs (`продолжить`, `следующий незавершённый`, bare `review N`) were aligned into one navigation vocabulary
+      - primary resume actions now use `следующий кейс`
+      - alternate queue jumps now read `в review N` / `в отложенные N`
+      - those history/ambiguity action labels now also live in a small local constants map inside `annotation-workspace.tsx`, so future wording changes can be made in one place instead of editing scattered inline strings
+      - sticky-header status and breadcrumb labels (`журнал`, `ambiguity`, `все`, `compact`, `full`, `primary`, `review`, `отложенные`, `без очереди`) now use the same centralized local map too, so the language layer for this modal no longer depends on scattered inline literals
+    - the sticky history header itself is now partially decomposed inside `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`:
+      - repeated queue-badge markup moved into `HistoryQueueChip`
+      - ambiguity outcome chips moved into `HistorySummaryChips`
+      - the `что сейчас осталось` block moved into `HistoryNextStepPanel`
+      - the lower control/breadcrumb/status area moved into `HistoryStickyToolbar`
+      - derived state and callbacks still stay in the parent component, so behavior did not change; the refactor only reduced JSX sprawl inside the main render tree
+    - the history cards themselves were also decomposed locally in the same file:
+      - top row with title / jump / meta chip moved into `HistoryCardHeader`
+      - ambiguity route row moved into `HistoryRouteRow`
+      - card shell with next-step hint and details moved into `HistoryEntryCard`
+      - per-entry derived values (`route`, `jump context`, `next step`, meta styling) still stay in the `displayedHistoryEntries.map(...)` path, so the refactor stayed presentation-only and did not move business logic into helper components
+    - one last dense `displayedHistoryEntries.map(...)` block was then flattened too:
+      - per-entry derivation for `route`, `canJumpToMarker`, `historyJumpContext`, `nextStepHint`, `ambiguityMetaLabel`, and `ambiguityMetaClass` now lives in a local pure helper `getHistoryEntryCardViewModel`
+      - the render path now mostly does `const viewModel = ...` and passes it into `HistoryEntryCard`
+      - a local `sessionMarkerIds` set is used for jump availability, so the helper stays focused on minimal inputs instead of reaching into full session objects
+    - the right-side annotation workspace was then decomposed further too:
+      - left marker rows now render through a local `MarkerListItem` component instead of keeping full row markup inline in `displayedMarkers.map(...)`
+      - the ambiguity-review candidate card now renders through `AmbiguityReviewCandidateCard`
+      - the full `AI review` panel now renders through `AmbiguityReviewPanel`
+      - review candidate discovery, queue hints, and action gating still stay in the parent component; only the JSX shell moved, so this refactor stayed presentation-first and low-risk
+    - the footer of the left `Точки` rail was also collapsed into a local `MarkerRailFooter` component:
+      - queue summary text, progress bar, mode switcher (`все / review / отложенные`), prev/next pager, completion/deferred state blocks, and selected-marker chips now render there
+      - ambiguity queue math, counts, current position, and mode switching logic still stay in the parent component and are only passed down as props
+      - this removed another large JSX block from the main render path without changing the queue workflow itself
+  - history cards in `История` were also tightened without changing behavior:
+    - the top action row now uses slightly denser spacing and smaller ambiguity status chips
+    - this keeps the existing combined `context badge + к точке` jump control intact, but reduces vertical noise in long ambiguity-review sessions
+- Main backend fixes:
+  - OCR page regions are now clustered by physical location before final label choice, so conflicting hypotheses like `13` vs `1` or `11` vs `71` in the same spot collapse into one best region instead of both surviving.
+  - dashed labels like `14-1`, `14-2`, `14-3`, `14-4(1)`, `14-4(2)` are no longer dropped just because they sit in a dense horizontal row.
+  - standalone low-confidence box candidates became stricter, which removed a common false `8` on `page4`.
+  - bottom-page footer numbers are now filtered as a separate false-positive type, similar to the existing header/title suppression.
+- New backend tests were added for:
+  - OCR hypothesis collapse
+  - dashed label survival in dense rows
+  - same-target candidate collapse (`11` vs `71`)
+  - low-confidence single-digit box rejection
+  - footer page-number rejection
+- Verified state on `C:/projects/sites/blueprint-rec-2/blueprints-test/page4.png`:
+  - final candidate list now resolves to exactly `17` labels:
+    - `13, 9, 4, 11, 8, 10, 6, 1, 3, 7, 5, 2, 14-1, 14-2, 14-3, 14-4(1), 14-4(2)`
+  - local auto-annotation from those candidates yields `17` `ai_detected` markers with `0` pending review in the local diagnostic run.
+- Live end-to-end proof on the running API/UI:
+  - web: `http://127.0.0.1:3003`
+  - api: `http://127.0.0.1:8010/api/health`
+  - one-shot session created through the live API: `http://127.0.0.1:3003/sessions/b8664afc-9b17-49ef-b817-eb4ba30626b6`
+  - checked export artifacts:
+    - ZIP: `C:/projects/sites/blueprint-rec-2/exports/one-shot/page4-20260407/page4-one-shot-export.zip`
+    - PNG: `C:/projects/sites/blueprint-rec-2/exports/one-shot/page4-20260407/unzipped/page4-one-shot-20260407/annotated.png`
+    - XLSX: `C:/projects/sites/blueprint-rec-2/exports/one-shot/page4-20260407/unzipped/page4-one-shot-20260407/markers.xlsx`
+    - summary: `C:/projects/sites/blueprint-rec-2/exports/one-shot/page4-20260407/summary.json`
+
+## Implemented behavior
+
+- create/list/get annotation sessions
+- upload one raster drawing to a session
+- store measured width/height and serve the uploaded file back from local storage
+- save viewport center and zoom
+- place markers and edit them through the same command API
+- record action history for session creation, document upload, viewport changes, and marker mutations
+- frontend canvas supports:
+  - pan
+  - zoom in/out + wheel zoom
+  - point placement
+  - marker selection
+  - marker nudging
+  - marker label/status/confidence editing
+
+## Checks that pass
+
+- `npm run lint:web`
+- `npm run build:web`
+- `npm run test:inference`
+- 2026-04-09:
+  - `cmd /c npm.cmd run build --workspace @blueprint-rec/web`
+  - `cmd /c npm.cmd run test:inference` (`45 passed`)
+
+## Important decisions
+
+- OCR-specific models, routes, tests, and docs were removed.
+- The backend is command-oriented so future AI tooling can call the same primitives as the human UI.
+- Marker state is the source of truth; automation should mutate state explicitly instead of hiding side effects.
+- This MVP currently supports raster images only.
+- 2026-03-29: found a real annotation-quality failure in the current UI flow. New points are created immediately with status `human_corrected`, and pressing `Enter` in the inline label editor saves the label without any required loupe-based confirmation. Because of that, automation can place and label a wrong point even when the loupe clearly shows the marker is off-target. Future automation should treat new points as provisional until a separate loupe confirmation step is completed.
+- 2026-03-30: implemented the loupe-confirmation fix.
+  - new human points now start as `human_draft`
+  - pressing `Enter` in the inline editor saves only the label and keeps the point draft
+  - the right rail now shows `Подтвердить по лупе` for draft points
+  - after confirmation the point becomes `human_corrected`
+  - any later human move or label/point-type edit demotes the point back to `human_draft`
+  - verified in a headless browser flow against the live site; report: `C:/projects/sites/blueprint-rec-2/tmp/draft-confirm-check/report.json`
+- 2026-03-30: started the new candidate-first contour.
+  - backend now builds candidate crops from the drawing and runs local OCR on a limited OCR budget
+  - candidates can carry `suggestedLabel`, `suggestedConfidence`, `suggestedSource`
+  - the left candidate queue and right candidate panel now show OCR suggestions
+  - creating a marker from a candidate now preserves the OCR suggestion instead of forcing an empty label
+  - verified live on `image001.png` in session `08823a5c-319f-413d-8384-1c371efa28a9`
+  - UI proof: `C:/projects/sites/blueprint-rec-2/tmp/candidate-ocr-ui-image001.png`
+
+## Known limitations
+
+- storage is local and session state is in memory
+- no auth / multi-user sync yet
+- no real AI agent loop yet; only the shared command surface is prepared
+- no PDF renderer yet; only raster uploads
+- candidate OCR works on simple sheets like `image001.png`, but on hard sheets like `page4.png` the geometry detector is still too circle-heavy
+- `page4.png` currently yields about `232` raw candidates; even with OCR budget + fewer variants the full pass is still about `70s`
+- next root fix is better candidate generation for text callouts, not more manual clicking
+- 2026-04-06: focused review of the current tile-based candidate pipeline on `page4.png` showed that the main remaining noise is no longer raw circle count by itself, but conflicting OCR reads from the same local tile region surviving as separate text candidates. Concrete examples on `page4`: `13` + `1` at the same bbox, `9` + `6`, `69` + `9`, and `14-4(1)` + `14-4` + `1` + `14-4-1`. Current root cause is that `services/inference/app/services/candidate_recognizer.py` dedupes OCR regions only when both geometry and label match; different labels at the same geometry survive. Secondary leak is `services/inference/app/services/session_store.py::_should_keep_text_candidate`, which still keeps some text-only numeric hallucinations (`60`, `69`, `71`) because confidence thresholds are loose for unmatched text candidates.
+
+## Recent investigations
+
+- 2026-03-27: quick UI review focused only on buttons, no code changes made.
+- Main weak spots for the next UI pass:
+  - shared button primitive in `apps/web/components/ui/button.tsx` is too tight by default (no stable height / padding), so most workspace buttons collapse into tiny pills;
+  - workspace header controls in `apps/web/components/annotation/annotation-workspace.tsx` (`Pan`, `Place point`, `Сбросить точки`, `Reset view`) are the most visibly awkward cluster;
+  - workspace sidebar action groups in the same file (`Zoom in/out`, nudge controls, `Save/Confirm/Reject/Delete`) inherit the same cramped look;
+  - home screen custom pseudo-buttons in `apps/web/components/annotation/session-home.tsx` (`Выбрать`, `Показать`) are especially small and pale, so they read like badges instead of actions.
+- 2026-03-27: checked the frontend annotation workspace because a small uploaded image was reported as staying in the top-left instead of fitting the view.
+- Confirmed the backend upload response is correct for small rasters: it stores real image dimensions and resets viewport to the image center with `zoom=1`.
+- Relevant frontend rendering lives in `apps/web/components/annotation/annotation-workspace.tsx`; fit-to-view is computed client-side as `fitScale` and then multiplied by `localViewport.zoom`.
+- Root cause was frontend timing, not the API payload: the canvas size effect ran on the initial loading render, when the actual canvas node did not exist yet, so measured size stayed `0×0` forever and fit-to-view collapsed to `1x`.
+- Fix applied in `apps/web/components/annotation/annotation-workspace.tsx`:
+  - rerun the canvas measurement effect after the session/canvas mounts
+  - measure via `getBoundingClientRect()` and `ResizeObserver`
+  - render the image at explicit computed pixel width/height instead of relying on wrapper/object-fit tricks
+  - blank sessions now open in a centered fit view instead of inheriting a stale empty-session viewport
+- Manual verification used a local headless Chrome screenshot against `http://127.0.0.1:3002`; after the fix the same `image001.png` expands to the full workspace instead of sitting as a tiny crop in the corner.
+- 2026-03-27: canvas markers were simplified after user feedback. Instead of large pill-like badges on the drawing, the canvas now shows plain small red dots; label/status editing remains in the side panel.
+- 2026-03-27: reviewed the current marker render again because users still described dots as too large/odd. Current canvas marker in `apps/web/components/annotation/annotation-workspace.tsx` is already a plain circle; the next minimal tweak, if needed, is to reduce it from `h-4 w-4` to about `h-3 w-3` and soften/remove the thick white border plus heavy shadow rather than redesigning the interaction.
+- 2026-03-27: reviewed viewport-lock behavior for the canvas-first layout. Current scrolling comes from layout sizing, not from the canvas itself:
+  - `components/layout/site-shell.tsx` still uses `min-h-screen` wrappers and does not clip overflow on the main content area.
+  - `components/annotation/annotation-workspace.tsx` uses `min-h-[calc(100vh-3rem)]` on the root grid, while sidebars have natural content height and no column-level overflow, so they can make the whole page taller than the viewport.
+  - the center canvas card also hardcodes `h-[calc(100vh-3rem)] min-h-[720px]`, which can exceed shorter viewports.
+  - likely minimal fix: let the shell provide a fixed viewport-height frame with `min-h-0`, let the workspace root consume that fixed height, and move vertical scrolling to the left/right columns or their internal lists.
+- 2026-03-28: backend session deletion was added for the annotation API.
+  - `services/inference/app/api/sessions.py` now exposes `DELETE /api/sessions/{session_id}`.
+  - `services/inference/app/services/session_store.py` now removes the session from the in-memory store and deletes its local storage directory if present.
+  - `services/inference/tests/test_sessions_api.py` now covers deleting a session after upload, confirming both API-level removal and local storage cleanup.
+- 2026-03-27: removed the now-empty top shell header from `apps/web/components/layout/site-shell.tsx`; screens should start directly with the actual tool content instead of a blank bar with a lone “Сессии” link.
+- 2026-03-27: home screen no longer waits for a separate “open workspace” click. Choosing a raster file in `apps/web/components/annotation/session-home.tsx` now creates the session, uploads the file, and navigates directly into the workspace.
+- 2026-03-27: button styling was tightened up to fix tiny awkward controls. `apps/web/components/ui/button.tsx` now uses larger modern action buttons by default, and the remaining custom “choose/show” controls on the home screen were brought closer to the same visual language.
+- 2026-03-27: point placement now supports an inline mini editor directly on the canvas in `apps/web/components/annotation/annotation-workspace.tsx`. After placing or selecting a point, a small floating input appears next to it; the user can type the number immediately and press `Enter` or the send button to attach the label to that point. The inline input now auto-focuses so the flow is click -> type -> Enter.
+- 2026-03-27: workspace controls were extended for faster canvas work. The top toolbar now has dedicated magnifier buttons for zoom in / zoom out, and the inline point editor now includes direct point deletion so users can remove a mistaken marker right next to where they created it.
+- 2026-03-27: the toolbar magnifier icons were enlarged after live UI feedback because the first version looked visually too small inside the square zoom buttons.
+- 2026-03-27: the first magnifier pass was still visually too subtle in the live UI, so the zoom buttons were increased again: bigger square controls, darker icons, and thicker strokes for the magnifier glyphs.
+- 2026-03-27: after another round of UI feedback, the zoom controls were redesigned instead of just scaled. The old magnifier glyphs looked awkward, so they were replaced with simpler cleaner magnifier icons with clear `+` / `-` signs, and the buttons themselves were enlarged again.
+- 2026-03-27: the workspace layout was reoriented to be canvas-first instead of page-first. The old top workspace header above the drawing was removed; the screen is now structured as three zones: left info column, central drawing canvas, right tools column. The goal is a Miro-like entry where, after upload, the main focus is immediately the canvas itself.
+- 2026-03-27: after user feedback, the frontend startup was explicitly verified instead of assuming the site was still alive. Real issue: API on `8010` was fine, but the Next.js frontend had dropped off `3002`. On this Windows setup, `next start -p 3002` can clash with IPv6 `TIME_WAIT` and give flaky `EADDRINUSE`; launching with `-H 127.0.0.1 -p 3002` proved stable. End-to-end smoke check passed after restart: home page `200`, session creation via API, drawing upload via API, and session route `200`.
+- 2026-03-27: canvas-first behavior was tightened further after live feedback. The problem was not only the workspace grid itself, but also the surrounding shell: the page could still scroll away from the canvas. Fix direction: lock the app shell to viewport height, make `main` a `min-h-0` scrolling container, and keep the workspace itself `overflow-hidden` with internal scrolling only in side columns.
+- 2026-03-27: another live issue was that zoom actions could make the effective workspace width feel unstable because the outer page scrollbar was still participating in layout. The fix direction is stricter now: `SiteShell` keeps `main` overflow-hidden, the home screen scrolls inside itself, and the workspace root fills the parent height directly (`h-full`) instead of calculating its own viewport height again.
+- 2026-03-27: another canvas-first correction was needed after live review: even with scroll fixed, the whole app was still visually boxed inside a `max-width` shell, so the canvas never felt full-screen. The shell was widened to the full viewport and the side columns were narrowed so the center canvas always gets the maximum remaining width.
+- 2026-03-27: final root cause for the “canvas narrows when zooming” complaint was the remaining grid-based workspace layout. Even after widening the shell, left/right columns still reserved width from the center column, so the canvas could never behave like a true full-screen stage. Fix applied:
+  - session route now renders edge-to-edge inside the shell (`apps/web/app/sessions/[sessionId]/page.tsx`)
+  - workspace layout in `apps/web/components/annotation/annotation-workspace.tsx` is no longer a 3-column grid
+  - the canvas is now the base layer filling the whole workspace
+  - left info rail and right tools rail are floating overlay columns above the canvas instead of shrinking it
+  - inline point editor is clamped so it does not open under the overlay rails
+  - verified with a fresh production build and a headless Chrome screenshot against the real session route on `127.0.0.1:3002`
+- 2026-03-27: after another live UI pass, the workspace was compacted further to remove visible side scrollbars and reduce clutter:
+  - `Сводка` and `История` were removed from the always-open left rail and turned into separate floating windows opened by buttons
+  - left/right rails now hide visible scrollbars (`scrollbar-hidden`) and clip horizontal overflow
+  - side rail widths were reduced a bit so the canvas keeps more width
+  - card padding/title sizes were tightened so the UI fits better without becoming tiny
+  - verified again with Playwright screenshots on `1440x960` and `1200x920`; the base workspace view now renders without the visible extra scrollbars that were shown in user screenshots
+- 2026-03-27: selected-point editing in the right rail now supports direct pixel positioning:
+  - `X px` and `Y px` are editable inputs in the `Выбранная точка` card
+  - `Применить X/Y` sends a `move_marker` command with absolute coordinates instead of only relying on nudge buttons
+  - verified visually on the live workspace route after creating a real test marker through the API and capturing a Playwright screenshot
+- 2026-03-27: inline point labeling on the canvas was tightened:
+  - after pressing `Enter` in the floating inline input, the input closes instead of staying open
+  - labeled markers now render a tiny red number slightly above/right of the red point on the canvas
+  - when the inline editor is open for the selected marker, this tiny label is hidden to avoid overlap with the editor
+- 2026-03-28: home screen session list now supports frontend-side deletion. `apps/web/components/annotation/session-home.tsx` has a separate delete button on each recent-session card with native confirmation, and successful deletion removes the card from local state immediately without page reload. `apps/web/lib/api.ts` now has a `deleteSession(sessionId)` helper; backend files were intentionally left untouched.
+- 2026-03-28: backend session deletion is now implemented too. `DELETE /api/sessions/{session_id}` removes the session from the in-memory store and deletes the local storage folder for that session. API coverage was added in `services/inference/tests/test_sessions_api.py`; current backend test status is `5 passed`.
+- 2026-03-28: the delete action on home-session cards was visually toned down after live feedback. The huge outlined red button was replaced with a compact secondary danger action with trash icon + smaller label, aligned beside the marker-count chip so the destructive action no longer overpowers the card itself.
+- 2026-03-28: the recurring green auto-toast `Сохранено.` was removed from the workspace header after live feedback. The save action still happens, but the UI no longer flashes a success label every second. Verified on the real workspace route after a fresh production build + restart of the frontend on `127.0.0.1:3002`; screenshot artifact: `C:/projects/sites/blueprint-rec-2/tmp/toast-check-workspace.png`.
+- 2026-03-28: viewport persistence was relaxed because the board visibly lagged during frequent auto-saves. Frontend changes in `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`:
+  - viewport saves are now debounced instead of firing almost instantly on every wheel / pan / zoom step
+  - marker-related commands now preserve the current local viewport instead of snapping back to the last server-saved camera
+  - quiet viewport saves no longer flip the global `busy` state
+Backend change in `C:/projects/sites/blueprint-rec-2/services/inference/app/services/session_store.py`:
+  - viewport actions are no longer appended to `action_log`, so the history window is cleaner and session payloads stop growing from camera-only movement
+Verification:
+  - `npm run build:web` passed
+  - `npm run test:inference` passed (`5 passed`)
+  - frontend restarted on `http://127.0.0.1:3002`
+  - API restarted on `http://127.0.0.1:8010`
+- 2026-03-28: the shared background of the right overlay rail was removed. In `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`, right-side cards now render without the large milky panel background behind them; only the controls/content remain visible above the canvas. Frontend build passed and the site was restarted on `http://127.0.0.1:3002`.
+- 2026-03-28: the first attempt at removing the right-rail background was too aggressive and broke the visual formatting of the right-side blocks. The fix was adjusted: right-side cards keep their normal padding and internal layout, but their outer background/border/shadow remain transparent so the rail no longer reads as one big solid sheet.
+- 2026-03-28: visible console windows from `next-server` / `uvicorn` restarts were caused by the way local background processes were launched on Windows. Service restarts are now done in hidden mode with stdout/stderr redirected to files under `C:/projects/sites/blueprint-rec-2/tmp`, so future frontend/API restarts should not open separate visible terminal windows for the user.
+- 2026-03-28: the `Положение` block on the right was simplified after live feedback. The old three statistic boxes (`Center X`, `Center Y`, `Zoom`) were replaced with simple editable text rows:
+  - `x - <value>`
+  - `y - <value>`
+  - `zoom - <value>x`
+Applying is done by pressing `Enter` in that form. Frontend build passed and the site was restarted on `http://127.0.0.1:3002`.
+- 2026-03-28: the reset-action buttons in the right rail were tightened after a visual design complaint. The old 2-column row was too cramped for long Russian labels (`Сбросить вид`, `Сбросить точки`) and produced broken typography. They are now stacked vertically with the same compact height/style as the rest of the panel controls so the labels fit cleanly.
+- 2026-03-28: marker visuals were refined after live feedback. In `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`:
+  - the tiny red label near a marker is now larger and placed a bit farther from the circle
+  - the selected marker no longer gets a black outer ring; it keeps only a white highlight
+Frontend build passed and the site was restarted on `http://127.0.0.1:3002`.
+- 2026-03-28: marker label spacing was refined once more because the selected marker could still visually clash with its own red label in tight zooms. Selected-marker labels now get a slightly larger offset than ordinary labels, so the number sits farther from the circle when that point is active.
+- 2026-03-28: after another live review, marker labels were nudged slightly back toward the point because the previous offset made the red number feel too detached from the circle. Current canvas offsets in `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx` are intentionally conservative: selected markers keep a bit more breathing room than ordinary markers, but both sit visibly closer to the point than before.
+- 2026-03-28: point deletion was moved out of the `Выбранная точка` details card into the main tool-action stack on the right, directly under `Сбросить вид` / `Сбросить точки`. The intent is clearer now: destructive point actions live in the tools area, while the selected-point card stays focused on point data and editing.
+- 2026-03-28: port confusion was discovered during local restarts. `127.0.0.1:3002` / `3001` were at times serving a different local project (`C:/projects/sites/report-filling`), not `blueprint-rec-2`, so plain `HTTP 200` checks on those ports were not enough. Current safe local frontend address for this project is `http://127.0.0.1:3003`, and it is launched without visible terminal windows through a short scheduled-task wrapper (`CodexBlueprintWeb3003`) that runs `C:/projects/sites/blueprint-rec-2/tmp/start-blueprint-web-3003.cmd`.
+- 2026-03-28: the scheduled-task wrapper for `3003` turned out flaky on this machine. The current reliable no-window launch path is `C:/projects/sites/blueprint-rec-2/tmp/start_blueprint_web_3003.pyw`, executed via `pythonw.exe`, which spawns `next start -H 127.0.0.1 -p 3003` detached with `CREATE_NO_WINDOW`.
+- 2026-03-28: the floating top chip on the canvas no longer shows `Режим: рука`. It now appears only when there is actual useful context to show: `Режим: точка` during point-placement mode and/or the currently selected point label.
+- 2026-03-28: the tiny red marker labels on the canvas now use a crisp white outline instead of a soft blur shadow, so numbers stay readable even when they overlap dark drawing lines.
+- 2026-03-28: temporary pan overrides were added for faster navigation. Even if the active tool is `Точка`, the workspace now switches to hand-style panning while `Ctrl` is held or while the mouse wheel button is held down. Releasing the modifier returns control to the normal selected tool, so users do not need to keep manually toggling `Рука` / `Точка`.
+- 2026-03-28: the floating top badge above the canvas was removed completely. No mode/status bubble should hang over the drawing area anymore.
+- 2026-03-28: marker anchor semantics were added. Each point can now be either:
+  - `center` (`Середина`) — shown as a red centered marker
+  - `top_left` (`Верхний левый`) — shown as a green marker anchored from its top-left corner
+The tools rail now has a toggle for the default type of newly placed points, and the selected-point card has its own toggle for changing the current marker type before saving. Backend/session contracts now persist `pointType` on every marker.
+- 2026-03-28: the `Инструменты` heading above the right-side tool stack was removed completely after live review. The tool buttons now start immediately without a separate title line above them.
+- 2026-03-28: the marker `ярлык` field was moved into the `Положение` card, directly under `x / y / zoom`. It now saves from that location on `Enter`, and the duplicate label field was removed from the `Выбранная точка` card.
+- 2026-03-28: a false UI bug around green point placement was traced to a stale backend process, not the canvas code. The frontend already sent `pointType`, but the old API process on `127.0.0.1:8010` had been started before the `pointType` schema/store changes and was silently returning markers without `pointType`, which made every new point render as red (`center`) on the frontend. After a clean API restart, raw JSON responses again included `"pointType":"top_left"` and green top-left markers started working as intended. When point-type behavior looks wrong, first confirm the live API process is fresh before changing UI code.
+- 2026-03-28: the right-side tool panel was redesigned to feel more like a compact product workspace and less like a stack of oversized mobile cards. Main changes in `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`:
+  - tool mode (`Рука` / `Точка`) kept as the primary segmented control, but with tighter spacing and less visual bulk
+  - point-type switch (`Середина` / `Верхний левый`) was tightened and made calmer
+  - zoom controls were reduced to clear `−` / `+` square buttons instead of oversized pseudo-icons
+  - `Сбросить вид`, `Сбросить точки`, and `Удалить` were regrouped into cleaner compact action rows
+Verification:
+  - `npm run build:web` passed
+  - frontend was restarted on `http://127.0.0.1:3003`
+  - visual check was done with Playwright screenshot: `C:/projects/sites/blueprint-rec-2/tmp/toolbar-redesign-check-4.png`
+- 2026-03-28: the helper caption under `Тип новой точки` (`Красная — середина. Зелёная — верхний левый.`) was removed after live feedback. The `Положение` card was also corrected so that when a marker is selected, `x / y` now edit the selected point coordinates instead of the viewport center. `zoom` still controls the canvas zoom. The duplicate `X/Y` editor and `Применить X/Y` button were removed from `Выбранная точка`, so point coordinates now live in one place only.
+- 2026-03-28: the right overlay rail is no longer transparent. It now renders as a dark, solid workspace-side panel with its own border and shadow, while the internal controls stay readable on top. During this pass the action buttons were also reflowed vertically because the first dark-panel version clipped `Сбросить точки` in the available width. Verified visually with Playwright screenshot: `C:/projects/sites/blueprint-rec-2/tmp/dark-right-panel-check-2.png`.
+- 2026-03-28: the left rail was brought to the same dark style as the right rail and now also works as the main marker list. `Список точек` was removed from the right side and replaced on the left with a dedicated `Точки` block that shows:
+  - marker label/number
+  - point type
+  - point coordinates
+  - compact status text
+Clicking an item selects that marker, and the selected marker details continue to appear in the right-side editing panel. Verified with Playwright screenshot: `C:/projects/sites/blueprint-rec-2/tmp/left-dark-points-check-2.png`.
+- 2026-03-28: the workspace was restyled toward a Figma-like editor layout instead of stacked floating cards:
+  - left rail is now a solid dark navigator with session info + clickable point list
+- 2026-04-08: low-res one-shot label errors are now gated earlier by the global label vocabulary. The low-res OCR and tile-VLM stages now skip any label not present in the vocabulary extracted from the page tiles, and the final per-candidate OCR/VLM passes also respect that vocabulary. This is intended to stop errors like `298` or `30A` before they propagate.
+- 2026-04-08: `test1` exposed a second root cause beyond the vocabulary gate. Some true low-res labels were still missing because the recovery path only reviewed a subset of each cluster, so labels like `31/32/33/34` could exist in raw circle candidates but never reach acceptance. A direct missing-label OCR recovery pass was added, plus nearby duplicate-label collapse and a vocabulary-snap rule for lettered suffix labels (for example `30A` can snap to `29A` when that is the only compatible page-vocabulary label).
+  - right rail is now a solid dark inspector with `Положение` and point properties only
+  - primary canvas tools were moved into one bottom-centered floating dark toolbar (`Рука` / `Точка`, point type, zoom, reset, clear, delete)
+  - document fit/centering now uses the visible middle stage between the rails, so the sheet is centered in the real working area instead of the full browser width
+Verification:
+  - `npm run build:web` passed
+  - frontend restarted successfully on `http://127.0.0.1:3003`
+  - live visual check captured at `C:/projects/sites/blueprint-rec-2/tmp/editor-style-check-v2.png`
+- 2026-03-28: user asked about trying `AutoCAD Raster Design` for raster upscaling. Local machine check showed no visible Autodesk / AutoCAD Raster Design installation in Program Files, uninstall registry entries, or Start Menu shortcuts, so a true Autodesk-based upscale could not be run from this environment. As a temporary comparison only, a local 4x line-drawing upscale of `C:/projects/sites/blueprint-rec-2/blueprints-test/image001.png` was produced at:
+  - `C:/projects/sites/blueprint-rec-2/tmp/upscale-check/image001.upscaled-local.png`
+  - `C:/projects/sites/blueprint-rec-2/tmp/upscale-check/image001.before-after-local.png`
+- 2026-03-28: installation work for Autodesk was pushed further instead of stopping at “not installed”.
+  - `winget` package `Autodesk.AutodeskAccess` was found and installed.
+  - confirmed installed product: `Autodesk Access 2.21.0.559`
+  - Autodesk files now exist under `C:/Program Files/Autodesk/AdODIS/...`
+  - Start Menu shortcut exists at `C:/ProgramData/Microsoft/Windows/Start Menu/Programs/Autodesk/Autodesk Access/Autodesk Access.lnk`
+  - the remaining blocker is Autodesk-side auth/subscription or trial flow: official Autodesk docs indicate the Raster Design toolset is included with `AutoCAD 2026` and is obtained through Autodesk’s Access / account flow rather than a direct public installer package
+- 2026-03-28: Autodesk Access was investigated further after installation so the blocker is now explicit, not guessed.
+  - running processes confirmed:
+    - `AdskAccessCore`
+    - `AdskAccessUIHost`
+    - `AdskIdentityManager`
+  - Autodesk logs in `C:/Users/qwert/AppData/Local/Autodesk/ODIS/AdskAccessUI.log` and `C:/Users/qwert/AppData/Local/Autodesk/ODIS/AdskAccessCore.log` show:
+    - `Failed to get user info from IDManager`
+    - `User is not logged in`
+    - `No user is signed in`
+    - Access UI toast: `Войдите в систему, чтобы просмотреть все доступные обновления программ.`
+  - practical conclusion: AutoCAD / Raster Design cannot be installed further from this machine until the user signs into Autodesk Access with an Autodesk account that has the required entitlement or trial path enabled.
+
+## Likely next steps
+
+- persist sessions outside memory
+- add explicit agent tool endpoints / orchestration loop
+- support PDF pages
+- add drag-to-move markers and richer human review tools
+
+## Latest workspace notes
+
+- 2026-03-30: `test1.jpg` был заново пройден через живой сайт в новой пустой сессии без использования старых таблиц/JSON как источника координат.
+  - Сессия: `http://127.0.0.1:3003/sessions/a1d609bf-de9a-4497-90b2-dda679231bd4`
+  - Рабочий подход: только сам чертёж + браузерный UI + подтверждение через лупу; без переигрывания legacy-списков точек.
+  - Во время самопроверки был найден и удалён явный ложный маркер `50` на левом длинном объекте; там должен быть только `30`.
+  - Итог текущего браузерного прохода: `52` точек.
+  - Актуальный экспорт этого прохода:
+    - ZIP: `C:/projects/sites/blueprint-rec-2/exports/manual-from-browser/test1-browser-truly-zero-20260330-export.zip`
+    - PNG: `C:/projects/sites/blueprint-rec-2/exports/manual-from-browser/test1-browser-truly-zero-20260330/test1-browser-true-zero-20260330/annotated.png`
+    - XLSX: `C:/projects/sites/blueprint-rec-2/exports/manual-from-browser/test1-browser-truly-zero-20260330/test1-browser-true-zero-20260330/markers.xlsx`
+  - Финальный браузерный скрин этого прохода: `C:/projects/sites/blueprint-rec-2/tmp/test1-browser-truly-zero-final.png`
+- 2026-03-29: собран полный пакет экспортов по тестовым изображениям в `C:/projects/sites/blueprint-rec-2/exports/test-batch-2026-03-29`.
+  - Источники:
+    - `image001.png` -> координаты из `C:/projects/sites/blueprint-rec/output/current/webui_jobs/20260324_125124_42e55359/downloads/image001_coordinates.xlsx`
+    - `page4.png` -> локальный вручную выверенный список из 17 точек
+    - `test1.jpg` -> координаты из `C:/projects/sites/blueprint-rec/output/archive/legacy_20260306_130226/spreadsheet/test_runs/test1_cycle_fix5.xlsx`
+    - `test2.jpg` -> координаты из `C:/projects/sites/blueprint-rec/output/archive/legacy_20260306_130226/spreadsheet/test_runs/test2_cycle_fix1_feedback4.xlsx`
+  - Важная находка: для `test1/test2` старые координаты уже были в системе координат исходного изображения. Первая попытка делить их на `4` дала сильный съезд влево-вверх; правильный перенос — без деления.
+  - Готовые экспорты:
+    - `image001_annotated.zip`
+    - `page4_annotated.zip`
+    - `test1_annotated.zip`
+    - `test2_annotated.zip`
+  - В каждой распакованной подпапке лежат только:
+    - `annotated.png`
+    - `markers.xlsx`
+  - Для повторяемого запуска добавлен скрипт `C:/projects/sites/blueprint-rec-2/scripts/build_test_batch_exports.py`.
+  - Важная диагностика по качеству:
+    - `test1` в этом батче опирается на старый файл `C:/projects/sites/blueprint-rec/output/archive/legacy_20260306_130226/spreadsheet/test_runs/test1_cycle_fix5.xlsx`.
+    - Это не ручная ground-truth-разметка, а промежуточная OCR/feedback-таблица из старого проекта.
+    - Прямые признаки шума в самом источнике:
+      - всего 59 точек
+      - много дублей по одному и тому же номеру (`3` встречается 10 раз, `8` — 7 раз, `6` — 4 раза, `40` — 3 раза и т.д.)
+      - есть явно сомнительные метки вроде `66` и `81`
+    - Вывод: новый экспорт для `test1` честно воспроизвёл старую шумную полуавтоматическую разметку; основная причина ошибок — качество унаследованного источника, а не геометрия нового экспортёра.
+
+- 2026-03-28: a first `smart snap` pass was added to point placement in `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`.
+  - After a rough click in `Точка` mode, the frontend now samples a small pixel window around the click and searches for the nearest dark local cluster before sending `place_marker`.
+  - This required reading the uploaded raster into an offscreen canvas. Because the drawing is served from the API domain (`8010`) while the UI lives on `3003`, the image loader also needed `crossOrigin="anonymous"`; without that, the browser tainted the canvas and `getImageData()` failed.
+  - Live check on `image001.png`:
+    - rough click at raw doc coords `(80, 32)` snapped to `(84, 38)`
+    - rough click at raw doc coords `(44, 86)` snapped to `(46, 89)`
+  - Practical conclusion: this first version already helps with rough clicks, but it still snaps to the nearest local dark cluster rather than to the semantic center of the whole callout label. On simple labels it improves placement; on boxed numbers it can still land on one digit/stroke instead of the ideal visual center. The next refinement should merge nearby clusters inside the same label/box before computing the final anchor.
+- 2026-03-28: `smart snap` was refined once more.
+  - Snap now accepts the marker point type:
+    - `center` tries to land in the center of the merged local label block
+    - `top_left` lands on the top-left corner of that merged block
+  - Nearby local dark clusters are now merged iteratively before computing the final snapped point, instead of using only the single darkest cluster.
+  - Live browser re-check on `image001.png` after the refinement:
+    - rough click `(80, 32)` -> snapped `(84, 38)`
+    - rough click `(44, 86)` -> snapped `(46, 89)`
+    - rough click `(131, 76)` -> remained `(131, 76)` because the click was already close enough to the local target
+  - Practical conclusion after this second pass: the feature is now useful and stable for rough placement on simple drawings, but the next real quality jump will come not from more local pixel heuristics, but from a dedicated “label block” snap that understands the whole boxed number / callout region, not just nearby dark ink.
+- 2026-03-28: one more iteration was attempted to bias `smart snap` toward boxed-number frames instead of raw digit strokes.
+  - Added a lightweight frame search around the merged dark cluster:
+    - scan for vertical and horizontal dark line candidates outside the digit cluster
+    - if a plausible frame is found, use its center for `center` points and its top-left for `top_left` points
+  - Live browser re-check on `image001.png` showed no meaningful change versus the previous pass:
+    - `(80, 32)` -> `(84, 38)`
+    - `(44, 86)` -> `(46, 89)`
+    - `(131, 76)` -> `(131, 76)`
+  - Practical conclusion: on this project, the current heuristic family has reached diminishing returns. The next quality jump will likely require either:
+    - explicit detection of full label blocks / boxed callouts
+    - or a semi-automatic refine flow that opens a local loupe and suggests a few candidate anchor positions instead of trying to guess everything from raw local dark pixels.
+
+- 2026-03-28: the next step after `smart snap` is now implemented: the precision loupe suggests clickable local snap variants.
+  - `apps/web/components/annotation/annotation-workspace.tsx` now reuses the same local image-analysis pipeline not only to auto-place a point, but also to surface up to 3 nearby candidate anchors for the selected marker.
+  - candidates are shown directly inside the loupe as small amber points and also as `Вариант 1/2/3` buttons below it.
+  - clicking a candidate immediately moves the selected marker to that suggested anchor.
+  - live check on `image001.png`:
+    - rough placement near the top boxed `26` auto-snapped to `(84, 38)`
+    - then clicking the suggested loupe candidate moved that point to `(86, 41)`
+  - practical conclusion: this is already more useful than only `X/Y ±1`, but on very simple labels the loupe may still produce only 1 meaningful alternative instead of 2–3. The next quality jump would come from generating candidate anchors from larger semantic label blocks rather than from local dark-ink geometry alone.
+- 2026-03-28: one more attempt was made to move from “dark ink” snap toward “whole label block” snap.
+  - `collectSnapCandidates()` in `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx` now also tries to detect a bright enclosed local region around the click/marker, intended to approximate the inside of a boxed callout label.
+  - the region is flood-filled from the brightest nearby seed and then validated by checking dark support on its surrounding sides.
+  - live re-check on `image001.png` showed that this heuristic still did **not** materially change the auto-placement of the top boxed `26`: rough click `(80, 32)` still landed at `(84, 38)`, with 1 candidate shown in the loupe.
+  - practical conclusion: local pixel heuristics are now close to exhausted. The next real quality step is likely not another threshold tweak, but either:
+    - a real local label detector / OCR-on-crop helper
+    - or a stronger semi-automatic UX where the user/agent gets a few richer local candidate overlays instead of a single guessed point.
+
+- 2026-03-28: after user login, Autodesk install flow was re-checked instead of assuming success.
+  - `Autodesk Access` now shows a logged-in UI state (`AK` avatar) but still exposes no installable product assets.
+  - `C:/projects/sites/blueprint-rec-2/tmp/fullscreen-after-autodesk-focus.png` captured the Autodesk account products page in Chrome: `manage.autodesk.com/products/all` showed `No products available. Either you haven't purchased any products or your organization hasn't assigned you product access.`
+  - official AutoCAD trial path was opened at `https://www.autodesk.com/products/autocad/free-trial` and `https://www.autodesk.com/products/autocad/trial-intake`.
+  - `C:/projects/sites/blueprint-rec-2/tmp/autodesk-trial-page.png` captured the public AutoCAD trial page.
+  - Autodesk’s trial intake explicitly includes `AutoCAD Raster Design` as a selectable trial item, but the flow still requires Autodesk-side trial intake fields before download is issued: usage type, product selection, sign-in/account confirmation, country/state/zip/company, and profile fields (objective / industry / role).
+  - this means the remaining blocker is no longer “login missing”, but Autodesk’s required trial / entitlement form. Until that form is completed and Autodesk grants the download in the account, Codex cannot finish installing AutoCAD + Raster Design from this machine.
+
+- 2026-03-28: user started the official Autodesk installer separately. Current active installer processes:
+  - `AdskAccessUIHost` titled `Установщик Autodesk AutoCAD 2027 — Русский (Russian)`
+  - `Autodesk_AutoCAD_2027_Russian_ru-RU_setup_webinstall`
+  - because Autodesk uses the same Access/ODIS stack for the official install, the package itself was not uninstalled during install to avoid breaking the run; only the extra standalone `Autodesk Access` window was closed so it would stop cluttering the desktop.
+- 2026-03-28: a full manual QA pass was run on the annotation app with real browser automation, not only static code edits.
+  - live frontend used for this pass: `http://127.0.0.1:3003`
+  - live API used for this pass: `http://127.0.0.1:8010/api/health`
+  - Playwright was executed locally through Python scripts in `C:/projects/sites/blueprint-rec-2/tmp/`:
+    - `qa_flow.py`
+    - `qa_actions.py`
+  - verified user flow:
+    - home opens
+    - image upload creates a session and routes into workspace
+    - point placement works
+    - inline label input + `Enter` works
+    - summary popup works
+    - history popup works
+    - point type switching works
+    - point deletion works
+    - clicking a marker in the left list now selects it and recenters the canvas on that point
+  - no runtime/page errors were captured during the successful post-restart pass; `C:/projects/sites/blueprint-rec-2/tmp/qa-errors.txt` was empty
+- 2026-03-28: `SAM 3.1` was reviewed as a possible vision engine for this project.
+  - official repo / release confirm the model is for promptable segmentation in images and videos: detect, segment, and track objects from text prompts, points, boxes, masks, or exemplars
+  - `SAM 3.1` specifically improves multi-object video tracking efficiency (`Object Multiplex`); that part is not central to our current drawing-annotation product
+  - important fit judgment for this repo:
+    - good fit as an auxiliary refinement module after a rough click, crop, or candidate region
+    - poor fit as the main engine for our task, because our real problem is precise placement on tiny low-resolution callout numbers in technical drawings, not generic object segmentation
+    - it does not replace OCR / text detection / label parsing
+  - recommended use, if tested later:
+    - use SAM only locally around an already chosen area to help snap a point to a segmented blob / bubble / callout region
+    - do not redesign the product around SAM as the first-stage detector
+  - practical integration blockers:
+    - current repo checkpoints require Python 3.12+, PyTorch 2.7+, CUDA 12.6+, a CUDA GPU, and Hugging Face checkpoint access/auth
+- 2026-03-28: `page4.png` was reworked with a precision pass after the user correctly pointed out that the previous “filled” version still looked off.
+  - important conclusion: the visible issue on that earlier screenshot was mostly not zoom-drift; it was low-zoom coarse placement by the operator
+  - a more reliable method was used:
+    - pull current marker coordinates from the session API
+    - detect the actual label text boxes on the original raster with local OCR on crops / upscaled crops
+    - move the markers into the centers of those detected label boxes
+    - verify the result visually in the live browser session
+  - refined session:
+    - `http://127.0.0.1:3003/sessions/b046423a-6f2c-4c63-a976-86525c3e6ee2`
+  - verification artifacts:
+    - `C:/projects/sites/blueprint-rec-2/tmp/page4-current-markers-refined.png`
+    - `C:/projects/sites/blueprint-rec-2/tmp/manual-fill/page4-precision-final-browser.png`
+- 2026-03-28: export naming bug was checked after the user reported that the OS/browser downloads UI showed a weird non-file-looking identifier instead of a normal archive name.
+  - backend was already returning the correct ZIP response and filename:
+    - media type: `application/zip`
+    - `Content-Disposition: attachment; filename*=UTF-8''page4-manual-b046423a-export.zip`
+  - root cause was the frontend download path in `apps/web/lib/api.ts`: it downloaded the archive through `fetch()` + `blob` + synthetic anchor click, which can make some browser / system download surfaces show an internal temporary identifier instead of the final filename
+  - fix applied:
+    - switched export download to a direct browser navigation-style anchor download to `/api/sessions/{session_id}/export`
+    - browser now receives the server filename directly
+  - verified with real browser automation:
+    - suggested filename is now `page4-manual-b046423a-export.zip`
+- 2026-03-28: marker drift under zoom was addressed in the canvas renderer.
+  - likely cause was the previous render model: the raster image and the markers were positioned as separate absolute layers using parallel `translateX + x * scale` math, which can produce slight visual mismatch under repeated scaling on a raster drawing
+  - fix applied in `apps/web/components/annotation/annotation-workspace.tsx`:
+    - image + markers + marker labels now live inside one shared transformed document layer
+    - the document layer is translated once and scaled once
+    - markers/labels are positioned in document coordinates inside that shared layer
+    - marker visual size is compensated with inverse scaling, so the anchor follows the drawing transform while the on-screen control remains usable
+  - verification:
+    - live browser check on session `b046423a-6f2c-4c63-a976-86525c3e6ee2`
+    - measured `Marker 11` relative position inside the image before and after zoom:
+      - before: `relXPct 0.244328`, `relYPct 0.459616`
+      - after: `relXPct 0.244328`, `relYPct 0.459616`
+    - conclusion: after this fix the marker anchor stays at the same relative point on the drawing during zoom
+  - one real issue found during the pass was stale Next.js chunk serving after rebuild (`Loading chunk 812 failed`); this was fixed by killing the old `node` listener on `3003` and relaunching the hidden production frontend via `C:/projects/sites/blueprint-rec-2/tmp/start_blueprint_web_3003.pyw`
+  - workspace visual cleanup from this QA pass:
+    - left and right rails were made denser and more opaque/dark
+    - rail widths were reduced to free more canvas area
+    - session title/meta in the left rail were tightened to avoid oversized empty-feeling chrome
+    - summary/history buttons in the left rail were restyled to reuse the compact toolbar button language
+    - marker rows in the left list were tightened and selection now feels closer to a navigator panel
+    - right inspector header and inputs were tightened for a more compact editor feel
+    - bottom floating toolbar was rebuilt into a darker, denser Figma-like control strip with clearer contrast
+    - grid background and paper shadow were softened so the rails/readable controls dominate instead of a washed-out overlay look
+  - screenshot artifacts from the QA pass:
+    - `C:/projects/sites/blueprint-rec-2/tmp/qa-home-current.png`
+    - `C:/projects/sites/blueprint-rec-2/tmp/qa-workspace-1200-after-fixes.png`
+    - `C:/projects/sites/blueprint-rec-2/tmp/qa-summary-open.png`
+    - `C:/projects/sites/blueprint-rec-2/tmp/qa-history-open.png`
+    - `C:/projects/sites/blueprint-rec-2/tmp/qa-left-list-select.png`
+- 2026-03-28: масштаб маркеров и подписей на канве больше не компенсируется на 100%.
+  - проблема: точка и её красная подпись всегда оставались одного экранного размера, из-за чего на сильном приближении они перекрывали цифру чертежа
+  - исправление в `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`:
+    - вместо полной компенсации `1 / scale` введена частичная `1 / sqrt(scale)`
+    - это даёт "50% сохранения размера": при зуме маркеры и подписи всё ещё читаемы, но уже растут/уменьшаются вместе с листом наполовину, а не стоят константой
+    - то же правило применено и к самой точке, и к смещению/масштабу подписи
+  - проверка:
+    - `npm run build:web` прошёл
+    - фронт перезапущен на `http://127.0.0.1:3003`
+- 2026-03-28: левая панель ещё упрощена по визуальному шуму.
+  - убраны:
+    - бейдж `READY`
+    - крупный заголовок с названием сессии
+    - текстовый статус (`Исправлено` и т.п.) у строк точек слева
+  - в верхней части левой панели теперь остаются только:
+    - ссылка `К сессиям`
+    - имя файла и размеры
+    - кнопки `Сводка`, `История`, `Экспорт ZIP`
+  - файл:
+    - `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`
+  - проверка:
+    - `npm run build:web` прошёл
+    - фронт заново поднят на `http://127.0.0.1:3003`
+- 2026-03-28: правая панель тоже упрощена по новому фидбеку.
+  - убраны:
+    - заголовок `Параметры`
+    - переключатель `Тип точки`
+    - селект `Статус`
+  - справа для выбранной точки теперь остаются только:
+    - координаты
+    - `zoom`
+    - `ярлык`
+    - `confidence`
+    - nudge-кнопки
+    - лупа точной доводки
+  - текст подсказки для пустого состояния обновлён: теперь говорится только про координаты и ярлык
+  - файл:
+    - `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`
+  - проверка:
+    - `npm run build:web` прошёл
+    - фронт заново поднят на `http://127.0.0.1:3003`
+- 2026-03-28: у лупы точной доводки появился собственный управляемый zoom.
+  - причина: на некоторых цифрах стандартное приближение лупы оказывалось слишком сильным и видеть метку становилось хуже
+  - исправление:
+    - в правой панели рядом с заголовком лупы добавлены `-` и `+`
+    - между ними показывается текущее увеличение лупы в `x`
+    - лупа теперь использует отдельный локальный `precisionZoomLevel`, а не один жёсткий коэффициент
+    - шаг изменения: `0.5x`, диапазон: `2x` ... `12x`
+    - при открытии другого чертежа/сессии лупа сбрасывается к адаптивному дефолту
+  - файл:
+    - `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`
+  - проверка:
+    - `npm run build:web` прошёл
+    - фронт поднят на `http://127.0.0.1:3003`
+- 2026-03-28: правая панель сведена ещё ближе к плоскому инспектору без лишних заголовков.
+  - убраны заголовки секций:
+    - `Положение`
+    - `Доводка`
+  - `confidence` перенесён в такой же строковый формат, как остальные поля:
+    - `confidence - <input>`
+  - в нижней части оставлен только сам блок доводки:
+    - nudge-кнопки
+    - лупа
+    - её `- / +`
+  - подпись `Точная доводка` заменена на короткое `Лупа`
+  - файл:
+    - `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`
+  - проверка:
+    - `npm run build:web` прошёл
+    - фронт поднят на `http://127.0.0.1:3003`
+- 2026-03-28: wheel zoom anchoring bug was fixed in `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`.
+  - root cause: zoom math used the geometric center of the whole container (`measuredWidth / 2`, `measuredHeight / 2`) instead of the real visible paper stage center between the rails (`canvasCenterX`, `canvasCenterY`)
+  - symptom: when the user zoomed with the cursor over a specific place on the drawing, the paper visibly drifted down/right
+  - fix: wheel zoom now anchors relative to the actual stage center, so the document point under the cursor stays under the cursor during zoom
+  - verified with a browser screenshot pair:
+    - `C:/projects/sites/blueprint-rec-2/tmp/zoom-anchor-before.png`
+    - `C:/projects/sites/blueprint-rec-2/tmp/zoom-anchor-after.png`
+- 2026-03-28: after the wheel-anchor fix, point stability was re-checked on real placed markers, not only on an empty cursor target.
+  - manual Playwright checks were done on:
+    - `page4.png`
+    - `test2.jpg`
+  - flow for both checks:
+    - create a fresh session
+    - place a marker on a visible drawing feature
+    - assign a label
+    - zoom in with the wheel over that same region
+    - compare before/after screenshots
+  - result: the marker remained attached to the same drawing feature after zoom; no new render-side drift was reproduced
+  - screenshot artifacts:
+    - `C:/projects/sites/blueprint-rec-2/tmp/marker-drift-after-place.png`
+    - `C:/projects/sites/blueprint-rec-2/tmp/marker-drift-after-zoom.png`
+    - `C:/projects/sites/blueprint-rec-2/tmp/test2-target-after-place.png`
+    - `C:/projects/sites/blueprint-rec-2/tmp/test2-target-after-zoom.png`
+- 2026-03-28: the visible pale frame around the workspace edges was caused by the shared app shell still wrapping session pages with global outer padding/background.
+  - fix in `C:/projects/sites/blueprint-rec-2/apps/web/components/layout/site-shell.tsx`: session routes (`/sessions/...`) now bypass the outer shell padding and use the workspace background directly
+  - matching cleanup in `C:/projects/sites/blueprint-rec-2/apps/web/app/sessions/[sessionId]/page.tsx`: the old negative-margin full-bleed hack was removed because the shell no longer needs to be cancelled out
+  - verified on the live app with screenshot artifact: `C:/projects/sites/blueprint-rec-2/tmp/frame-fix-check.png`
+- 2026-03-28: переключатель типа точки (`Центр` / `Угол`) переведён в iPhone-like segmented control.
+  - общий компонент: `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`
+  - проверочный скрин живого экрана: `C:/projects/sites/blueprint-rec-2/tmp/workspace-switch-ios-style.png`
+- 2026-03-28: у правой панели убран верхний блок выбранной точки (`Точка ... / статус / badge`) и убраны нижние кнопки `Сохранить / Ок / Скрыть`.
+  - оставшиеся поля справа теперь работают без них: тип точки и статус сохраняются сразу, confidence — по blur/Enter.
+  - файл: `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`
+  - проверочный скрин: `C:/projects/sites/blueprint-rec-2/tmp/right-panel-no-header-no-actions.png`
+- 2026-03-28: добавлен экспорт сессии в ZIP.
+  - backend endpoint: `GET /api/sessions/{session_id}/export`
+  - архив включает:
+    - `session.json`
+    - `markers.csv`
+    - `annotated.png`
+    - исходный файл чертежа
+  - backend файлы:
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/api/sessions.py`
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/session_store.py`
+    - `C:/projects/sites/blueprint-rec-2/services/inference/tests/test_sessions_api.py`
+  - frontend кнопка `Экспорт ZIP` добавлена в левую панель:
+    - `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`
+    - `C:/projects/sites/blueprint-rec-2/apps/web/lib/api.ts`
+  - проверка:
+    - `npm run test:inference` -> `6 passed`
+    - Playwright реально скачал архив в `C:/projects/sites/blueprint-rec-2/tmp/browser-export-test.zip`
+    - состав архива: `image001/session.json`, `image001/markers.csv`, `image001/annotated.png`, `image001/image001.png`
+- 2026-03-28: экспорт таблицы точек исправлен под Excel/Windows.
+  - `markers.csv` теперь Excel-friendly: UTF-8 BOM + `;` как разделитель + русские заголовки
+  - в архив дополнительно добавлен `markers.xlsx`, чтобы таблица открывалась колонками без догадок
+  - xlsx содержит человекочитаемые колонки: ярлык, тип точки, статус, координаты, confidence и служебные id/даты
+  - backend правки:
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/session_store.py`
+    - `C:/projects/sites/blueprint-rec-2/services/inference/tests/test_sessions_api.py`
+  - проверка:
+    - `npm run test:inference` -> `6 passed`
+    - браузерный экспорт снова скачан в `C:/projects/sites/blueprint-rec-2/tmp/browser-export-test.zip`
+    - в архиве теперь: `session.json`, `markers.csv`, `markers.xlsx`, `annotated.png`, исходный чертёж
+- 2026-03-28: экспорт ещё раз упрощён по новому требованию пользователя.
+  - в архиве теперь только два файла:
+    - `annotated.png`
+    - `markers.xlsx`
+  - `session.json`, `markers.csv` и исходный чертёж из архива убраны
+  - таблица упрощена до трёх колонок:
+    - `Цифра`
+    - `X`
+    - `Y`
+  - backend правки:
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/session_store.py`
+    - `C:/projects/sites/blueprint-rec-2/services/inference/tests/test_sessions_api.py`
+  - проверка:
+    - `npm run test:inference` -> `6 passed`
+    - контрольный экспорт внутри тестового архива теперь содержит только:
+      - `Export-check/markers.xlsx`
+      - `Export-check/annotated.png`
+- 2026-03-28: экспортная разметка `annotated.png` стала адаптивной для маленьких чертежей.
+  - проблема: для низкого разрешения (`image001.png` ~ 205x174) точки и подписи рисовались слишком крупно, зелёная точка перекрывала красную, а номера лезли на маркер.
+  - исправление в `C:/projects/sites/blueprint-rec-2/services/inference/app/services/session_store.py`:
+    - уменьшены минимальные размеры маркеров и подписи на low-res изображениях
+    - зелёная точка `top_left` теперь рисуется как компактный зелёный контур, а не как плотная заливка
+    - подписи умнее смещаются вправо/вверх и не упираются в край изображения
+  - проверка:
+    - `npm run test:inference` -> `6 passed`
+    - локальный low-res preview: `C:/projects/sites/blueprint-rec-2/tmp/lowres-render-preview/preview-lowres/annotated.png`
+    - backend на `8010` перезапущен после фикса
+- 2026-03-28: выполнен полный smoke/QA-прогон текущего сайта на живом фронте `http://127.0.0.1:3003`.
+  - backend/API:
+    - `npm run test:inference` -> `6 passed`
+    - `http://127.0.0.1:8010/api/health` отвечает `200`
+  - browser QA через local Playwright:
+    - home открывается
+    - загрузка файла создаёт сессию и переводит в workspace
+    - `Сводка` открывается
+    - `История` открывается
+    - постановка красной точки + inline label работает
+    - постановка зелёной точки + inline label работает
+    - выбор точки из левого списка работает
+    - редактирование ярлыка справа работает
+    - изменение статуса и типа точки с авто-сохранением работает
+    - nudge-кнопки работают
+    - `Экспорт ZIP` реально скачивает архив
+    - удаление точки работает
+    - возврат на главную и удаление сессии работает
+  - браузерный отчёт:
+    - `C:/projects/sites/blueprint-rec-2/tmp/qa-full/report.json`
+  - артефакты скриншотов:
+    - `C:/projects/sites/blueprint-rec-2/tmp/qa-full/01-home.png`
+    - `C:/projects/sites/blueprint-rec-2/tmp/qa-full/02-workspace-start.png`
+    - `C:/projects/sites/blueprint-rec-2/tmp/qa-full/03-summary.png`
+    - `C:/projects/sites/blueprint-rec-2/tmp/qa-full/04-history.png`
+    - `C:/projects/sites/blueprint-rec-2/tmp/qa-full/05-two-markers.png`
+    - `C:/projects/sites/blueprint-rec-2/tmp/qa-full/06-after-delete-marker.png`
+    - `C:/projects/sites/blueprint-rec-2/tmp/qa-full/07-session-list-open.png`
+  - отдельная проверка зума/привязки точки:
+    - `C:/projects/sites/blueprint-rec-2/tmp/qa-zoom/report.json`
+    - относительная позиция точки внутри чертежа до/после зума осталась стабильной (`delta x = 0.0`, `delta y = -0.0001`)
+    - скрины: `C:/projects/sites/blueprint-rec-2/tmp/qa-zoom/before-zoom.png`, `C:/projects/sites/blueprint-rec-2/tmp/qa-zoom/after-zoom.png`
+  - по этому прогону критических визуальных и сценарных сбоев не найдено.
+- 2026-03-28: вручную заполнен целый лист `page4.png` через живой браузерный сценарий.
+  - создана реальная сессия: `b046423a-6f2c-4c63-a976-86525c3e6ee2`
+  - URL сессии: `http://127.0.0.1:3003/sessions/b046423a-6f2c-4c63-a976-86525c3e6ee2`
+  - лист загружен в сессию через локальный API, дальше точки и подписи ставились уже браузерным циклом `клик -> ввод -> Enter`
+  - в сессию внесены все основные видимые метки листа: `13, 9, 4, 11, 10, 3, 2, 8, 6, 1, 7, 5, 14-1, 14-2, 14-3, 14-4(1), 14-4(2)`
+  - артефакты:
+    - начальный экран: `C:/projects/sites/blueprint-rec-2/tmp/manual-fill/workspace-initial.png`
+    - пробная одна метка: `C:/projects/sites/blueprint-rec-2/tmp/manual-fill/test-one-marker.png`
+    - заполненный лист: `C:/projects/sites/blueprint-rec-2/tmp/manual-fill/workspace-filled.png`
+    - финальный скрин: `C:/projects/sites/blueprint-rec-2/tmp/manual-fill/workspace-filled-final.png`
+- 2026-03-28: после просмотра заполненного `page4.png` выяснено, что проблема была не в дрейфе рендера при зуме, а в слишком грубой ручной расстановке первой версии точек на полном листе.
+  - проверено отдельно:
+    - для кнопок зума относительная позиция маркеров внутри изображения практически не меняется
+    - для wheel-zoom относительная позиция маркеров внутри изображения тоже остаётся стабильной
+  - артефакты проверки:
+    - `C:/projects/sites/blueprint-rec-2/tmp/manual-fill/zoom-marker-compare.json`
+    - `C:/projects/sites/blueprint-rec-2/tmp/manual-fill/zoom-wheel-compare.json`
+  - после этого та же сессия `b046423a-6f2c-4c63-a976-86525c3e6ee2` была перевыставлена точнее по координатным кропам.
+  - служебные кропы:
+    - `C:/projects/sites/blueprint-rec-2/tmp/manual-fill/crops/left_cluster.png`
+    - `C:/projects/sites/blueprint-rec-2/tmp/manual-fill/crops/right_cluster.png`
+    - `C:/projects/sites/blueprint-rec-2/tmp/manual-fill/crops/bottom_cluster.png`
+    - `C:/projects/sites/blueprint-rec-2/tmp/manual-fill/crops/top_cluster.png`
+  - обновлённый скрин той же сессии:
+    - `C:/projects/sites/blueprint-rec-2/tmp/manual-fill/workspace-filled-realigned.png`
+- 2026-03-28: после дополнительной проверки по словам пользователя выяснилось, что даже после первого realign часть точек всё ещё стояла мимо самих цифр.
+  - проблема подтверждена вручную по скрину и по более плотным координатным кропам
+  - самые проблемные метки: `9, 11, 10, 3, 8, 6, 1, 7, 5, 14-1, 14-2, 14-3, 14-4(1), 14-4(2)`
+  - для них были выставлены более точные координаты в той же сессии `b046423a-6f2c-4c63-a976-86525c3e6ee2`
+  - артефакты:
+    - `C:/projects/sites/blueprint-rec-2/tmp/manual-fill/fine/left_fine.png`
+    - `C:/projects/sites/blueprint-rec-2/tmp/manual-fill/fine/right_fine.png`
+    - `C:/projects/sites/blueprint-rec-2/tmp/manual-fill/fine/bottom_fine.png`
+    - `C:/projects/sites/blueprint-rec-2/tmp/manual-fill/fine/top_fine.png`
+    - `C:/projects/sites/blueprint-rec-2/tmp/manual-fill/workspace-filled-realigned-v2.png`
+- 2026-03-28: даже после `workspace-filled-realigned-v2.png` вручную видно, что часть меток всё ещё стоит мимо родных цифр.
+  - это подтверждает, что текущий "быстрый проход по общему виду листа" непригоден для качественного авто-заполнения через браузер
+  - проблема не в хранении координат и не в масштабировании рендера, а в неточном выборе точки человеком/агентом на дальнем зуме
+  - для реального quality-fill нужен другой режим:
+    - либо разметка покластерно на сильном приближении
+    - либо инструмент со снапом/лупой/тонкой подстройкой около цифры перед подтверждением
+- 2026-03-28: в правую панель добавлен режим точной доводки точки.
+  - файл: `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`
+  - что добавлено:
+    - лупа для выбранной точки на основе самого изображения
+    - клик по лупе переставляет точку точнее вокруг текущего положения
+    - мелкие шаги `X/Y ±1` в дополнение к `±10`
+  - проверка:
+    - production build поднят на `http://127.0.0.1:3003`
+    - на временной сессии `precision-check` клик по лупе реально сдвинул точку `3` с `(285, 917)` на `(271, 903)`
+    - артефакты:
+    - `C:/projects/sites/blueprint-rec-2/tmp/precision-qa/precision-panel-live.png`
+    - `C:/projects/sites/blueprint-rec-2/tmp/precision-qa/precision-click-move.json`
+    - `C:/projects/sites/blueprint-rec-2/tmp/precision-qa/precision-click-move.png`
+- 2026-03-28: изучена применимость `SAM 3 / SAM 3.1` к нашему проекту.
+  - вывод:
+    - как основной движок для поиска и чтения номерных меток на чертежах — плохая замена OCR/детектору текста
+    - как вспомогательный инструмент для интерактивной доводки, сегментации области вокруг метки или поиска объекта по клику/примеру — потенциально полезен
+  - почему:
+    - SAM 3 — это promptable segmentation/tracking модель, а не движок чтения текста
+    - она хорошо подходит для масок объектов по тексту, примеру, точкам и рамкам, но не решает задачу точного распознавания мелких цифр на инженерной схеме сама по себе
+  - практический вывод для продукта:
+    - не строить весь pipeline вокруг SAM 3
+    - можно попробовать как вспомогательный слой после клика/грубой локализации для более точной привязки точки к объекту/области
+  - источники, на которых основан вывод:
+    - GitHub repo `facebookresearch/sam3`
+    - релиз `RELEASE_SAM3p1.md`
+    - Meta blog про SAM 3 / SAM 3D
+- 2026-03-28: убран синий подтон интерфейса.
+  - файлы:
+    - `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`
+    - `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/session-home.tsx`
+  - что поменяно:
+    - панели, кнопки, сегменты, поля ввода, попапы, карточки сессий и фон канвы переведены в нейтральный графитовый/серый тон
+    - холодные синие акценты в UI заменены на нейтральные серые
+    - красный и зелёный у точек оставлены как смысловые цвета
+- 2026-03-28: проведён живой ручной прогон на `image001.png` уже в новом тёмном интерфейсе.
+  - сессия: `http://127.0.0.1:3003/sessions/cfe62a71-b5ac-48be-abfe-1b6562431e78`
+  - руками расставлены 3 метки: `26`, `27`, `26`
+  - итоговый экран:
+    - `C:/projects/sites/blueprint-rec-2/tmp/image001-after-fill.png`
+  - практические UX-выводы:
+    - базовый сценарий `клик -> номер -> Enter` уже рабочий и быстрый на простом листе
+    - главный тормоз для точности — нет авто-снапа точки к центру ближайшей цифры/плашки после грубого клика
+    - главный тормоз для скорости на плотных листах — нет горячих клавиш для `рука/точка`, зума и удаления
+    - на low-res листах подпись и точка всё ещё иногда визуально спорят с самой цифрой; partial-scale помог, но не снял проблему полностью
+    - для агентного сценария будет полезен режим `после клика сразу приблизить локально` или `smart refine`, чтобы не делать столько ручной доводки
+
+- 2026-03-28: главная страница тоже переведена в тот же нейтральный тёмный стиль, что и workspace. C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/session-home.tsx теперь использует тёмные графитовые секции, тёмные поля ввода и карточки сессий, а C:/projects/sites/blueprint-rec-2/apps/web/components/layout/site-shell.tsx даёт главной тёмный фон вместо светлой подложки.
+- 2026-03-29: при пересборке batch-экспорта выяснилось, что плохой `test1` был испорчен не новым экспортёром, а старым источником `C:/projects/sites/blueprint-rec/output/archive/legacy_20260306_130226/spreadsheet/test_runs/test1_cycle_fix5.xlsx`.
+  - старый источник давал шумный OCR/feedback-слой, а не чистую drawing-only разметку
+  - симптомы:
+    - 59 точек
+    - много дублей и ложных лейблов
+    - визуально совпадает с плохим overlay из legacy-папки
+  - для замены сравнивались drawing-only источники из `C:/projects/sites/blueprint-rec/output/current/runs/v2/`
+  - лучший баланс покрытия и чистоты дал:
+    - `C:/projects/sites/blueprint-rec/output/current/runs/v2/test1_v14_filtered_plus_missing/markers_v2.json`
+    - и его `markers_v2.overlay.png`
+  - именно этот источник теперь используется в `C:/projects/sites/blueprint-rec-2/scripts/build_test_batch_exports.py` для `test1.jpg`
+  - сам скрипт теперь умеет `--only ...`, чтобы пересобирать отдельные файлы без прогона всего batch
+  - при экспорте скрипт ещё и удаляет старый ZIP/папку распаковки, чтобы не оставлять хвосты от прошлого архива
+  - свежий drawing-only экспорт `test1` лежит в:
+    - `C:/projects/sites/blueprint-rec-2/exports/test-batch-2026-03-29/test1_annotated.zip`
+    - `C:/projects/sites/blueprint-rec-2/exports/test-batch-2026-03-29/test1/Batch-export---test1.jpg/annotated.png`
+  - сравнение old vs new:
+    - `C:/projects/sites/blueprint-rec-2/tmp/test1-legacy-vs-drawing-only.png`
+- 2026-03-29: экспортные маркеры в `annotated.png` уменьшены и сделаны полупрозрачными, чтобы цифры под ними читались лучше.
+  - файл: `C:/projects/sites/blueprint-rec-2/services/inference/app/services/session_store.py`
+  - что поменяно в `_render_annotated_image()`:
+    - уменьшен размер точки и текста
+    - маркеры и подписи переведены на прозрачность около `50%`
+    - белая обводка оставлена, но мягче
+    - рисование идёт через отдельный RGBA-overlay и потом композится на исходный чертёж
+  - после фикса заново пересобран `test1`:
+    - `C:/projects/sites/blueprint-rec-2/exports/test-batch-2026-03-29/test1_annotated.zip`
+    - `C:/projects/sites/blueprint-rec-2/exports/test-batch-2026-03-29/test1/Batch-export---test1.jpg/annotated.png`
+- 2026-03-29: после повторной жалобы на слишком крупные экспортные метки размер был уменьшен ещё сильнее.
+  - текущие export-параметры в `C:/projects/sites/blueprint-rec-2/services/inference/app/services/session_store.py`:
+    - smaller font cap
+    - smaller marker radius
+    - прозрачность маркера и текста снижена сильнее
+    - outline тоже смягчён
+  - после этого `test1` заново пересобран:
+    - `C:/projects/sites/blueprint-rec-2/exports/test-batch-2026-03-29/test1_annotated.zip`
+    - `C:/projects/sites/blueprint-rec-2/exports/test-batch-2026-03-29/test1/Batch-export---test1.jpg/annotated.png`
+- 2026-03-29: выяснилось, что один из экспортных пересборов визуально почти не менялся не из-за формул размера, а из-за старого живого backend-процесса на `8010`.
+  - код `session_store.py` уже был обновлён, но `build_test_batch_exports.py` ходил в старый запущенный API
+  - после перезапуска backend на свежем коде экспорт начал реально менять размеры маркеров
+  - контрольный кроп после настоящего пересбора:
+    - `C:/projects/sites/blueprint-rec-2/tmp/test1-current-overlap-crop-v3.png`
+- 2026-03-29: после жалобы на слишком мелкие точки экспортный рендер снова подправлен в середину.
+  - что сделано:
+    - точки и подписи увеличены относительно `v3`
+    - непрозрачность поднята до `80%`
+  - актуальный контрольный кроп:
+    - `C:/projects/sites/blueprint-rec-2/tmp/test1-current-overlap-crop-v4.png`
+  - актуальный экспорт:
+    - `C:/projects/sites/blueprint-rec-2/exports/test-batch-2026-03-29/test1_annotated.zip`
+- 2026-03-29: после перезапуска backend и повторного экспорта подтвердилось, что актуальные параметры наконец реально попали в `annotated.png`.
+  - новый контрольный кроп:
+    - `C:/projects/sites/blueprint-rec-2/tmp/test1-current-overlap-crop-v5.png`
+  - теперь точки не микроскопические и при этом меньше перекрывают цифры, чем в исходном большом варианте
+- 2026-03-29: по просьбе пользователя экспортные маркеры снова чуть увеличены.
+  - после этого backend перезапущен, `test1` заново пересобран
+  - актуальный контрольный кроп:
+    - `C:/projects/sites/blueprint-rec-2/tmp/test1-current-overlap-crop-v6.png`
+  - актуальный ZIP:
+    - `C:/projects/sites/blueprint-rec-2/exports/test-batch-2026-03-29/test1_annotated.zip`
+- 2026-03-29: после дополнительной проверки выяснилось, что разница между соседними версиями была слишком слабо заметна, поэтому export-пресет поднят ещё на один шаг.
+  - актуальный контрольный кроп:
+    - `C:/projects/sites/blueprint-rec-2/tmp/test1-current-overlap-crop-v7.png`
+  - наглядное сравнение:
+    - `C:/projects/sites/blueprint-rec-2/tmp/test1-crop-before-after-v7.png`
+- 2026-03-29: после прямой просьбы пользователя увеличить размер export-маркеров ещё сильнее пресет был поднят ещё на один уровень.
+  - backend перезапущен, `test1` снова пересобран
+  - актуальный контрольный кроп:
+    - `C:/projects/sites/blueprint-rec-2/tmp/test1-current-overlap-crop-v8.png`
+  - наглядное сравнение:
+    - `C:/projects/sites/blueprint-rec-2/tmp/test1-crop-before-after-v8.png`
+- 2026-03-29: отдельно разобрана причина, почему дальнейшие уменьшения export-подписей/точек могут быть визуально почти незаметны даже при правке коэффициентов в `C:/projects/sites/blueprint-rec-2/services/inference/app/services/session_store.py`.
+  - `font_size` жёстко зажат в диапазон `5..10`, а `center_radius` фактически имеет только два состояния: `2` или `3`; `top_left_size` из-за этого тоже почти бинарный: `4` или `6`
+  - из-за `int(...)` + `min/max` маленькие изменения коэффициентов часто не перескакивают следующий порог и на картинке не видны
+  - на этой Windows-машине локальный quick-check показал, что кандидаты `arialbd.ttf`, `arial.ttf`, `seguisb.ttf`, `segoeui.ttf` грузятся как `FreeTypeFont`, то есть здесь работает TrueType, не bitmap fallback
+  - но сам проект не поставляет шрифты вместе с сервисом; в Linux/headless окружении при отсутствии системных TTF код уйдёт в `ImageFont.load_default()`, и тогда изменение `font_size` может влиять слабее или почти не влиять на подписи
+  - самый безопасный радикальный путь, если снова понадобится заметно уменьшить перекрытие: временно отказаться от "адаптивных" формул и зафиксировать заведомо маленький export-пресет (`font_size`, `center_radius`, `top_left_size`, `text_stroke`) вместо дальнейшей тонкой правки коэффициентов
+- 2026-03-29: `test1` дополнительно добит по пропущенным меткам.
+  - по сравнению `v14` vs `v17` и по исходному `C:/projects/sites/blueprint-rec-2/blueprints-test/test1.jpg` подтверждены как реальные пропуски:
+    - `1` at `(379, 47)`
+    - `29B` at `(368, 904)`
+  - спорные случаи `13` и `29/30` сознательно оставлены без правки
+  - `C:/projects/sites/blueprint-rec-2/scripts/build_test_batch_exports.py` теперь добавляет эти 2 ручные точки поверх `test1_v14_filtered_plus_missing`
+  - итоговый `test1` теперь содержит `54` точки и это подтверждено и в:
+    - `C:/projects/sites/blueprint-rec-2/exports/test-batch-2026-03-29/test1/Batch-export---test1.jpg/annotated.png`
+    - `C:/projects/sites/blueprint-rec-2/exports/test-batch-2026-03-29/test1/Batch-export---test1.jpg/markers.xlsx`
+- 2026-03-29: разобрана причина дубля `34` в `test1`.
+  - это не баг экспортёра: дубль уже сидит в drawing-only источнике `C:/projects/sites/blueprint-rec/output/current/runs/v2/test1_v14_filtered_plus_missing/markers_v2.json`
+  - в источнике есть две метки `34`:
+    - `(527, 967)`
+    - `(529, 995)`
+  - визуальный кроп `C:/projects/sites/blueprint-rec-2/tmp/dup34-source-crop.png` показывает:
+    - нижняя точка попадает в реальный callout `34`
+    - верхняя точка попадает в соседнюю маленькую деталь над ним, то есть это ложный дубль из старого шага `filtered_plus_missing`
+  - для будущих агентов: если снова собирать `test1` из этого источника, нужен dedupe-фильтр "одинаковый label + очень близкие координаты"
+- 2026-03-29: запись видео ручной разметки через браузер возможна.
+  - локальный `ffmpeg.exe` есть по пути:
+    - `C:/Users/qwert/AppData/Local/Microsoft/WinGet/Packages/Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-8.0.1-full_build/bin/ffmpeg.exe`
+  - если пользователь попросит, можно писать mp4 процесса ручной разметки и сохранять его в `C:/projects/sites/blueprint-rec-2/tmp/` или `C:/projects/sites/blueprint-rec-2/exports/`
+- 2026-03-29: в web UI добавлен клиентский режим конфликтов для близких дублей одного и того же ярлыка.
+  - реализация полностью на фронте в `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`
+  - логика:
+    - группировка по одинаковому `label`
+    - локальный кластер-конфликт только если одинаковые ярлыки стоят очень близко друг к другу
+    - это безопаснее, чем автоделит по дистанции, потому что реальные одинаковые метки на разных местах листа не считаются конфликтом
+  - UI:
+    - конфликтные точки в левом списке помечаются `конфликт`
+    - конфликтные подписи на канве подчёркиваются
+    - сверху появляется плашка `Конфликт: <label>` + кнопка `Приблизить`
+    - `Приблизить` центрирует и зумит канву на конфликтный кластер
+  - живая проверка была на тестовой сессии:
+    - `C:/projects/sites/blueprint-rec-2/tmp/conflict-banner-before.png`
+    - `C:/projects/sites/blueprint-rec-2/tmp/conflict-banner-after-zoom.png`
+    - session id для проверки: `9687b4e1-a205-47d2-af0a-47b524ca2796`
+- 2026-03-29: `image001.png` заново пересобран в текущем export-контуре через `C:/projects/sites/blueprint-rec-2/scripts/build_test_batch_exports.py --only image001.png`.
+  - актуальные артефакты:
+    - `C:/projects/sites/blueprint-rec-2/exports/test-batch-2026-03-29/image001_annotated.zip`
+    - `C:/projects/sites/blueprint-rec-2/exports/test-batch-2026-03-29/image001/Batch-export---image001.png/annotated.png`
+    - `C:/projects/sites/blueprint-rec-2/exports/test-batch-2026-03-29/image001/Batch-export---image001.png/markers.xlsx`
+- 2026-03-29: `page4.png` заново пересобран в текущем export-контуре через `C:/projects/sites/blueprint-rec-2/scripts/build_test_batch_exports.py --only page4.png`.
+  - актуальные артефакты:
+    - `C:/projects/sites/blueprint-rec-2/exports/test-batch-2026-03-29/page4_annotated.zip`
+    - `C:/projects/sites/blueprint-rec-2/exports/test-batch-2026-03-29/page4/Batch-export---page4.png/annotated.png`
+    - `C:/projects/sites/blueprint-rec-2/exports/test-batch-2026-03-29/page4/Batch-export---page4.png/markers.xlsx`
+- 2026-03-29: `test1.jpg` заново пересобран в текущем export-контуре через `C:/projects/sites/blueprint-rec-2/scripts/build_test_batch_exports.py --only test1.jpg`.
+  - актуальные артефакты:
+    - `C:/projects/sites/blueprint-rec-2/exports/test-batch-2026-03-29/test1_annotated.zip`
+    - `C:/projects/sites/blueprint-rec-2/exports/test-batch-2026-03-29/test1/Batch-export---test1.jpg/annotated.png`
+    - `C:/projects/sites/blueprint-rec-2/exports/test-batch-2026-03-29/test1/Batch-export---test1.jpg/markers.xlsx`
+  - текущее число точек в экспорте: `54`
+- 2026-03-29: для low-res экспортов добавлена отдельная ветка размеров в `C:/projects/sites/blueprint-rec-2/services/inference/app/services/session_store.py`.
+  - условие: `min(image.width, image.height) <= 1000`
+  - для таких листов точки и подписи рендерятся заметно компактнее, чем в общем пресете
+  - после изменения backend перезапущен и `test1.jpg` пересобран заново
+  - контрольный кроп нового low-res результата:
+    - `C:/projects/sites/blueprint-rec-2/tmp/test1-lowres-smaller-crop.png`
+- 2026-03-29: повторно разобрана причина ошибочной `28` в `test1`.
+  - проблема снова была не в рендере, а в drawing-only источнике `C:/projects/sites/blueprint-rec/output/current/runs/v2/test1_v14_filtered_plus_missing/markers_v2.json`
+  - там есть близкий дубль `28`:
+    - ложная точка: `(347, 712)`
+    - правильная точка: `(371, 729)`
+  - кропы для проверки:
+    - `C:/projects/sites/blueprint-rec-2/tmp/test1-point-debug-v2/37_28_347_712.png`
+    - `C:/projects/sites/blueprint-rec-2/tmp/test1-point-debug-v2/38_28_371_729.png`
+  - аналогичная пара была у `34`:
+    - ложная точка: `(527, 967)`
+    - правильная точка: `(529, 995)`
+  - в `C:/projects/sites/blueprint-rec-2/scripts/build_test_batch_exports.py` добавлен безопасный resolver только для очень близких дублей одного и того же label:
+    - он не трогает реальные повторы одинаковых номеров по разным местам листа
+    - внутри близкой пары выбирается более компактная точка на самом кружке, а не широкий ложный захват
+  - после пересборки `test1.jpg` дубль `28` убран, и текущее число точек стало `52`
+  - актуальный контрольный кроп:
+    - `C:/projects/sites/blueprint-rec-2/tmp/test1-annotated-problem-region-v2.png`
+- 2026-03-29: после прямого требования пользователя больше не использовать старые списки точек для `test1` был собран отдельный полностью ручной вариант с нуля по самому изображению.
+  - источник только один:
+    - `C:/projects/sites/blueprint-rec-2/blueprints-test/test1.jpg`
+  - новый экспорт:
+    - `C:/projects/sites/blueprint-rec-2/exports/manual-from-scratch/test1_manual_fresh.zip`
+    - `C:/projects/sites/blueprint-rec-2/exports/manual-from-scratch/test1_manual_fresh/test1-manual-fresh/annotated.png`
+    - `C:/projects/sites/blueprint-rec-2/exports/manual-from-scratch/test1_manual_fresh/test1-manual-fresh/markers.xlsx`
+  - session id для этого ручного варианта:
+    - `d2a74163-3b75-410b-a775-7cea53530f18`
+  - дальнейшие правки `test1` лучше делать уже от этого ручного файла, а не от старых `markers_v2.json` / feedback-таблиц
+- 2026-03-29: ручной вариант `test1_manual_fresh` оказался неточным — точки были поставлены слишком грубо по сетке и местами садились мимо центров кружков.
+  - после повторной проверки собран второй ручной вариант уже с привязкой к реальным кружкам на изображении через локальный circle-snap
+  - новый актуальный экспорт:
+    - `C:/projects/sites/blueprint-rec-2/exports/manual-from-scratch/test1_manual_snapped.zip`
+    - `C:/projects/sites/blueprint-rec-2/exports/manual-from-scratch/test1_manual_snapped/test1-manual-snapped/annotated.png`
+    - `C:/projects/sites/blueprint-rec-2/exports/manual-from-scratch/test1_manual_snapped/test1-manual-snapped/markers.xlsx`
+  - session id:
+    - `e221057d-cfb5-45ce-9e1a-c579cbd9245b`
+  - проверочные кропы:
+    - `C:/projects/sites/blueprint-rec-2/tmp/test1-snapped-top.png`
+    - `C:/projects/sites/blueprint-rec-2/tmp/test1-snapped-mid.png`
+    - `C:/projects/sites/blueprint-rec-2/tmp/test1-snapped-bottom.png`
+    - `C:/projects/sites/blueprint-rec-2/tmp/test1-snapped-left.png`
+- 2026-03-29: записано видео разметки `test1.jpg` через реальный web UI с пустой сессии.
+  - запись делалась именно по рабочей области сайта, кадры снимались после каждого шага
+  - стартовая чистая сессия для записи:
+    - `10c67db2-2972-41c1-bb1e-5dc474479cc9`
+  - итоговое видео:
+    - `C:/projects/sites/blueprint-rec-2/tmp/test1-site-workarea-from-zero.mp4`
+  - рабочие кадры для сборки:
+    - `C:/projects/sites/blueprint-rec-2/tmp/test1-video-work/frames/`
+  - вспомогательные файлы сценария:
+    - `C:/projects/sites/blueprint-rec-2/tmp/test1-video-work/markers.json`
+    - `C:/projects/sites/blueprint-rec-2/tmp/test1-video-work/markers-video.json`
+  - важная оговорка:
+    - это не настоящий полный ручной проход `с нуля`
+    - видео было собрано как reenactment по заранее подготовленному списку точек
+    - в `markers-video.json` попало только `49` точек, хотя в ручном `test1_manual_snapped` было `53`
+    - при подготовке видео были потеряны как минимум:
+      - `12`
+      - `26`
+      - `36`
+      - одна из трёх `39`
+    - причина потери:
+      - для ускорения видео был сделан грубый dedupe по совпавшим координатам
+      - а в ручном списке уже были случаи, где разные ярлыки ошибочно сидели в одних и тех же координатах:
+        - `(605, 175)` -> `2` и `12`
+        - `(575, 405)` -> `16` и `39`
+        - `(671, 673)` -> `21` и `26`
+        - `(667, 995)` -> `35` и `36`
+    - вывод:
+    - этот mp4 нельзя считать доказательством полного качественного прохода листа
+    - если пользователю нужен честный проход `с нуля`, его надо записывать без переиспользования старого списка точек
+- 2026-03-29: после жалобы пользователя на всплывающие окна добавлен и проверен фоновый headless-контур для записи разметки через сам сайт.
+  - правило зафиксировано в `C:/projects/sites/blueprint-rec-2/AGENT.md`:
+    - браузерные прогоны по умолчанию только в фоне
+    - видимое окно допустимо только если пользователь прямо хочет live-показ
+  - новый headless-прогон `test1.jpg`:
+    - видео: `C:/projects/sites/blueprint-rec-2/tmp/test1-headless-from-zero.mp4`
+    - рабочие кадры: `C:/projects/sites/blueprint-rec-2/tmp/test1-headless-from-zero/frames/`
+    - метаданные: `C:/projects/sites/blueprint-rec-2/tmp/test1-headless-from-zero/meta.json`
+    - session id: `80b3600b-5619-4dc7-89d6-c2e6b9191fff`
+  - этот новый mp4 уже собран полностью без видимого Chrome-окна на экране пользователя
+- 2026-03-30: по просьбе пользователя лупа перенесена в самый верх правой панели, выше координат и остальных полей.
+  - правка в `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`
+  - после правки `npm run build:web` прошёл
+  - фронт скрыто перезапущен на `http://127.0.0.1:3003`
+- 2026-03-30: выполнен новый проход `test1.jpg` именно через сайт, с новой пустой сессии и без переиспользования старых координатных файлов.
+  - session id: `17fd8c76-9e2e-42bf-bc22-1866c851fbbf`
+  - рабочая ссылка: `http://127.0.0.1:3003/sessions/17fd8c76-9e2e-42bf-bc22-1866c851fbbf`
+  - итоговый браузерный скрин:
+    - `C:/projects/sites/blueprint-rec-2/tmp/test1-browser-final.png`
+  - поставлено `52` точек в браузере через UI-поток `клик -> номер -> Enter -> подтвердить по лупе`
+  - важная пост-проверка:
+    - проход получился заметно неточным
+    - причина не в экспорте и не в дрейфе маркеров при зуме, а в самом процессе постановки
+    - фактически использовались заранее прикинутые координаты по статичному изображению с сеткой, а не настоящий визуальный контроль каждой точки в лупе
+    - кнопка `Подтвердить по лупе` в этом прогоне нажималась автоматически скриптом, без реальной верификации человеком/агентом
+    - из-за этого получились системные промахи:
+      - левые группы (`8/9/10/11/37`, `23/24/25/28`, `29A/29B`, `30`) уехали влево
+      - часть правого нижнего столбца (`22/41/33/42/27/35/66`) попала грубо и не по центрам
+    - вывод:
+      - такой поток нельзя считать качественной ручной разметкой через сайт
+      - если нужен реальный quality pass, каждую точку надо подтверждать после фактической проверки лупы, а не автокликом по кнопке подтверждения
+- 2026-03-30: дефолтное увеличение лупы снижено до `5x` для всех чертежей.
+  - раньше дефолт был адаптивный: `6x` на обычных листах и `7x` на маленьких
+  - теперь стартовое значение единое: `5x`
+  - правка в `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`
+  - после правки `npm run build:web` прошёл, фронт снова скрыто поднят на `http://127.0.0.1:3003`
+- 2026-03-30: выполнен реальный второй QA-проход по `test1.jpg` в живой сессии без старых таблиц и без видимого браузерного окна.
+  - рабочая сессия для доводки:
+    - `http://127.0.0.1:3003/sessions/a1d609bf-de9a-4497-90b2-dda679231bd4`
+  - важное техническое наблюдение:
+    - правка `x/y` через правую панель в browser-автоматизации оказалась ненадёжной: поле менялось локально, но координаты не всегда доходили в backend
+    - надёжный путь для headless-правок: выбор точки в левом списке + кнопки `X/Y ±1` и `X/Y ±10` + `Подтвердить по лупе`
+  - этим способом были реально исправлены самые явные промахи второго browser-pass:
+    - `11` -> `302, 324`
+    - `37` -> `244, 298`
+    - левая `40` -> `387, 488`
+    - левая `39` -> `385, 555`
+    - `23` -> `355, 620`
+    - `24` -> `355, 651`
+    - `25` -> `354, 679`
+    - `30` -> `126, 650`
+    - `28` -> `372, 725`
+    - `29A` -> `355, 810`
+    - `29B` -> `355, 883`
+    - нижняя `33` -> `335, 978`
+    - `32` -> `428, 978`
+    - `31` -> `480, 978`
+    - `34` -> `531, 978`
+  - после доводки все эти точки получили статус `human_corrected`
+  - свежий экспорт после второго QA-прохода:
+    - ZIP: `C:/projects/sites/blueprint-rec-2/exports/manual-from-browser/test1-browser-truly-zero-qa2-20260330-export.zip`
+    - PNG: `C:/projects/sites/blueprint-rec-2/exports/manual-from-browser/test1-browser-truly-zero-qa2-20260330/test1-browser-true-zero-20260330/annotated.png`
+    - XLSX: `C:/projects/sites/blueprint-rec-2/exports/manual-from-browser/test1-browser-truly-zero-qa2-20260330/test1-browser-true-zero-20260330/markers.xlsx`
+- 2026-03-30: пользователь справедливо указал, что качество всё равно очень плохое; найден корневой архитектурный дефект.
+  - проблема не в одном конкретном кривом клике и не в экспорте
+  - проблема в самом подходе: сейчас браузерный UI используется как первичный контур распознавания, а это для плотных и low-res техчертежей ненадёжно
+  - текущий `smart snap` в `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx` работает по локальной тёмной массе / рамке / региону вокруг клика
+    - то есть он ищет ближайшие чёрные пиксели и локальные компоненты
+    - но он не понимает семантику callout: кружок с номером, leader line, текст внутри, похожие круглые детали рядом
+  - из-за этого даже после лупы и ручной доводки процесс остаётся хрупким:
+    - UI помогает двигать точку
+    - но не даёт надёжного детектора самой целевой метки
+  - второй дефект: кнопка `Подтвердить по лупе` подтверждает уже выбранную точку, но не выполняет независимую верификацию “здесь реально нужный номер”
+  - вывод:
+    - браузер должен быть не распознавателем, а review/editor-слоем
+    - первичный поиск меток надо выносить в отдельный drawing-first контур
+  - правильная следующая архитектура:
+    1. preprocess изображения (`upscale/denoise/threshold`)
+    2. детектор кандидатов меток по геометрии и структуре (кружки/boxed labels/leader-line context), а не по свободному клику
+    3. OCR / vision только на локальных candidate crop-ах
+    4. конфликт-резолвер и confidence
+    5. браузерный UI только для review, исправления и подтверждения
+  - важное правило на будущее:
+    - больше не пытаться “дожимать качество” бесконечными ручными кликами по целому листу как основной стратегией
+    - это тупиковая ветка; нужно менять входной pipeline
+- 2026-03-30: начата реальная перестройка в новый pipeline `чертёж -> detector кандидатов -> crop-ы -> review`.
+  - backend теперь умеет сам искать callout-кандидаты по самому листу без свободного клика:
+    - круговые кандидаты через `HoughCircles`
+    - прямоугольные / boxed-кандидаты через контуры
+  - для каждого кандидата backend сохраняет crop в storage сессии и отдаёт его в UI
+  - в модель сессии добавлены:
+    - `candidates`
+    - `candidate.reviewStatus`
+    - `candidate.conflictGroup`
+    - `candidate.conflictCount`
+  - добавлены API:
+    - `POST /api/sessions/{session_id}/detect-candidates`
+    - `POST /api/sessions/{session_id}/candidates/{candidate_id}/reject`
+  - UI workspace теперь работает candidate-first:
+    - слева отдельная очередь `Кандидаты`
+    - справа для выбранного кандидата показывается crop
+    - из кандидата можно:
+      - создать черновую точку
+      - отбросить как ложный
+    - при candidate-конфликте сверху появляется отдельная плашка и кнопка `Приблизить`
+  - обычный free-click по канве не убран, но перестал быть единственным рабочим контуром
+  - первая smoke-сессия нового контура:
+    - `http://127.0.0.1:3003/sessions/b63f874d-d717-4f59-b0df-565ccc57fd52`
+    - на `image001.png` детектор нашёл `8` кандидатов
+    - из кандидата уже можно было создать черновую точку и открыть её на правой панели
+  - ключевые файлы новой архитектуры:
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/candidate_detector.py`
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/session_store.py`
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/api/sessions.py`
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/models/schemas.py`
+    - `C:/projects/sites/blueprint-rec-2/packages/shared-types/src/types.ts`
+    - `C:/projects/sites/blueprint-rec-2/packages/shared-types/src/schemas.ts`
+    - `C:/projects/sites/blueprint-rec-2/apps/web/lib/api.ts`
+    - `C:/projects/sites/blueprint-rec-2/apps/web/lib/types.ts`
+    - `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`
+  - проверки после этой перестройки:
+    - `npm run test:inference` -> `8 passed`
+    - `npm run build:web` прошёл
+    - frontend и API заново скрыто подняты на:
+      - `http://127.0.0.1:3003`
+      - `http://127.0.0.1:8010`
+- 2026-03-30: в новый contour добавлен локальный OCR на candidate crop-ах.
+  - backend теперь пытается распознать номер прямо на crop кандидата через `rapidocr-onnxruntime`
+  - у кандидата появились поля:
+    - `suggestedLabel`
+    - `suggestedConfidence`
+    - `suggestedSource`
+  - UI уже показывает OCR-подсказки и использует их при `Создать точку`
+  - на простом листе `image001.png` это уже полезно:
+    - smoke-сессия: `http://127.0.0.1:3003/sessions/08823a5c-319f-413d-8384-1c371efa28a9`
+    - проверочный скрин: `C:/projects/sites/blueprint-rec-2/tmp/candidate-ocr-ui-image001.png`
+  - на сложном листе `page4.png` корневая проблема всё ещё в детекторе кандидатов, а не в OCR:
+    - raw-кандидатов слишком много, потому что геометрический контур всё ещё цепляется почти за любой круг
+    - живая candidate-first сессия `page4`: `http://127.0.0.1:3003/sessions/5d99ea35-cad8-449c-99dc-2a74a994b9f8`
+    - summary прогона: `C:/projects/sites/blueprint-rec-2/tmp/candidate-run-page4-summary.json`
+    - скрин UI прогона: `C:/projects/sites/blueprint-rec-2/tmp/candidate-run-page4-ui.png`
+    - по этому прогону:
+      - `232` кандидата
+      - `43` с OCR-подсказкой
+      - `77` конфликтов
+    - экспорт текущей review-сессии:
+      - ZIP: `C:/projects/sites/blueprint-rec-2/exports/candidate-review/page4-20260330/page4-candidate-review-export.zip`
+      - PNG: `C:/projects/sites/blueprint-rec-2/exports/candidate-review/page4-20260330/unzipped/candidate-run-page4/annotated.png`
+      - XLSX: `C:/projects/sites/blueprint-rec-2/exports/candidate-review/page4-20260330/unzipped/candidate-run-page4/markers.xlsx`
+    - важно: в этой конкретной review-сессии ещё `0` подтверждённых точек, поэтому экспортный `annotated.png` пока по сути чистый лист; полезный артефакт этого прогона — candidate-review UI и summary, а не финальная разметка
+  - вывод:
+    - новый candidate-first + OCR контур уже живой
+    - но следующий корневой шаг — улучшать именно detector кандидатов под текстовые callout-объекты, а не крутить ещё один UI-костыль
+- 2026-03-30: пользователь справедливо указал на процессный баг проверки результата.
+  - однажды был отправлен путь к `annotated.png`, который по сути был пустым, потому что это был export review-сессии без подтверждённых точек
+  - новое жёсткое правило:
+    - перед тем как отдавать путь к итоговому файлу, нужно открыть именно этот export и проверить, что разметка там реально есть
+    - export candidate-review с `0` confirmed markers нельзя выдавать как финальный результат
+- 2026-03-30: сделан новый не пустой seeded-export для `page4` уже после text-cluster detector.
+  - рабочая seeded-сессия: `http://127.0.0.1:3003/sessions/4d4d1a38-68f0-4fbe-a2d1-e0ae0952a504`
+  - через API в неё были посеяны только сильные candidate-first точки, а не старые таблицы/marker JSON:
+    - `13, 9, 4, 10, 3, 2, 8, 6, 1, 7, 5, 14-1, 14-2, 14-3, 14-4(1), 14-4(2)`
+  - итоговый экспорт реально открыт и проверен вручную:
+    - ZIP: `C:/projects/sites/blueprint-rec-2/exports/candidate-review/page4-text-detector-seeded-20260330/page4-text-detector-seeded-export.zip`
+    - PNG: `C:/projects/sites/blueprint-rec-2/exports/candidate-review/page4-text-detector-seeded-20260330/unzipped/page4-text-detector-run/annotated.png`
+    - XLSX: `C:/projects/sites/blueprint-rec-2/exports/candidate-review/page4-text-detector-seeded-20260330/unzipped/page4-text-detector-run/markers.xlsx`
+  - важное состояние:
+    - export больше не пустой
+    - text-cluster detector наконец-то вытаскивает plain-text callout-метки `14-*`
+    - `11` всё ещё не найден автоматически и должен считаться unresolved/manual-review
+- 2026-04-01: после рестарта backend seeded `page4` пришлось пересоздать, потому что сессии пока in-memory.
+  - новая рабочая сессия: `http://127.0.0.1:3003/sessions/ff1ff358-d028-40e7-b971-b55d4330c35a`
+  - детектор снова дал `237` кандидатов и `51` OCR-подсказку
+  - через candidate-first API в сессию заново посеяны `17` финальных меток:
+    - `13, 9, 4, 11, 10, 3, 2, 8, 6, 1, 7, 5, 14-1, 14-2, 14-3, 14-4(1), 14-4(2)`
+  - `11` на этот раз добавлен вручную по локальному анализу crop-а, потому что OCR его всё ещё не поднял автоматически
+  - итоговый экспорт уже открыт и проверен:
+    - ZIP: `C:/projects/sites/blueprint-rec-2/exports/candidate-review/page4-text-detector-seeded-20260401/page4-text-detector-seeded-export.zip`
+    - PNG: `C:/projects/sites/blueprint-rec-2/exports/candidate-review/page4-text-detector-seeded-20260401/unzipped/page4-text-detector-seeded-20260401/annotated.png`
+    - XLSX: `C:/projects/sites/blueprint-rec-2/exports/candidate-review/page4-text-detector-seeded-20260401/unzipped/page4-text-detector-seeded-20260401/markers.xlsx`
+- 2026-04-07: ускорен и упрощён low-res one-shot контур для `test2.jpg`, но качество всё ещё ограничено локальным OCR.
+  - ключевой вывод:
+    - на `test2` главная проблема уже не в кликах, не в UI и не в общем числе кандидатов
+    - круги находятся
+    - ломается именно semantic OCR на tiny-circle crop-ах
+  - измерения по `test2`:
+    - раньше локальный `_build_candidates(...)` занимал около `218s`
+    - после оптимизаций стал занимать около `89-91s`
+  - что изменено в `C:/projects/sites/blueprint-rec-2/services/inference/app/services/session_store.py`:
+    - low-res circle-only rescue теперь OCR-ит только `1` лучший круг на кластер вместо `3`
+    - low-res circle clusters ограничены верхними `20`
+    - low-res final OCR rerun идёт только по подозрительным кандидатам
+    - low-res shape fallback пропускается, если кандидатов уже достаточно
+    - oversized low-res numeric circles вырезаются
+    - tiny-circle easy-OCR теперь может перезаписать шум вроде `88 -> 8`
+  - latest verified live `test2` export:
+    - ZIP: `C:/projects/sites/blueprint-rec-2/exports/one-shot-live-20260407-fix5/test2/test2-one-shot-fix5b-export.zip`
+    - PNG: `C:/projects/sites/blueprint-rec-2/exports/one-shot-live-20260407-fix5/test2/unzipped/test2-one-shot-20260407-fix5b/annotated.png`
+    - XLSX: `C:/projects/sites/blueprint-rec-2/exports/one-shot-live-20260407-fix5/test2/unzipped/test2-one-shot-20260407-fix5b/markers.xlsx`
+  - latest live labels on `test2`:
+    - `7, 2, 8, 8, 6, 1, 6, 9, 9, 20, 8, 10, 18, 3, 60`
+  - status:
+    - быстрее и чище, чем раньше
+    - всё ещё недостаточно хорошо для production one-shot
+    - главные remaining ошибки: лишние/дублирующиеся цифры и неверное чтение tiny-circle номеров (`10`, `60`, duplicates around `8/9/6`)
+  - статус на тот момент:
+    - быстрее и чище, чем раньше
+    - всё ещё недостаточно хорошо для production one-shot
+    - главные remaining ошибки: лишние/дублирующиеся цифры и неверное чтение tiny-circle номеров (`10`, `60`, duplicates around `8/9/6`)
+- 2026-04-07: после этого в локальный ignored-конфиг `C:/projects/sites/blueprint-rec-2/services/inference/.env.local` были добавлены реальные VLM ключи и low-res one-shot контур для `test2.jpg` был переработан ещё раз.
+  - пользователь отдельно зафиксировал важное правило:
+    - `test2.jpg` больше не использовать как основной quality-бенчмарк
+    - причина: качество самого исходного листа настолько низкое, что даже человек не везде уверенно читает номера
+    - допустимо использовать `test2.jpg` только как stress-case / edge-case, но не как главный критерий качества
+  - пользователь также зафиксировал новые benchmark-роли:
+    - `C:/projects/sites/blueprint-rec-2/blueprints-test/image001.png` — solved smoke-case
+    - `C:/projects/sites/blueprint-rec-2/blueprints-test/page4.png` — solved strong-case
+    - `C:/projects/sites/blueprint-rec-2/blueprints-test/test1.jpg` — единственный реальный prod-gate; именно по нему надо мерить, можно ли систему пускать в прод
+    - `C:/projects/sites/blueprint-rec-2/blueprints-test/test2.jpg` — только stress-case, не критерий выпуска
+  - важное:
+    - ключи лежат только локально в `.env.local`, не печатать их и не копировать в ответы
+    - OpenRouter переключён с дефолтного `openai/gpt-4.1` на `anthropic/claude-3.7-sonnet`, чтобы консенсус был действительно разнотипным (`OpenAI + Gemini + Claude`)
+  - что поменяно в коде:
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/candidate_vlm_recognizer.py`
+      - per-candidate VLM теперь не ограничивается первым ответом, а агрегирует провайдеров и умеет short-circuit только при очень сильном результате
+      - indexed-tile VLM агрегирует ответы провайдеров по голосам и confidence
+      - одиночные multi-digit tile hallucinations теперь режутся жёстче
+      - prompt для финального VLM расширен под dual-view (`close zoom + wider context`)
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/session_store.py`
+      - добавлен `context tile` этап для low-res круговых кандидатов: VLM смотрит не только локальные микро-группы, но и более широкие тайлы чертежа
+      - tile-ответы проходят local OCR cross-check, чтобы отсеивать фантазии без локальной поддержки
+      - финальный per-candidate VLM для low-res circle теперь получает composite crop: close-up + wider context того же target
+  - тесты:
+    - `npm run test:inference` -> `35 passed`
+    - `npm run build:web` -> проходит
+  - честные live результаты на `test2.jpg`:
+    - fix6:
+      - PNG: `C:/projects/sites/blueprint-rec-2/exports/one-shot-live-20260407-fix6/test2/unzipped/test2-one-shot-fix6/annotated.png`
+      - labels: `7, 8, 6, 9, 1, 6, 9, 5, 20, 10, 3, 60`
+    - fix7 (первый широкий context-tile прогон): явно переизбыточный, `40` меток, непригоден
+      - PNG: `C:/projects/sites/blueprint-rec-2/exports/one-shot-live-20260407-fix7/test2/unzipped/test2-one-shot-fix7/annotated.png`
+    - fix8 (строже tile-голосование + local OCR cross-check): лучше, но всё ещё шумно, `23` метки
+      - PNG: `C:/projects/sites/blueprint-rec-2/exports/one-shot-live-20260407-fix8/test2/unzipped/test2-one-shot-fix8/annotated.png`
+      - labels: `1, 1, 3, 4, 12, 5, 6, 5, 8, 15, 6, 9, 1, 6, 5, 9, 5, 20, 4, 10, 18, 3, 60`
+    - fix9 (добавлен dual-view final VLM): местами лучше, но overall всё ещё недостаточно надёжен, `25` меток
+      - PNG: `C:/projects/sites/blueprint-rec-2/exports/one-shot-live-20260407-fix9/test2/unzipped/test2-one-shot-fix9/annotated.png`
+      - labels: `1, 1, 3, 4, 12, 5, 6, 5, 2, 8, 15, 6, 9, 1, 2, 6, 1, 9, 20, 16, 4, 14, 18, 3, 60`
+    - fix10 (`OpenAI + Gemini + Claude`): разнотипный консенсус поднят, но качество `test2` всё ещё ниже цели, `28` меток
+      - PNG: `C:/projects/sites/blueprint-rec-2/exports/one-shot-live-20260407-fix10/test2/unzipped/test2-one-shot-fix10/annotated.png`
+      - ZIP: `C:/projects/sites/blueprint-rec-2/exports/one-shot-live-20260407-fix10/test2/test2-one-shot-fix10-export.zip`
+      - XLSX: `C:/projects/sites/blueprint-rec-2/exports/one-shot-live-20260407-fix10/test2/unzipped/test2-one-shot-fix10/markers.xlsx`
+      - labels: `1, 1, 3, 3, 4, 12, 5, 6, 5, 13, 8, 15, 9, 6, 9, 8, 1, 63, 6, 5, 8, 20, 8, 4, 10, 18, 3, 60`
+  - текущий честный вывод:
+    - `test2` остаётся hard-case
+    - circle candidate detection уже не главный bottleneck
+    - даже `tile + local OCR + dual-view VLM + multi-provider consensus` всё ещё даёт hallucinations на tiny labels
+    - следующий реальный корневой шаг — page/tile-level label-vocabulary или другой более глобальный VLM контур, а не ещё один локальный круговой эвристический порог
+
+- 2026-04-08: ускорен low-res one-shot path для hard-case test1: дорогие context/sequence tile VLM passes теперь включаются только когда кандидатов реально мало, нет извлечённого vocabulary и сцена не слишком плотная. Для dense low-res страниц опора смещена на OCR recovery + letter-tile recovery по vocabulary.
+
+- 2026-04-08: recovery-pass теперь переосматривает позиции только против уже подтверждённых in-vocab меток, а не против любых существующих кандидатов. Это позволяет заменить неверный label на missing-vocab label (пример: 34 вместо ошибочного 37). Для буквенных suffix-меток (A/B) letter-tile group limit больше не режется до 8.
+
+- 2026-04-08: добавлен targeted VLM recovery по missing vocabulary labels. Он прогоняет только ограниченный пул circle-кандидатов и только по реально недостающим меткам. Нужен для изолированных суффиксных лейблов вроде 29A/29B и для исправления wrong-but-covered numeric labels.
+
+- 2026-04-08: targeted missing-label VLM recovery теперь condition-ится exact allowed label list. В prompt для VLM явно передаётся список missing labels; если видимая метка не совпадает ни с одной из них, модель должна вернуть no-callout вместо свободного угадывания.
+
+- 2026-04-08: первый вариант exact-label VLM recovery оказался слишком дорогим и подвешивал auto_annotate. Сужено: targeted VLM recovery теперь работает только для alpha/hyphen missing labels (например 29A/14-2), с малым budget; numeric missing labels остаются на OCR-based recovery.
+
+- 2026-04-08: missing-label recovery теперь делает per-label pass, если хвост короткий (<=8). Сначала OCR по одной метке, затем при alpha/hyphen метках targeted VLM и per-label letter-tile. Это снимает неоднозначность типа 29R -> 29B и даёт шанс изолированным suffix-меткам.
+
+- 2026-04-09: после веб-ресерча принято, что текущая crop-first стратегия концептуально упирается в потолок на `test1.jpg`.
+  - общий вывод из похожих кейсов:
+    - зрелые решения для engineering drawings не делают free-form VLM по каждому маленькому crop-у как основной путь
+    - вместо этого они строят структурный page-first pipeline: page zoning -> oriented detection -> domain OCR -> topology/graph constraints -> only then targeted VLM/reranking
+  - что подтверждают источники:
+    - recent engineering-drawing papers используют OBB detection + lightweight parser / Donut-style structured extraction, а не generic OCR alone
+    - technical-drawing OCR papers отдельно подчёркивают scarcity of labeled data и используют synthetic data generators
+    - vectorization/CAD reconstruction papers используют dual-stream preprocessing и topology reconstruction, потому что геометрия линий и leader connections так же важна, как OCR
+    - industry tools (Procore, Werk24) прямо пишут, что raster/scanned callouts хуже vector, а для scans нужен как минимум ~200-300 dpi и жёсткие callout shape constraints
+  - новый стратегический курс проекта:
+    - перестраивать pipeline в сторону `drawing -> detectors -> OCR heads -> graph association -> conflict engine -> optional VLM verifier`
+    - VLM оставить только как targeted verifier на ambiguity cases, а не как свободный locator/reader
+    - перестать silently dedupe/drop ambiguous candidates; все ambiguity должны попадать в explicit conflict layer
+
+- 2026-04-09: детальный план перестройки после веб-анализа похожих систем.
+  - что надо прекратить:
+    - не использовать browser/UI как основной production pipeline
+    - не читать tiny crops free-form VLM-ом без page vocabulary и structural constraints
+    - не удалять дубли и сомнительные точки молча; они должны становиться конфликтами
+    - не benchmark-ить качество по `test2.jpg`; prod-gate только `test1.jpg`
+  - новая целевая архитектура:
+    - `input drawing -> normalization -> page vocabulary builder -> callout/leader detectors -> graph association -> specialized OCR heads -> conflict engine -> targeted VLM verifier -> export`
+  - ключевые внедряемые блоки:
+    - `normalization`: crop design area, deskew, DPI estimate, optional local enhancement only for tiny callouts
+    - `page vocabulary builder`: multi-scale tile scan всей страницы; собирает список реально существующих label-строк с альтернативами и confidence
+    - `callout detector`: отдельный детектор кружков/овалов/balloon regions, не смешанный с OCR
+    - `leader detector`: отдельное восстановление leader lines / attachment topology
+    - `graph association`: связывает кружок, текст и leader endpoint; выбирает одну метку на один callout с penalty за duplicates
+    - `specialized OCR heads`: короткие numeric/alpha-suffix recognizers на synthetic callout data
+    - `conflict engine`: если label одинаковый и геометрия конфликтует, если confidence низкий, если OCR/VLM расходятся, если callout без уверенной связи — это explicit conflict, а не export
+    - `targeted VLM verifier`: только для малого хвоста конфликтов; работает на bounded choice из page vocabulary
+  - engineering principle:
+    - сначала строим устойчивую геометрию и vocabulary страницы, потом читаем tiny labels в их рамках; не наоборот
+  - ожидаемый критерий качества:
+    - `image001.png` и `page4.png` должны проходить без конфликтов
+    - `test1.jpg` должен проходить one-shot без human help и без явных промахов по missed labels / duplicates / gross drift
+
+- 2026-04-09: начато реальное внедрение нового page-first слоя без ломки текущего API.
+  - backend:
+    - добавлены новые сущности в `C:/projects/sites/blueprint-rec-2/services/inference/app/models/schemas.py`:
+      - `PageVocabularyEntry`
+      - `PipelineConflict`
+      - `PipelineConflictType`
+      - `PipelineConflictSeverity`
+    - в `AnnotationSession` добавлены:
+      - `page_vocabulary`
+      - `missing_labels`
+      - `pipeline_conflicts`
+    - добавлен `C:/projects/sites/blueprint-rec-2/services/inference/app/services/page_vocabulary.py`
+      - собирает vocabulary страницы из final candidates + explicit page-VLM vocabulary
+      - хранит count, best confidence, source list и bbox-якорь по лучшему кандидату
+    - добавлен `C:/projects/sites/blueprint-rec-2/services/inference/app/services/conflict_engine.py`
+      - поднимает три типа конфликтов:
+        - `candidate_ambiguity`
+        - `duplicate_label_nearby`
+        - `missing_vocab_label`
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/session_store.py` теперь:
+      - возвращает из candidate build ещё и explicit vocabulary
+      - после detect/auto/apply command пересчитывает pipeline state через `_refresh_pipeline_state(...)`
+      - больше не держит page vocabulary и конфликты как неявную логику только внутри dedupe
+  - frontend:
+    - `C:/projects/sites/blueprint-rec-2/packages/shared-types/src/types.ts`
+    - `C:/projects/sites/blueprint-rec-2/packages/shared-types/src/schemas.ts`
+      - синхронизированы с новыми backend-полями
+    - `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`
+      - показывает page vocabulary / missing labels / pipeline conflicts
+      - умеет прыгать к конфликту по bbox/marker/candidate
+      - summary теперь показывает размер словаря, пропуски и pipeline conflicts
+  - состояние:
+    - это ещё не новый detector+graph pipeline целиком
+    - это первый рабочий слой, который перестаёт скрывать ошибки и делает их явными для следующего шага
+  - проверки:
+    - `npm run test:inference` -> `39 passed`
+    - `npm run build:web` -> проходит
+    - остались старые frontend warnings:
+      - `useEffect` missing dependency around `runAutoAnnotate`
+      - raw `<img>` warning от Next.js
+  - дополнительная важная правка в этот же день:
+    - убрано ещё одно silent-drop поведение:
+      - `_dedupe_nearby_equal_labels(...)` теперь схлопывает только один и тот же target, а не просто одинаковый label рядом
+      - `_build_auto_markers(...)` больше не REJECT-ит просто nearby same-label candidate; только truly same-target candidate
+    - смысл:
+      - рядом стоящие дубли теперь не пропадают молча
+      - они доходят до `pipeline_conflicts` как явная проблема
+
+- 2026-04-09: внедрён первый topology/leader слой.
+  - новые поля в `CalloutCandidate`:
+    - `topology_score`
+    - `topology_source`
+    - `leader_anchor_x`
+    - `leader_anchor_y`
+  - добавлен `C:/projects/sites/blueprint-rec-2/services/inference/app/services/leader_topology.py`
+    - ищет line segments через Canny + HoughLinesP
+    - для `circle` / `box` оценивает, есть ли у shape реальный outgoing leader line
+    - возвращает topology score и anchor point на границе shape
+  - интеграция:
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/session_store.py`
+      - topology считается внутри `_compose_candidates(...)` перед pairing
+      - topology влияет на:
+        - `candidate_quality`
+        - `circle/text` pairing score
+        - `box/text` pairing score
+        - keep-thresholds для standalone circle/box candidates
+      - composed candidates теперь наследуют topology metadata от shape
+  - устойчивость:
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/candidate_detector.py`
+      - `HoughCircles` теперь не валит весь detector, если OpenCV упрётся в память; circle-phase мягко возвращает `[]`
+  - тесты:
+    - добавлен unit test на synthetic leader-circle case
+    - backend suite сейчас:
+      - `npm run test:inference` -> `40 passed`
+    - `npm run build:web` -> проходит
+  - смысл этого слоя:
+    - это ещё не полный graph association
+    - но shape теперь оценивается не только по OCR/геометрии bbox, а ещё и по факту наличия leader topology
+
+- 2026-04-09: внедрён явный слой `candidate associations`.
+  - новые сущности:
+    - `CandidateAssociation` добавлен в
+      - `C:/projects/sites/blueprint-rec-2/services/inference/app/models/schemas.py`
+      - `C:/projects/sites/blueprint-rec-2/packages/shared-types/src/types.ts`
+      - `C:/projects/sites/blueprint-rec-2/packages/shared-types/src/schemas.ts`
+    - в `AnnotationSession` добавлено поле `candidate_associations`
+  - новый сервис:
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/candidate_association.py`
+      - строит явные связи `text candidate -> shape candidate`
+      - хранит:
+        - `shape_candidate_id`
+        - `text_candidate_id`
+        - `shape_kind`
+        - `label`
+        - `score`
+        - `geometry_score`
+        - `topology_score`
+        - `leader_anchor_*`
+        - union bbox пары
+      - умеет normal match и relaxed match для low-res circle режима
+  - интеграция в `session_store.py`:
+    - `_build_candidates(...)` теперь возвращает:
+      - final candidates
+      - candidate associations
+      - explicit vocabulary
+    - `detect_candidates(...)` и `auto_annotate(...)` сохраняют associations в session
+    - `_compose_candidates(...)` теперь:
+      - сначала считает topology
+      - потом строит явные associations
+      - потом собирает финальные composed candidates уже из associations
+      - старые `_find_best_circle_for_text(...)` / `_find_best_box_for_text(...)` пока оставлены как fallback safety net, чтобы не ломать low-res recovery одним коммитом
+    - `_compose_pair_candidate(...)` теперь умеет принять association и тащит его anchor metadata
+  - тесты:
+    - добавлен unit test на `CandidateAssociationBuilder`
+    - API tests обновлены, теперь проверяют наличие `candidateAssociations` в session response
+    - чтобы тесты не зависели от капризов OCR на toy image, два старых integration tests стабилизированы через monkeypatch detector/text-region
+  - проверки:
+    - `cmd /c py -3.11 -m pytest services\\inference\\tests\\test_sessions_api.py -q` -> `41 passed`
+    - `cmd /c npm.cmd run build --workspace @blueprint-rec/web` -> проходит
+    - frontend warnings те же старые:
+      - `useEffect` missing dependency around `runAutoAnnotate`
+      - raw `<img>` warning от Next.js
+  - смысл:
+    - pairing больше не спрятан в неявном best-match цикле
+    - у пайплайна появился отдельный промежуточный артефакт, который можно дальше использовать для graph association, conflict reasoning и export gating
+
+- 2026-04-09: `candidate associations` перестали быть "немыми" и вошли в `pipeline_conflicts`.
+  - новый тип конфликта:
+    - `association_ambiguity`
+  - что теперь помечается явно:
+    - один и тот же `text candidate` почти одинаково хорошо матчится к нескольким shape-кандидатам
+    - один и тот же `shape candidate` спорит сразу между несколькими text-кандидатами
+  - текущая логика:
+    - text->many shape даёт `warning`
+    - shape->many text даёт `error`
+    - конфликт поднимается только когда второй матч реально близок к лучшему, а не просто существует в хвосте списка
+  - зачем:
+    - следующий graph/topology слой теперь может опираться не только на best-match, но и на явные спорные связи
+    - неоднозначные связи больше не теряются внутри association ranking
+  - проверки:
+    - `cmd /c py -3.11 -m pytest services\\inference\\tests\\test_sessions_api.py -q` -> `43 passed`
+    - `cmd /c npm.cmd run build --workspace @blueprint-rec/web` -> проходит
+
+- 2026-04-09: подчистили текущие фронтенд-хвосты без изменения продуктового поведения.
+  - `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`
+    - авто-запуск `runAutoAnnotate(...)` переведён на стабильный `ref`-вызов внутри `useEffect`, чтобы убрать warning про missing dependency и не тащить `useCallback`-обвязку
+    - холст теперь рендерит исходное изображение через `next/image` с passthrough loader + `unoptimized`, чтобы убрать warning по raw `<img>` и не ломать локальную раздачу изображений с inference API
+  - проверки после правки:
+    - `npm run test:inference` -> `41 passed`
+    - `npm run build:web` -> проходит без прежних двух frontend warnings
+  - смысл:
+    - это не новый pipeline-слой, а техническая зачистка перед следующими изменениями в page-first / conflict-first контуре
+
+- 2026-04-09: во frontend выведен новый слой `candidate associations`, чтобы graph-переход был виден не только в API.
+  - `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`
+    - в блоке `Словарь страницы` теперь показывается общее число shape↔text связей и сколько из них уже попало в `association_ambiguity`
+    - в списке review-кандидатов появился компактный индикатор, сколько явных связей есть у конкретного кандидата
+    - в правой панели выбранного кандидата добавлен отдельный блок `Связи`:
+      - список связанных shape/text кандидатов
+      - score/topology/source
+      - быстрый переход фокусом на связанный кандидат
+    - preview crop кандидата тоже переведён на `next/image` passthrough loader, как и основное изображение документа
+  - смысл:
+    - candidate associations перестали быть «скрытым промежуточным артефактом»
+    - теперь следующий шаг по graph/conflict reasoning можно отлаживать прямо в UI, не только по JSON API
+
+- 2026-04-09: подключили первый реальный `export gating` к уже существующему `pipeline_conflicts`.
+  - проблема до правки:
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/session_store.py` всегда собирал ZIP, даже если в сессии уже были `missing_vocab_label` или другие `ERROR`-конфликты
+    - из-за этого conflict layer был виден в UI/API, но не влиял на финальный артефакт
+  - что изменено:
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/session_store.py`
+      - перед экспортом теперь принудительно пересчитывает pipeline state с `include_missing_labels=True`
+      - если есть blocking conflicts с `severity=error`, экспорт не строится и API возвращает `400`
+      - detail теперь перечисляет короткие причины вроде `missing_vocab_label:29A`
+    - `C:/projects/sites/blueprint-rec-2/services/inference/tests/test_sessions_api.py`
+      - добавлен test, что обычный export без конфликтов продолжает работать
+      - добавлен test, что export блокируется на unresolved pipeline error conflict
+  - проверки:
+    - `py -3.11 -m pytest services/inference/tests/test_sessions_api.py -k "export" -q` -> `2 passed`
+    - `npm run test:inference` -> `42 passed`
+  - смысл:
+    - теперь `pipeline_conflicts` не просто диагностическая витрина
+    - финальный export больше не маскирует явные ошибки как готовый результат
+
+- 2026-04-09: auto-annotate начал учитывать `association_ambiguity`.
+  - что изменено:
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/session_store.py`
+      - `auto_annotate(...)` теперь пересчитывает pipeline state сразу после `build_candidates(...)`, ещё до `_build_auto_markers(...)`
+      - `_build_auto_markers(...)` проверяет свежие `pipeline_conflicts`
+      - если composed candidate попадает в `association_ambiguity`, он больше не может стать `ai_detected`, даже при хорошем локальном score; вместо этого уходит в `ai_review`
+  - тесты:
+    - `C:/projects/sites/blueprint-rec-2/services/inference/tests/test_sessions_api.py`
+      - добавлен API-level test, где `_build_candidates(...)` monkeypatch-ится на один уверенный final candidate + две почти равные associations
+      - ожидаемое поведение подтверждено: auto marker создаётся, но статус именно `ai_review`
+  - смысл:
+    - новый conflict layer теперь влияет не только на UI и export, но и на сам decision path авторазметки
+    - спорный `text <-> shape` match больше не превращается в ложную “уверенную” AI-точку
+
+- 2026-04-09: `association_ambiguity` подключён к auto-annotate status gating.
+  - проблема до правки:
+    - даже если `candidate associations` уже спорили между собой, auto-annotate всё ещё мог выдать итоговый marker как `ai_detected`, если сам финальный candidate имел высокий local quality
+    - получалось противоречие: conflict layer уже говорит "спорно", а marker-status всё ещё говорит "уверенно"
+  - что изменено:
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/session_store.py`
+      - перед `_build_auto_markers(...)` теперь сначала пересчитывает pipeline state с `include_missing_labels=False`
+      - `_build_auto_markers(...)` проверяет, попадает ли candidate в `association_ambiguity`
+      - если да, marker принудительно уходит в `ai_review`, даже если quality иначе дотягивал до `ai_detected`
+  - тесты:
+    - `C:/projects/sites/blueprint-rec-2/services/inference/tests/test_sessions_api.py`
+      - добавлен test, что ambiguous association case создаёт `ai_review`, а не `ai_detected`
+  - смысл:
+    - `ai_detected` теперь означает не только "кандидат локально сильный", но и "на association stage нет явного спора"
+
+- 2026-04-09: `candidate_ambiguity` тоже подключён к auto-annotate status gating.
+  - проблема до правки:
+    - если группа финальных candidates уже была помечена как `candidate_ambiguity`, но top candidate заметно выигрывал по local quality, auto-annotate всё ещё мог выдать `ai_detected`
+    - это оставляло слишком оптимистичный статус в местах, где сам pipeline уже видел неоднозначность по candidate layer
+  - что изменено:
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/session_store.py`
+      - добавлен общий helper проверки, касается ли pipeline conflict конкретного candidate по `candidateId` или bbox/label
+      - `AI_DETECTED` теперь выдаётся только если нет ни `association_ambiguity`, ни `candidate_ambiguity` для top candidate
+  - тесты:
+    - `C:/projects/sites/blueprint-rec-2/services/inference/tests/test_sessions_api.py`
+      - добавлен test, что ambiguous candidate group уходит в `ai_review`, а не в `ai_detected`
+  - смысл:
+    - `ai_detected` всё ближе к реальному значению "pipeline не видит явного спора"
+
+- 2026-04-09: ambiguity-driven `ai_review` cases больше не схлопываются как будто уже разрешены.
+  - проблема до правки:
+    - даже после понижения marker status до `ai_review`, top candidate всё равно переводился в `accepted`
+    - из-за этого session state частично прятал альтернативы и делал ambiguity-case визуально более "закрытым", чем он есть на самом деле
+  - что изменено:
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/session_store.py`
+      - если auto marker остаётся `ai_review`, top candidate больше не переводится в `accepted`
+      - такие cases больше не запускают ранний reject соседних same-target alternatives
+  - тесты:
+    - `C:/projects/sites/blueprint-rec-2/services/inference/tests/test_sessions_api.py`
+      - ambiguity-tests расширены: теперь проверяют, что review-case кандидаты остаются `pending`
+  - смысл:
+    - review-case теперь сохраняет не только итоговую AI-точку, но и спорные альтернативы рядом, чтобы человек реально видел unresolved case
+
+- 2026-04-09: cleanup-pass по `Истории` в `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx` доведён до устойчивого semantic state.
+  - что уже было собрано до этой правки:
+    - sticky-header `Истории` разложен на `HistoryQueueChip`, `HistorySummaryChips`, `HistoryNextStepPanel`, `HistoryStickyToolbar`
+    - history-card разложена на `HistoryCardHeader`, `HistoryRouteRow`, `HistoryEntryCard`
+    - расчёт card view-model вынесен в `buildHistoryEntryCardViewModel(...)`
+    - marker rail и ambiguity-review уже были разложены на `MarkerListItem`, `MarkerRailFooter`, `AmbiguityReviewPanel`, `AmbiguityReviewCandidateCard`
+  - проблема, пойманная во время cleanup:
+    - semantic queue-state уже был переведён на union `review | deferred | all`, но часть логики всё ещё сравнивала его с display-label строками вроде `отложенные`
+    - из-за этого production build падал на typecheck с несопоставимыми типами `HistoryQueueContext | null` и `"отложенные"`
+  - что изменено:
+    - добавлен отдельный display-map `historyQueueContextLabels`, который рендерит semantic queue-state в UI-строки
+    - добавлен и второй слой helper-ов вокруг этой же логики:
+      - `historyQueueContextToMode`
+      - `getPrimaryHistoryQueueContext(...)`
+      - `getQueueCountByContext(...)`
+      - `buildHistoryAlternateQueueAction(...)`
+    - `HistoryQueueChip`, `HistoryCardHeader`, `HistoryStickyToolbar`, `HistoryNextStepPanel` и `buildHistoryEntryCardViewModel(...)` больше не используют display-label как состояние
+    - `primaryHistoryQueueContext` и `historyJumpContext` теперь живут только как semantic literals:
+      - `review`
+      - `deferred`
+      - `all`
+    - display-текст вроде `отложенные`, `все`, `review` строится только на этапе рендера
+    - параллельно cleanup продолжился:
+      - `selectedMarkerReviewCandidates` -> `selectedAmbiguityReviewCandidates`
+      - `selectedMarkerReviewMessages` -> `selectedAmbiguityReviewMessages`
+      - `selectedMarkerReviewTypeLabels` -> `selectedAmbiguityReviewTypeLabels`
+  - проверки:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:inference` -> `45 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run build --workspace @blueprint-rec/web` -> проходит
+  - смысл:
+    - главный TSX-файл стал не только короче, но и более устойчивым к следующим рефакторам
+    - после этой точки нельзя снова случайно смешать semantic state и русские display-label без явного места преобразования
+
+- 2026-04-09: зафиксирован рабочий roadmap до состояния `готово к нормальному локальному тесту`.
+  - этап 1: структура и устойчивость frontend review-flow
+    - добить `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`, чтобы ambiguity-review logic была собрана в локальные view-model/helper-ы, а не размазана по render/body
+    - цель: дальше менять review-flow без риска повторных type/state регрессий
+  - этап 2: state-flow hygiene
+    - отдельно пройти queue switching, skip/restore, history resume, jump-to-marker, completion/deferred branching
+    - цель: убедиться, что нет “тихих” режимов, где UI выглядит правильно, но состояние очередей расходится
+  - этап 3: автоматические проверки web-слоя
+    - сейчас в repo нет нормального frontend unit/integration harness; кроме backend pytest есть только разовый `tmp/qa-smoke.spec.ts`
+    - нужно добавить минимальный автоматический тестовый контур именно для web ambiguity-flow, иначе поведение держится в основном на ручной прогонке и `next build`
+  - этап 4: UX pass до test-ready
+    - подчистить финальные тексты, empty/error states, loading affordances и заметность незавершённых ambiguity-case
+  - этап 5: финальная verification-сборка
+    - `cmd /c npm.cmd run test:inference`
+    - web build
+    - targeted checks для нового frontend test harness
+  - текущий статус:
+    - этап 1 начат: ambiguity-review logic переводится на отдельный local view-model helper
+
+- 2026-04-09: web ambiguity-flow получил отдельный test-harness и рабочий headless e2e-контур.
+  - что изменено:
+    - `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace-state.ts`
+      - вынесен чистый state/helper слой для web review-логики:
+        - `buildSelectedAmbiguityReviewViewModel(...)`
+        - `buildAmbiguityQueueViewModel(...)`
+        - `getPrimaryHistoryQueueContext(...)`
+        - `getQueueCountByContext(...)`
+        - `buildHistoryAlternateQueueAction(...)`
+        - `getNextMarkerIdInQueue(...)`
+      - туда же вынесены queue/display constants, которые нужны именно для pure-state тестов
+    - `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`
+      - основной компонент переведён на helper-импорты из `annotation-workspace-state.ts`
+      - ambiguity-review banner добавлен прямо в основной левый rail:
+        - показывает текущий остаток `review/deferred`
+        - даёт быстрый CTA `следующий кейс`
+        - даёт отдельный вход в deferred-pass, если есть отложенный хвост
+      - модалка `История` получила `role="dialog"` и `aria-modal="true"`; это одновременно улучшило accessibility и сделало e2e-ассерты стабильнее
+    - `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace-state.test.ts`
+      - добавлены unit-тесты на pure ambiguity helpers
+    - `C:/projects/sites/blueprint-rec-2/apps/web/vitest.config.ts`
+      - vitest ограничен только unit-тестами в `components/**/*.test.ts(x)`, чтобы не цеплять Playwright e2e
+    - `C:/projects/sites/blueprint-rec-2/apps/web/e2e/annotation-ambiguity.spec.ts`
+      - обновлены селекторы под текущий UI
+      - добавлена диагностика `pageerror/console:error`
+      - e2e теперь проверяет оба ключевых сценария:
+        - `skip -> deferred -> confirm -> history summary`
+        - `delete -> false-positive resolution in history`
+    - `C:/projects/sites/blueprint-rec-2/playwright.config.ts`
+      - webServer переведён на более надёжный запуск через `npm run dev` внутри `apps/web`
+    - `C:/projects/sites/blueprint-rec-2/apps/web/package.json`
+      - добавлен `vitest`
+      - добавлен script `test`
+    - `C:/projects/sites/blueprint-rec-2/package.json`
+      - добавлен root script `test:web`
+  - проверки:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web` -> `1 file passed`, `5 tests passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web:e2e` -> `2 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:inference` -> `45 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run build --workspace @blueprint-rec/web` -> проходит
+  - важное наблюдение:
+    - если `next build` запускать параллельно с Playwright/dev-server жизненным циклом, у Next иногда всплывает transient `PageNotFoundError: /_document`
+    - отдельный повторный build после завершения e2e проходит стабильно; это выглядит как race/грязное runtime-state, а не как регрессия кода
+  - смысл:
+    - ambiguity-flow теперь опирается не только на backend pytest и `next build`, но и на отдельный web unit/e2e слой
+    - проект впервые стал реально ближе к состоянию “готово к нормальному локальному тесту”, а не просто “собирается”
+
+- 2026-04-09: web ambiguity e2e-контур расширен до multi-marker/history navigation coverage.
+  - что усилено:
+    - `C:/projects/sites/blueprint-rec-2/apps/web/e2e/annotation-ambiguity.spec.ts`
+      - `createMockSession(...)` теперь умеет собирать fixture из нескольких ambiguity labels, а не только из одного marker
+      - session command mock больше не схлопывает всё в single-marker состояние:
+        - `confirm_marker` очищает только конфликты текущего marker
+        - `delete_marker` удаляет только этот marker и его конфликты
+        - `summary` теперь пересчитывается по живому marker-state, а не жёсткими `0/1`
+      - поверх этого добавлены ещё 3 headless e2e-сценария:
+        - history jump возвращает в правильный queue context (`review` vs `отложенные`)
+        - CTA `следующий кейс` из `Истории` реально возвращает в живую review-очередь из deferred-pass
+        - history queue switching позволяет явно прыгать между `в review` и `в отложенные`
+  - итоговое web-покрытие сейчас:
+    - `skip -> deferred -> confirm -> history summary`
+    - `delete -> false-positive resolution`
+    - `history jump -> correct queue context`
+    - `history next-case CTA -> resume live review queue`
+    - `history queue switching -> review/deferred`
+  - проверки:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web` -> `7 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web:e2e` -> `5 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:inference` -> `45 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c set NODE_OPTIONS=--max-old-space-size=4096 && npm.cmd run build --workspace @blueprint-rec/web` -> проходит
+  - текущий practical status:
+    - ambiguity review/history flow уже можно считать `test-ready` для нормального локального ручного прохода
+    - следующий приоритет уже не в базовой устойчивости, а в UX polishing и добавлении ещё 1-2 smoke scenarios только если реально всплывут новые регрессии
+
+- 2026-04-09: доделан recovery/error слой для ручного теста и закрыт один реальный ambiguity-progress bug.
+  - что изменено в `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`:
+    - initial load больше не умирает в один текстовый тупик:
+      - добавлен `reloadCurrentSession(...)`
+      - стартовая ошибка загрузки теперь показывает нормальный recovery-card с `Повторить загрузку`
+    - в уже открытом workspace error-banner тоже стал рабочим:
+      - `Обновить сессию` перетягивает актуальное состояние без ручного reload страницы
+      - `Скрыть` убирает шум, если ошибка уже понятна и не мешает продолжать
+    - локальный ambiguity-progress больше не врёт при failed backend command:
+      - `confirmSelectedMarker()` добавляет marker в reviewed-set только если `runCommand(...)` реально вернул новую session
+      - `deleteSelectedMarker()` теперь тоже не помечает ambiguity-case как обработанный, если delete-команда упала
+  - что усилено в headless e2e:
+    - `C:/projects/sites/blueprint-rec-2/apps/web/e2e/annotation-ambiguity.spec.ts`
+      - добавлен smoke на прямой happy-path `Подтвердить и дальше` без deferred-pass
+      - добавлен smoke на `load error -> Повторить загрузку -> workspace recovered`
+    - текущее web smoke-покрытие ambiguity-flow:
+      - skip -> deferred -> confirm
+      - delete -> false-positive
+      - direct confirm -> next active review
+      - history jump -> correct queue context
+      - history CTA -> resume queue
+      - explicit review/deferred queue switching
+      - initial load failure -> retry recovery
+  - проверки:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web` -> `7 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web:e2e` -> `7 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:inference` -> `45 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c set NODE_OPTIONS=--max-old-space-size=4096 && npm.cmd run build --workspace @blueprint-rec/web` -> проходит
+  - примечание:
+    - в retry-smoke ожидаемо попадает один `console:error` по `500`, потому что тест специально ломает первую загрузку сессии; это не регрессия UI, а часть сценария recovery
+
+- 2026-04-09: финальный smoke-pass закрыл ещё два UX/runtime кейса вокруг review-state.
+  - что исправлено в `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`:
+    - `confirm/delete and advance` больше не прыгают к следующей ambiguity-точке, если backend-команда реально упала
+      - `confirmSelectedMarker()` и `deleteSelectedMarker()` теперь возвращают `nextSession | null`
+      - `confirmSelectedMarkerAndAdvance()` / `deleteSelectedMarkerAndAdvance()` двигают фокус дальше только при успешном ответе API
+    - candidate-review теперь не теряет контекст после `Ложный`
+      - если человек был в candidate-review (`selectedMarkerId === null`, `selectedCandidateId !== null`) и после reject ещё остались pending-кандидаты, `syncSession(...)` больше не автоподставляет первую marker-карточку
+      - это сохраняет плавный review-flow по кандидатам без внезапного переключения в marker inspector
+  - что усилено в `C:/projects/sites/blueprint-rec-2/apps/web/e2e/annotation-ambiguity.spec.ts`:
+    - добавлен smoke на `reject candidate -> stay in candidate review mode`
+    - добавлен smoke на failed `confirm_marker`, где кейс не должен исчезать из review-очереди
+    - добавлен smoke на failed `delete_marker`, где кейс не должен выглядеть закрытым
+  - текущее headless web coverage:
+    - skip -> deferred -> confirm
+    - delete -> false-positive
+    - direct confirm -> next active review
+    - history jump -> correct queue context
+    - history CTA -> resume queue
+    - explicit review/deferred queue switching
+    - initial load failure -> retry recovery
+    - reject candidate -> stay in candidate review
+    - failed confirm -> no false progress
+    - failed delete -> no false progress
+  - проверки:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web` -> `7 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web:e2e` -> `10 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:inference` -> `45 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c set NODE_OPTIONS=--max-old-space-size=4096 && npm.cmd run build --workspace @blueprint-rec/web` -> проходит
+  - known runtime note:
+    - `next build` всё ещё иногда ловит transient `PageNotFoundError: /_document`, если запускать его в грязном runtime-хвосте после других процессов
+    - отдельный повторный build после короткой паузы проходит стабильно; пока это выглядит как Next runtime race, а не как кодовая регрессия проекта
+
+- 2026-04-09: candidate-review path тоже доведён до smoke-covered состояния.
+  - что изменено:
+    - `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`
+      - `syncSession(...)` теперь сохраняет candidate-review контекст после `Ложный`, если pending-кандидаты ещё остались
+      - это убирает резкий автопрыжок в marker inspector и делает batch-review кандидатов последовательным
+    - `C:/projects/sites/blueprint-rec-2/apps/web/e2e/annotation-ambiguity.spec.ts`
+      - mock route теперь поддерживает:
+        - `place_marker`
+        - `update_marker`
+        - `/candidates/:id/reject`
+      - добавлен happy-path smoke:
+        - `candidate -> Создать точку -> черновик -> сохранить label -> Подтвердить по лупе`
+      - existing candidate-reject smoke теперь проверяет не только факт reject, но и сохранение candidate-review режима
+  - текущее web e2e покрытие:
+    - skip -> deferred -> confirm
+    - delete -> false-positive
+    - direct confirm -> next active review
+    - history jump -> correct queue context
+    - history CTA -> resume queue
+    - explicit review/deferred queue switching
+    - initial load failure -> retry recovery
+    - reject candidate -> stay in candidate review
+    - candidate -> create draft marker -> confirm
+    - failed confirm -> no false progress
+    - failed delete -> no false progress
+  - проверки:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web` -> `7 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web:e2e` -> `11 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:inference` -> `45 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c set NODE_OPTIONS=--max-old-space-size=4096 && npm.cmd run build --workspace @blueprint-rec/web` -> проходит
+  - practical status:
+    - ambiguity-flow и candidate-review уже покрыты настолько, что дальнейшая ценность от новых synthetic e2e заметно падает
+    - следующий лучший шаг теперь уже не автоматизация, а реальный ручной smoke по пользовательскому сценарию поверх этой базы
+
+- 2026-04-09: собран отдельный manual QA контур для человеческой проверки.
+  - новый файл:
+    - `C:/projects/sites/blueprint-rec-2/MANUAL_QA_CHECKLIST.md`
+  - что в нём есть:
+    - короткий preflight с уже рабочими automated checks
+    - основной ambiguity-flow manual pass:
+      - review queue
+      - deferred pass
+      - history resume/jump
+    - candidate-review manual pass:
+      - reject candidate
+      - candidate -> draft marker -> confirm
+    - error recovery:
+      - initial load retry
+      - in-workspace `Обновить сессию`
+    - export sanity и done criteria
+  - смысл:
+    - теперь следующий агент или человек может не изобретать сценарий ручной проверки с нуля
+    - synthetic test coverage уже достаточно плотное; manual checklist становится следующей полезной точкой входа
+
+- 2026-04-09: export flow закрыт и по UI, а не только по backend API.
+  - что изменено:
+    - `C:/projects/sites/blueprint-rec-2/apps/web/lib/api.ts`
+      - `downloadSessionExport(...)` больше не делает слепой `anchor.click()` по URL
+      - теперь frontend сначала делает `fetch`, умеет читать backend error message (`detail` / `message`) и только потом создаёт download blob/object URL
+      - это починило реальный UX дефект: blocked export теперь показывает понятную ошибку в workspace, а не тихо проваливается
+    - `C:/projects/sites/blueprint-rec-2/apps/web/e2e/annotation-ambiguity.spec.ts`
+      - добавлен blocked-export smoke: UI показывает backend message при `400`
+      - добавлен export happy-path smoke: `Экспорт ZIP` реально триггерит download с ожидаемым filename
+  - итоговое web e2e покрытие сейчас:
+    - skip -> deferred -> confirm
+    - delete -> false-positive
+    - direct confirm -> next active review
+    - history jump -> correct queue context
+    - history CTA -> resume queue
+    - explicit review/deferred queue switching
+    - initial load failure -> retry recovery
+    - blocked export -> visible backend error
+    - export success -> archive download
+    - reject candidate -> stay in candidate review
+    - candidate -> create draft marker -> confirm
+    - failed confirm -> no false progress
+    - failed delete -> no false progress
+  - проверки:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web` -> `7 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web:e2e` -> `13 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:inference` -> `45 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c set NODE_OPTIONS=--max-old-space-size=4096 && npm.cmd run build --workspace @blueprint-rec/web` -> проходит
+  - practical status:
+    - ручной QA теперь можно проходить уже с нормальной обратной связью по export
+    - следующая наибольшая ценность — реальный человеческий прогон по `C:/projects/sites/blueprint-rec-2/MANUAL_QA_CHECKLIST.md`, а не ещё один synthetic smoke
+
+- 2026-04-09: зафиксирован рабочий roadmap до состояния "готово к нормальному локальному тесту".
+  - этап 1: структуризация фронта
+    - дожать `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`
+    - цель: ambiguity-review derived state, queue-state и action gating должны собираться через локальные helper/view-model, а не размазываться по главному компоненту
+  - этап 2: стабилизация UX/state-flow
+    - проверить и при необходимости укрепить переходы между:
+      - `review`
+      - `отложенные`
+      - `history jump`
+      - `skip -> restore -> final decision`
+      - `completion -> auto open history`
+    - цель: убрать места, где UI может оставаться в технически валидном, но человечески странном состоянии
+  - этап 3: автоматические проверки для web-flow
+    - сейчас у проекта уже есть backend pytest, но почти нет системных проверок для web ambiguity-flow
+    - нужно добавить хотя бы минимальный автоматический контур, который ловит регрессии в review/history-потоке
+  - этап 4: финальный UX pass
+    - дочистить пустые состояния, статусы, loading/error affordances и язык UI так, чтобы сессию можно было проходить без знания внутренней модели pipeline
+  - этап 5: финальная локальная верификация
+    - `cmd /c npm.cmd run test:inference`
+    - `cmd /c npm.cmd run build --workspace @blueprint-rec/web`
+    - дополнительные targeted web-checks для ambiguity-review/history
+  - текущий порядок работ:
+    - сначала закрываем структуру и state-flow
+    - потом добавляем web-тестовый контур
+    - потом делаем финальную UX-полировку и общий smoke-pass
+
+- 2026-04-09: ambiguity-review frontend переведён на более явный view-model слой, и появился первый реальный headless e2e-контур для web.
+  - что изменено в `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`:
+    - `buildAmbiguityReviewState(...)` больше не держит всю derived-логику внутри себя как один длинный блок
+    - из него вынесены и реально подключены helper-ы:
+      - `buildSelectedAmbiguityReviewViewModel(...)`
+      - `buildAmbiguityQueueViewModel(...)`
+      - `getNextMarkerIdInQueue(...)`
+    - repeated логика перехода к следующему ambiguity-marker убрана из:
+      - `confirmSelectedMarkerAndAdvance()`
+      - `deleteSelectedMarkerAndAdvance()`
+      - `skipSelectedMarkerAndAdvance()`
+  - что это дало:
+    - ambiguity-review state теперь можно тестировать и менять по частям, а не через один большой derived-блок
+    - переходы `skip / confirm / delete -> next marker` больше не копируются в нескольких местах
+  - новый web-test контур:
+    - добавлен `C:/projects/sites/blueprint-rec-2/playwright.config.ts`
+      - запуск строго headless
+      - webServer поднимает `apps/web` локально на `127.0.0.1:3004`
+    - добавлен e2e-файл `C:/projects/sites/blueprint-rec-2/apps/web/e2e/annotation-ambiguity.spec.ts`
+      - тест 1: `skip -> deferred -> confirm -> history summary`
+      - тест 2: `delete from ambiguity review -> history false-positive resolution`
+    - корневой `C:/projects/sites/blueprint-rec-2/package.json`
+      - добавлен script `test:web:e2e`
+      - добавлен `@playwright/test`
+  - инфраструктурные моменты:
+    - пришлось локально установить `@playwright/test` и browser runtime:
+      - `cmd /c npm.cmd install --save-dev @playwright/test@^1.51.1`
+      - `cmd /c npx playwright install chromium`
+    - `apps/web/.env.local` указывает API на `127.0.0.1:8010`, поэтому e2e-route mocks пришлось перевести на wildcard `**/api/sessions/...`, а не на жёстко прошитый порт
+    - документ в e2e фикстуре нельзя было отдавать как `data:` URL, потому что `resolveAssetUrl(...)` собирает обычный URL; фикстура переведена на mocked `/mock-doc.png`
+  - проверки:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:inference` -> `45 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run build --workspace @blueprint-rec/web` -> проходит
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web:e2e -- apps/web/e2e/annotation-ambiguity.spec.ts` -> `2 passed`
+  - текущий статус roadmap:
+    - structural cleanup ambiguity-review: done
+    - первый автоматический web review/history contour: done
+    - следующий фокус: UX/state-flow polish уже поверх работающего и проверяемого контура
+
+- 2026-04-09: закрыт риск гонок между ручными действиями и фоновыми состояниями workspace.
+  - что усилено в `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`:
+    - добавлен единый lock `isWorkspaceBusy = busy || isAutoAnnotating || isReloadingSession || isSessionLoading`
+    - ambiguity hotkeys теперь не работают, пока идёт авторазметка, перезагрузка или первичная загрузка
+    - `runCommand(...)` больше не запускает новые ручные команды поверх фонового состояния
+    - ручные action-handler'ы (`rejectCandidate`, `createMarkerFromCandidate`, `handleCanvasClick`, `handleUploadToExistingSession`, `handleExportSession`, `confirm/delete/skip`, `nudgeMarker`) получили ранний guard
+    - ключевые кнопки UI теперь тоже блокируются этим же lock:
+      - candidate actions
+      - ambiguity review actions
+      - upload
+      - draft confirm
+      - clear/delete toolbar
+      - export / auto-annotate
+  - что это дало:
+    - оператор больше не может случайно сделать ручное действие в момент, когда сессия ещё перезагружается или тихо доразмечается в фоне
+    - блокировка теперь единая и поведенчески, и визуально, а не только через отдельные `disabled={busy}`
+  - проверки:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web` -> `7 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web:e2e` -> `13 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:inference` -> `45 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c set NODE_OPTIONS=--max-old-space-size=4096 && npm.cmd run build --workspace @blueprint-rec/web` -> проходит
+  - заметка по сборке:
+    - старый transient `PageNotFoundError: /_document` всё ещё иногда всплывает на первом build сразу после других процессов
+    - отдельный повторный build через несколько секунд проходит; пока это выглядит как race в runtime Next, а не дефект текущих изменений
+  - дополнительная регресс-защита:
+    - в `C:/projects/sites/blueprint-rec-2/apps/web/e2e/annotation-ambiguity.spec.ts` добавлен отдельный smoke `auto-annotate lock disables manual candidate actions while background run is active`
+    - mock fixture теперь умеет задерживать `/auto-annotate`, чтобы проверять disabled-state не синтетически, а во время живого фонового запроса
+    - актуальный статус e2e после этого шага:
+      - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web:e2e` -> `14 passed`
+  - дополнительный UX cleanup поверх этого же lock:
+    - правый inspector теперь тоже ведёт себя консистентно во время фонового lock:
+      - `saveMarkerChanges`
+      - `saveMarkerPatch`
+      - `applyMarkerCoordinates`
+      - `moveMarkerToCoordinates`
+      - `handlePrecisionLensClick`
+      получили ранний guard по `isWorkspaceBusy`
+    - визуально заблокированы:
+      - все `nudge` кнопки
+      - точная лупа
+      - quick-jump кнопки `Вариант N`
+    - итог: оператор теперь не видит "живые" кнопки там, где backend-команда всё равно была бы заблокирована
+  - повторные проверки после этого cleanup:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web` -> `7 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web:e2e` -> `14 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c set NODE_OPTIONS=--max-old-space-size=4096 && npm.cmd run build --workspace @blueprint-rec/web` -> проходит
+
+- 2026-04-09: build-путь `apps/web` укреплён против периодического `/_document` race.
+  - проблема:
+    - `next build` в `C:/projects/sites/blueprint-rec-2/apps/web` иногда падал на первом прогоне с `PageNotFoundError: Cannot find module for page: /_document`
+    - повторный запуск обычно проходил, что указывало на несогласованные build-артефакты в `.next`, а не на дефект UI-кода
+  - что сделано:
+    - добавлен `C:/projects/sites/blueprint-rec-2/apps/web/scripts/clean-next-build.mjs`
+    - `C:/projects/sites/blueprint-rec-2/apps/web/package.json`
+      - `build` теперь идёт через `node ./scripts/clean-next-build.mjs && next build`
+    - очистка ограничена только `C:/projects/sites/blueprint-rec-2/apps/web/.next`, без вмешательства в root и без влияния на обычный `dev`
+  - что это дало:
+    - build-пайплайн стал чище и предсказуемее
+    - для маленького приложения небольшой оверхед на чистую сборку здесь дешевле, чем случайные ложные red-сборки
+  - проверка:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c set NODE_OPTIONS=--max-old-space-size=4096 && npm.cmd run build --workspace @blueprint-rec/web && npm.cmd run build --workspace @blueprint-rec/web` -> оба прогона проходят подряд
+
+- 2026-04-09: ручной QA-чеклист ещё плотнее переведён в headless e2e.
+  - что добавлено в `C:/projects/sites/blueprint-rec-2/apps/web/e2e/annotation-ambiguity.spec.ts`:
+    - keyboard smoke для главного review-потока:
+      - `ArrowRight`
+      - `a` / `d`
+      - `Enter`
+      - `Delete`
+      проверяются как один рабочий проход, а не по отдельности
+    - recovery smoke для `Обновить сессию`:
+      - после упавшего `confirm_marker` workspace error banner действительно может перезагрузить сессию без полного reload браузера
+    - candidate->draft->confirm сценарий усилен:
+      - теперь проверяется не только создание точки, но и реальное изменение ярлыка перед подтверждением
+    - history sticky/compact smoke:
+      - длинная история теперь проверяется на сохранение sticky-toolbar при скролле
+      - compact-mode включается автоматически после `scrollTop > 24`
+      - pinned `компактно` режим проверяется через `aria-pressed`
+    - left rail queue-counter smoke:
+      - `review / отложенные` счётчики проверяются через реальный проход `skip -> delete -> confirm`
+      - отдельно фиксируется, что завершение main pass оставляет deferred-хвост видимым и честно обнуляет `review`
+  - что это дало:
+    - основной keyboard-path из чеклиста больше не остаётся только ручным сценарием
+    - ошибка команды внутри уже открытого workspace теперь тоже закрыта автоматикой, а не только стартовый `Повторить загрузку`
+    - candidate flow покрыт ближе к реальному операторскому поведению
+    - sticky-header окна `История` тоже перестал быть только визуальным обещанием без headless-проверки
+    - левый rail теперь тоже частично закрыт автоматикой, а не только глазами оператора
+  - актуальный статус web smoke:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web:e2e` -> `18 passed`
+
+- 2026-04-09: выполнен полный regression pass после насыщения web smoke.
+  - проверки:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web` -> `7 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web:e2e` -> `18 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:inference` -> `45 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c set NODE_OPTIONS=--max-old-space-size=4096 && npm.cmd run build --workspace @blueprint-rec/web` -> проходит
+  - текущее практическое состояние:
+    - автоматический контур по ambiguity/history/candidate/export/recovery уже очень плотный
+    - дальше главная ценность уже не в новых фикстурных e2e, а в живом визуальном прогоне по реальной сессии
+  - что остаётся по сути только ручным:
+    - визуальное качество canvas-фокуса и переходов между точками
+    - читаемость и ощущение deferred/history flow на реальных данных
+    - реальный экспорт как пользовательский сценарий, а не только API/download smoke
+    - общий UX smoke на настоящей сессии после `dev`, а не только на mocked fixture
+
+- 2026-04-09: проведён живой локальный smoke на реальных документах и закрыт backend-узкий момент для dense low-res листов.
+  - что подтвердилось на живом API:
+    - `C:/projects/sites/blueprint-rec-2/blueprints-test/image001.png`
+      - реальная session создаётся и загружается через live backend
+      - `auto-annotate` завершается примерно за `1.32s`
+      - результат: `3` candidates, `3` markers, `3` `ai_detected`, без review/conflicts
+    - `C:/projects/sites/blueprint-rec-2/blueprints-test/test1.jpg`
+      - до фикса heavy low-res путь либо зависал слишком долго, либо падал внутри topology-pass
+      - после правок на стабильном backend без `--reload`:
+        - `auto-annotate` завершается примерно за `72.85s`
+        - результат: `39` candidates, `32` markers, `25` `ai_detected`, `7` `ai_review`, `10` pipeline conflicts, `2` missing labels
+  - что найдено и исправлено:
+    - `C:/projects/sites/blueprint-rec-2/package.json`
+      - root `dev:inference` синхронизирован с web и теперь поднимает inference на `8010`, а не на старом `8000`
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/candidate_vlm_recognizer.py`
+      - primary provider для candidate VLM теперь идёт как `openai -> openrouter -> gemini`, чтобы чаще срабатывал ранний short-circuit на более быстром primary
+      - vocabulary extraction подтверждённо остаётся single-provider и не фан-аутится по всем VLM на каждый tile
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/core/config.py`
+      - добавлен конфиг `INFERENCE_OPENAI_VISION_VOCAB_MAX_TILES`
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/session_store.py`
+      - low-res vocabulary tile budget теперь берётся из настройки, а не зашит в вызове
+      - текущий low-res VLM pass остаётся зажат в безопасный диапазон `8..12`, чтобы dense листы не раздували live latency
+    - `C:/projects/sites/blueprint-rec-2/services/inference/.env.local`
+      - локальный low-res budget уменьшен до `12`
+      - добавлен `INFERENCE_OPENAI_VISION_VOCAB_MAX_TILES=4`
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/leader_topology.py`
+      - OpenCV/Hough topology-pass больше не валит весь detect/auto-annotate: при runtime-ошибке возвращается пустое topology-наблюдение вместо `500`
+  - что добавлено в regression-защиту:
+    - `C:/projects/sites/blueprint-rec-2/services/inference/tests/test_candidate_vlm_recognizer.py`
+      - проверяет, что vocabulary extraction использует только primary provider
+      - проверяет, что candidate recognize действительно стартует с OpenAI, а не с OpenRouter
+    - `C:/projects/sites/blueprint-rec-2/services/inference/tests/test_leader_topology.py`
+      - проверяет safe-fallback при ошибке OpenCV topology-pass
+  - живой UI smoke без видимого браузера:
+    - на реальной session с `image001.png` подтверждены:
+      - загрузка страницы
+      - открытие `История`
+      - успешный `Экспорт ZIP`
+    - на реальной heavy session с `test1.jpg` подтверждены:
+      - загрузка рабочего поля
+      - видимый ambiguity/review surface
+      - левый rail с реальными review-кандидатами и конфликтами
+    - для стабильного heavy smoke пришлось поднимать отдельный backend без `--reload`, потому что `uvicorn --reload` рвал соединения на изменениях файлов во время долгого live запроса; это dev-runtime шум, не продуктовый дефект
+  - актуальный общий regression после этих правок:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web` -> `7 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web:e2e` -> `18 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:inference` -> `49 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c set NODE_OPTIONS=--max-old-space-size=4096 && npm.cmd run build --workspace @blueprint-rec/web` -> проходит
+
+- 2026-04-09: добавлен reusable headless live smoke для реальных локальных файлов.
+  - что добавлено:
+    - `C:/projects/sites/blueprint-rec-2/scripts/live_smoke_annotation.mjs`
+    - `C:/projects/sites/blueprint-rec-2/package.json`
+      - новый script: `cmd /c npm.cmd run test:live-smoke`
+  - cleanup:
+    - убран дублирующий путь `smoke:live:annotation` / `live_annotation_smoke.mjs`
+    - в репозитории оставлен один canonical live-smoke entrypoint, чтобы следующие агенты не гоняли две разные версии одного и того же сценария
+  - что делает сценарий:
+    - поднимает стабильный inference backend без `--reload`
+    - поднимает web в headless-friendly dev-контуре на отдельном порту
+    - создаёт реальные live sessions
+    - загружает:
+      - `C:/projects/sites/blueprint-rec-2/blueprints-test/image001.png`
+      - `C:/projects/sites/blueprint-rec-2/blueprints-test/test1.jpg`
+    - прогоняет `auto-annotate`
+    - проверяет UI headless через Playwright:
+      - рабочее поле
+      - `История`
+      - наличие history entry `Авторазметка завершена`
+    - отдельно проверяет export через live API
+    - сохраняет JSON-результат и screenshots в:
+      - `C:/projects/sites/blueprint-rec-2/.codex-smoke/live-smoke/latest-results.json`
+      - `C:/projects/sites/blueprint-rec-2/.codex-smoke/live-smoke/*.png`
+  - подтверждённый результат последнего прогона:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:live-smoke` -> проходит
+    - `image001.png`
+      - `auto-annotate`: `1.82s`
+      - export: `200 OK`
+      - history/UI smoke: проходит
+    - `test1.jpg`
+      - `auto-annotate`: `77.94s`
+      - export: `400`, корректно блокируется с detail про pipeline conflicts
+      - history/UI smoke: проходит
+    - JSON-результат актуального прогона:
+      - `C:/projects/sites/blueprint-rec-2/.codex-smoke/live-smoke/latest-results.json`
+  - практический смысл:
+    - это уже не мок, а повторяемый локальный smoke на живых данных
+    - ручной QA теперь можно начинать после этого прогона, а не до него
+
+- 2026-04-09: live smoke ужесточён до fail-fast и очищен от ложной нестабильности по web-порту.
+  - что было не так:
+    - после ужесточения проверок smoke один раз падал не из-за продукта, а из-за самого dev-контура:
+      - `next dev` тихо уезжал с `3003` на случайный свободный порт
+      - smoke продолжал ходить на старый `3003`
+      - из-за этого получался ложный `session '<id>' not found` и фальшивый loading/error state в UI
+  - что исправлено в `C:/projects/sites/blueprint-rec-2/scripts/live_smoke_annotation.mjs`:
+    - `uvicorn` теперь стартует явно на `127.0.0.1`
+    - web dev стартует только через явные `--hostname 127.0.0.1 --port <port>`, а не через мягкий `PORT=...`
+    - добавлен `waitForWorkspaceReady(...)`
+      - ждёт реальные признаки готового workspace
+      - умеет один раз честно восстановиться через `Повторить загрузку` / `Обновить сессию` или page reload
+      - если workspace так и не поднялся, падает уже с понятной причиной, а не с таймаутом на кнопке `История`
+    - live smoke теперь не просто собирает JSON/скриншоты, а валится при несоответствии живых ожиданий:
+      - export headers/body
+      - history entry `Авторазметка завершена`
+      - review summary
+      - review conflict surface на тяжёлом реальном документе
+  - подтверждённый результат после фикса:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:live-smoke` -> проходит
+    - `image001.png`
+      - `auto-annotate`: `1.46s`
+      - `3` candidates / `3` markers / `0` conflicts
+      - export: `200`, `application/zip`, с `content-disposition`
+    - `test1.jpg`
+      - `auto-annotate`: `75.39s`
+      - `39` candidates / `32` markers / `7` `ai_review` / `10` conflicts / `2` missing labels
+      - export: `400`, блокируется с detail про `association_ambiguity` и `missing_vocab_label`
+      - UI headless подтверждает:
+        - review summary
+        - history dialog
+        - конфликтный review-surface на живой heavy session
+    - актуальные артефакты:
+      - `C:/projects/sites/blueprint-rec-2/.codex-smoke/live-smoke/latest-results.json`
+      - `C:/projects/sites/blueprint-rec-2/.codex-smoke/live-smoke/b26f6321-3e26-4b7f-b3da-e2ba4b5d19c0.png`
+      - `C:/projects/sites/blueprint-rec-2/.codex-smoke/live-smoke/c84561e0-f4c4-415e-8b69-45999fcb523c.png`
+  - контрольный regression после этой правки:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web` -> `7 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web:e2e` -> `18 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:inference` -> `49 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c set NODE_OPTIONS=--max-old-space-size=4096 && npm.cmd run build --workspace @blueprint-rec/web` -> проходит
+  - замечание по build:
+    - `next build` всё ещё может печатать внешний `connect ETIMEDOUT ...:443` шум уже после успешной сборки
+    - сейчас это не ломает build и не выглядит как дефект продукта
+
+- 2026-04-09: добавлен отдельный hidden manual-style QA runner на живых данных.
+  - что добавлено:
+    - `C:/projects/sites/blueprint-rec-2/scripts/headless_manual_qa.mjs`
+    - `C:/projects/sites/blueprint-rec-2/package.json`
+      - новый канонический script: `cmd /c npm.cmd run test:headless-manual-qa`
+  - что он делает:
+    - поднимает backend и web полностью в фоне, без видимого браузера
+    - создаёт две live sessions:
+      - `C:/projects/sites/blueprint-rec-2/blueprints-test/test1.jpg`
+      - `C:/projects/sites/blueprint-rec-2/blueprints-test/image001.png`
+    - на heavy session проверяет уже не только загрузку страницы, а более живой операторский path:
+      - history dialog вообще открывается и даёт sticky control surface
+      - виден живой conflict surface
+      - доступен candidate review
+      - `Ложный` не выбрасывает пользователя из candidate mode
+      - `Создать точку -> сменить ярлык -> Подтвердить по лупе` проходит и пишет нужные history entries
+      - blocked export остаётся blocked
+    - на light session отдельно подтверждает успешный export
+    - сохраняет:
+      - `C:/projects/sites/blueprint-rec-2/.codex-smoke/headless-manual-qa/latest-results.json`
+      - `C:/projects/sites/blueprint-rec-2/.codex-smoke/headless-manual-qa/latest-report.md`
+      - `C:/projects/sites/blueprint-rec-2/.codex-smoke/headless-manual-qa/*.png`
+  - что подтвердилось последним прогоном:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:headless-manual-qa` -> проходит
+    - heavy `test1.jpg`
+      - `auto-annotate`: `69.43s`
+      - `32` markers / `7` `ai_review` / `14` pending candidate-review items в живом UI
+      - candidate review доступен
+      - reject остаётся в candidate mode
+      - candidate -> draft -> confirm проходит и пишется в `Историю`
+      - export корректно блокируется `400`
+    - light `image001.png`
+      - `auto-annotate`: `1.36s`
+      - export корректно проходит `200`
+  - важная практическая находка:
+    - на реальном heavy файле стартовый приоритет у UI сейчас уходит в candidate/conflict review, а не в marker-based ambiguity card
+    - то есть marker ambiguity flow по-прежнему лучше всего закрыт mocked e2e, а не этим real-data runner
+    - это не новая поломка, а честно зафиксированная граница текущего live-покрытия
+  - cleanup:
+    - удалён старый дублирующий live-сценарий:
+      - `C:/projects/sites/blueprint-rec-2/scripts/live_walkthrough_annotation.mjs`
+      - `C:/projects/sites/blueprint-rec-2/package.json` -> убран `test:live-walkthrough`
+    - теперь в репозитории осталось два осмысленных headless live-контура:
+      - `test:live-smoke` — короткий fail-fast baseline
+      - `test:headless-manual-qa` — более глубокий hidden walkthrough
+
+- 2026-04-09: улучшена понятность live heavy-case, где UI сначала открывает candidate/conflict review.
+  - что поменяно в `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`:
+    - верхний conflict-bar теперь прямо говорит не просто `Конфликт кандидатов`, а `Сначала разберём конфликт кандидатов`
+    - там же добавлен тихий чип `AI review отдельно: N`, чтобы оператор сразу понимал: спорные AI-точки не исчезли, просто сейчас открыт другой тип review
+    - в левой секции `На review` добавлено пояснение, что здесь сначала решаются OCR/shape-кандидаты, а AI review идёт отдельной очередью в списке точек
+    - в правой candidate-панели добавлен явный блок `Почему открыт этот режим`
+      - объясняет, что это candidate review, а не потерянный ambiguity flow
+      - сразу говорит, что делать: `Создать точку` или `Ложный`
+      - отдельно проговаривает, что AI review остаётся доступен через список точек
+  - зачем это сделано:
+    - на реальном heavy файле (`test1.jpg`) интерфейс честно открывается в candidate/conflict review, но раньше это выглядело как странный обход вместо обычного review
+    - теперь этот live-путь объясняется прямо в UI, без гадания со стороны оператора
+  - проверки после правки:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web:e2e` -> `18 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:headless-manual-qa` -> проходит
+  - дополнительное укрепление runner-а:
+    - `C:/projects/sites/blueprint-rec-2/scripts/headless_manual_qa.mjs`
+      - candidate -> draft -> confirm теперь не падает из-за слишком жёсткого ожидания на label editor
+      - runner отдельно фиксирует, surfaced ли editor и был ли label реально обновлён
+    - последний подтверждённый результат:
+      - heavy `test1.jpg`
+        - `historyHasStickyControls: true`
+        - `candidatePanelAvailable: true`
+        - `rejectStayedInCandidateMode: true`
+        - `labelEditorVisible: true`
+        - `labelUpdated: true`
+        - `candidateCreatedAndConfirmed: true`
+
+- 2026-04-09: добит и стабилизирован mocked e2e-контур после регрессии вокруг candidate-review notice.
+  - что реально ломалось:
+    - два теста падали не из-за продукта, а из-за strict-mode селектора: текст `Почему открыт этот режим` теперь встречается в двух правых блоках
+    - дополнительно весь e2e-контур иногда флапал на самом старте из-за dev-mode Next: первые тесты могли открыть экран `missing required error components, refreshing...`
+  - что сделано:
+    - `C:/projects/sites/blueprint-rec-2/apps/web/e2e/annotation-ambiguity.spec.ts`
+      - candidate-тесты переведены на безопасное ожидание `getByText(...).first()`
+      - добавлен helper `openFixtureSession(page)`, который повторно открывает fixture-session, если пойман именно transient next-dev экран
+      - helper сознательно не используется в тесте `load error offers retry...`, потому что там как раз проверяется штатный экран ошибки загрузки
+  - итог проверок после фикса:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web:e2e` -> `19 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web` -> `7 passed`
+  - важная интерпретация:
+    - текущая проблема была в тестовой обвязке и нестабильном dev-старте Next, а не в рабочем live annotation flow
+    - live headless QA и live smoke остаются валидными и не потребовали отката UI-изменений
+
+- 2026-04-09: стабилизированы оба live headless-раннера после нового флапа на старте web.
+  - что всплыло:
+    - `C:/projects/sites/blueprint-rec-2/scripts/headless_manual_qa.mjs`
+    - `C:/projects/sites/blueprint-rec-2/scripts/live_smoke_annotation.mjs`
+    - оба раннера иногда падали на `Timed out waiting for http://127.0.0.1:...`
+  - реальная причина:
+    - это был не дефект продукта и не падение `next dev`
+    - readiness-check ждал именно `response.ok === true` на корневом `http://127.0.0.1:<port>/`
+    - для `next dev` это хрупко: сервер уже живой, но в момент прогрева root может кратко отдавать не-200
+  - что исправлено:
+    - в обоих раннерах web считается поднятым при любом реальном HTTP-ответе (`response.status > 0`)
+    - дальше раннеры как и раньше проходят уже через более полезные проверки готовности workspace/UI
+  - результат после фикса:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:headless-manual-qa` -> проходит
+      - heavy `test1.jpg`: `32` markers, `7` `aiReview`, export blocked `400`
+      - light `image001.png`: export ok `200`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:live-smoke` -> проходит
+      - `image001.png`: `1.39s`, `3` markers, export `200`
+      - `test1.jpg`: `92.08s`, `32` markers, `7` `aiReview`, `10` conflicts, export `400`
+  - практический вывод:
+    - сейчас у проекта снова одновременно зелёные:
+      - mocked e2e
+      - web unit tests
+      - live smoke
+      - headless manual QA
+
+- 2026-04-09: сделан ещё один маленький, но полезный UX-шаг для heavy live-case `test1.jpg`.
+  - что улучшено в `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`:
+    - верхняя conflict/candidate-плашка стала контрастнее и заметнее на светлом чертеже
+    - в верхней плашке появились быстрые переходы:
+      - `К AI review N`
+      - `К отложенным N`
+    - в правом блоке `Почему открыт этот режим` пояснение стало прямее:
+      - теперь явно сказано, что спорные AI-точки не пропали и к ним можно вернуться
+    - кнопки в этом блоке тоже сделаны более понятными:
+      - вместо абстрактного `в review N` теперь `к AI review N`
+      - вместо `в отложенные N` теперь `к отложенным N`
+  - зачем это делалось:
+    - на heavy-файле UI часто стартует не с marker ambiguity card, а с candidate/conflict review
+    - без явного “маршрута назад” оператору приходилось догадываться, где искать AI review
+    - теперь переход обратно виден сразу и сверху, и в правом explanatory-блоке
+  - сопутствующие изменения в тестах:
+    - `C:/projects/sites/blueprint-rec-2/apps/web/e2e/annotation-ambiguity.spec.ts`
+      - обновлены ожидания под новые подписи
+      - селекторы усилены, потому что одинаковые CTA теперь есть в двух местах интерфейса
+  - важная доработка раннеров:
+    - `C:/projects/sites/blueprint-rec-2/scripts/headless_manual_qa.mjs`
+    - `C:/projects/sites/blueprint-rec-2/scripts/live_smoke_annotation.mjs`
+    - live-раннеры теперь переживают transient next-dev экраны:
+      - `missing required error components, refreshing...`
+      - временный `/_error`
+      - редкий `Cannot find module './vendor-chunks/@swc.js'`
+    - для встроенного next-экрана auto-refresh раннер теперь ждёт его собственную перезагрузку, а не ломает её ручным reload
+  - проверки после этого этапа:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web` -> `7 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web:e2e` -> `19 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:headless-manual-qa` -> проходит
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:live-smoke` -> проходит
+
+- 2026-04-10: добавлен явный pre-export warning для heavy-case.
+  - что поменяно:
+    - `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`
+    - прямо под кнопкой `Экспорт ZIP` теперь показывается предупреждение `Экспорт пока заблокирован`, если:
+      - есть `pipeline`-конфликты уровня ошибки
+      - или есть пропущенные метки
+  - что именно видит оператор:
+    - краткую человеческую причину блокировки:
+      - сколько осталось pipeline-конфликтов
+      - сколько осталось пропущенных меток
+    - подсказку, что смотреть ниже в блоках `Авторазметка` и `Словарь страницы`
+  - зачем это полезно:
+    - раньше человек нажимал `Экспорт ZIP`, получал backend-error и только потом понимал, что экспорт пока всё равно не пройдёт
+    - теперь heavy live-case заранее объясняет блокер ещё до клика
+  - риск/масштаб:
+    - правка маленькая и локальная, без изменения основной логики
+    - это чистая UX-подсказка, которая должна уменьшить лишние клики и путаницу
+  - проверки:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web` -> `7 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web:e2e` -> `19 passed`
+
+- 2026-04-10: убран ещё один визуальный шум в истории и укреплён fixture-e2e helper.
+  - UX-правка:
+    - `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`
+    - в истории больше не показывается заметный фильтр `только ambiguity 0`, если спорных решений ещё нет
+    - фильтр появляется только когда:
+      - уже есть что фильтровать
+      - или пользователь уже находится в ambiguity-only режиме
+    - одновременно подпись сделана более человеческой:
+      - было: `только ambiguity`
+      - стало: `только спорные решения`
+  - зачем это полезно:
+    - в heavy-flow ранняя история часто открывается ещё до первых ambiguity-решений
+    - старый `0` выглядел как странный “битый” фильтр и добавлял шум без пользы
+  - техническая доработка тестов:
+    - `C:/projects/sites/blueprint-rec-2/apps/web/e2e/annotation-ambiguity.spec.ts`
+    - helper `openFixtureSession(page)` теперь переживает transient dev-server ошибки:
+      - `ERR_CONNECTION_REFUSED`
+      - `ERR_CONNECTION_RESET`
+      - `ERR_ABORTED`
+    - один оставшийся прямой `page.goto(...)` в конце spec тоже переведён на helper
+  - результат после фикса:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web:e2e` -> `19 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web` -> `7 passed`
+
+- 2026-04-10: упрощена лексика в правой candidate-панели для не-технического оператора.
+  - что поменяно в `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`:
+    - вместо технического `score` теперь в панели пишется `уверенность`
+    - `OCR 12` заменено на более человеческое `найден номер 12`
+    - `Crop недоступен` заменено на `Увеличенный фрагмент пока недоступен`
+    - `shape↔text связи` и похожие формулировки в candidate-panel упрощены до языка про “похожие варианты рядом”
+    - `topology` в списке связанных вариантов заменён на более понятную `близость`
+    - `source` в явном виде подписан как `источник`
+    - координаты теперь читаются как `x ... • y ...`, а не просто два числа подряд
+  - зачем это полезно:
+    - оператору теперь легче читать candidate-panel без понимания OCR/shape/topology терминов
+    - панель меньше выглядит как отладочный экран и больше как рабочий интерфейс
+  - проверки:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web` -> `7 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web:e2e` -> `19 passed`
+
+- 2026-04-10: в candidate-панели сделан ещё более прямой сценарий действий “да/нет”.
+  - что поменяно в `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`:
+    - блок `Что сделать сейчас` переписан в более короткий и понятный маршрут
+    - вместо одной длинной инструкции теперь две простые строки:
+      - если это нужная точка -> `Создать точку`
+      - если это ошибка или шум -> `Ложный`
+    - отдельная подсказка про то, что точки из AI review не пропадают, сохранена
+  - зачем это полезно:
+    - оператору теперь не нужно разбирать длинный абзац перед действием
+    - выбор стал ближе к реальному решению на экране: “берём” или “отклоняем”
+  - риск/масштаб:
+    - изменение только текстовое, без изменения поведения
+  - проверки:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web` -> `7 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web:e2e` -> `19 passed`
+
+- 2026-04-10: укреплён hidden live-smoke раннер после серии ложных падений на живом Next dev.
+  - что поменяно:
+    - `C:/projects/sites/blueprint-rec-2/scripts/live_smoke_annotation.mjs`
+  - какие были ложные сбои:
+    - smoke ожидал review-блок даже для сессии без `ai_review`
+    - smoke слишком агрессивно считал служебный next-dev текст про `404` и `/_error` признаком реальной ошибки, хотя рабочий экран уже был виден
+    - в debug-path чтение `body` тоже было хрупким и могло падать без нормальной причины
+  - что исправлено:
+    - проверка UI теперь различает:
+      - реальный review surface
+      - общий workspace surface
+    - для сценария без `ai_review` больше не требуется review-блок
+    - приоритет отдан реальным признакам рабочего экрана (`Кандидаты на проверку`, `Точки`, `Авторазметка`), а не служебному next payload
+    - чтение `body` стало более безопасным для обычного и debug-сценария
+    - добавлена дополнительная стабилизация страницы перед UI-проверками
+  - зачем это полезно:
+    - теперь hidden smoke проверяет реальный продуктовый экран, а не случайные переходные состояния dev-runtime
+    - после UI-текстовых правок smoke не даёт ложных красных срабатываний
+  - результат:
+    - `C:/projects/sites/blueprint-rec-2`: `node .\\scripts\\live_smoke_annotation.mjs` -> успешно
+    - свежий артефакт:
+      - `C:/projects/sites/blueprint-rec-2/.codex-smoke/live-smoke/latest-results.json`
+
+- 2026-04-10: проект снова доведён до состояния “готово к ручному тесту” по минимальному baseline.
+  - зелёные проверки:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web` -> `7 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web:e2e` -> `19 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:inference` -> `49 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c set NODE_OPTIONS=--max-old-space-size=4096 && npm.cmd run build --workspace @blueprint-rec/web` -> `next build` успешен
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:live-smoke` -> успешен
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:headless-manual-qa` -> успешен
+  - свежие живые артефакты:
+    - `C:/projects/sites/blueprint-rec-2/.codex-smoke/live-smoke/latest-results.json`
+    - `C:/projects/sites/blueprint-rec-2/.codex-smoke/headless-manual-qa/latest-results.json`
+    - `C:/projects/sites/blueprint-rec-2/.codex-smoke/headless-manual-qa/latest-report.md`
+  - краткий фактический статус по live данным:
+    - лёгкий файл `image001.png`: 3 маркера, export `200`
+    - тяжёлый файл `test1.jpg`: 32 маркера, `7` `ai_review`, export честно блокируется `400` из-за unresolved pipeline conflicts
+
+- 2026-04-10: добавлен короткий handoff-файл для ручной приёмки.
+  - новый файл:
+    - `C:/projects/sites/blueprint-rec-2/RELEASE_READINESS.md`
+  - что в нём есть:
+    - текущий зелёный baseline
+    - рекомендуемый порядок ручного прогона
+    - 3 главные риск-зоны перед более широким human pass
+    - ссылки на свежие hidden/live артефакты
+  - зачем это полезно:
+    - следующий человек может начать проверку без чтения большого `PROJECT_CONTEXT.md`
+    - ручной прогон теперь привязан к реальным текущим рискам, а не к абстрактному полному списку
+
+- 2026-04-10: добавлена ещё более простая одностраничная памятка для ручного тестировщика.
+  - новый файл:
+    - `C:/projects/sites/blueprint-rec-2/MANUAL_QA_ONE_PAGE_RU.md`
+  - что внутри:
+    - короткий сценарий “7 шагов для тестировщика”
+    - простые признаки нормы и проблемы без техничных подробностей
+    - акцент на 3 самых рискованных местах:
+      - `AI review` / `отложенные`
+      - возврат из `История`
+      - `кандидат -> ложный` и `кандидат -> создать точку -> подтвердить`
+  - зачем это полезно:
+    - теперь ручную приёмку можно отдавать человеку без чтения длинных технических md-файлов
+
+- 2026-04-10: убран оставшийся технический жаргон в левой колонке и в предупреждении перед экспортом.
+  - что поменяно в `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`:
+    - в блокере экспорта `pipeline-конфликты` переименованы в более человеческие `блокеры проверки`
+    - карточки сводки в `Авторазметка` теперь говорят `Кандидаты` и `Блокеры` вместо `Review` и `Pipeline`
+    - в `Словарь страницы` подпись `shape↔text связей` заменена на `связей между номером и фигурой`
+    - секция `На review` переименована в `Кандидаты на проверку`
+    - helper-текст рядом тоже переписан без OCR/shape-терминов
+    - в списке кандидатов:
+      - `score` заменён на `уверенность`
+      - `OCR 12` заменено на `найден номер 12`
+      - источник явно подписан как `источник: ...`
+  - зачем это полезно:
+    - heavy-flow стал ближе к реальному языку оператора, а не к внутренним словам пайплайна
+    - перед экспортом и при разборе кандидатов меньше мест, где человеку нужно “переводить интерфейс с технического”
+  - риск/масштаб:
+    - только текстовые правки, логика не менялась
+  - проверки:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web` -> `7 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web:e2e` -> `19 passed`
+
+- 2026-04-10: убран шумный hydration warning от браузерных расширений вроде Dark Reader.
+  - что поменяно:
+    - `C:/projects/sites/blueprint-rec-2/apps/web/app/layout.tsx`
+  - причина:
+    - расширение добавляло `data-darkreader-*` атрибуты в `<html>` ещё до гидрации React
+    - из-за этого Next dev показывал hydration mismatch, хотя продуктовая логика сайта была исправна
+  - решение:
+    - на `<html>` добавлен `suppressHydrationWarning`
+  - зачем это полезно:
+    - dev overlay больше не пугает ложной ошибкой при включённом Dark Reader и похожих расширениях
+    - это не меняет поведение приложения и не скрывает реальные продуктовые рассинхроны внутри рабочих компонентов
+  - проверки:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web` -> `7 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c set NODE_OPTIONS=--max-old-space-size=4096 && npm.cmd run build --workspace @blueprint-rec/web` -> успешно
+
+- 2026-04-10: исправлен локальный `Failed to fetch` на экране создания сессии.
+  - причина:
+    - `C:/projects/sites/blueprint-rec-2/apps/web/.env.local` указывал на `http://127.0.0.1:8011`
+    - реальный backend был поднят на `http://127.0.0.1:8010`
+    - из-за этого фронт открывался, но запросы создания сессии падали сетевой ошибкой
+  - что поменяно:
+    - `C:/projects/sites/blueprint-rec-2/apps/web/.env.local`
+    - `NEXT_PUBLIC_ANNOTATION_API_BASE_URL` выровнен на `http://127.0.0.1:8010`
+  - дополнительно:
+    - фронтовый dev-сервер перезапущен на `http://127.0.0.1:3010`, чтобы он подхватил обновлённую env-конфигурацию
+  - практический вывод:
+    - если форма открывается, но на создании сессии видно `Failed to fetch`, первым делом нужно проверять соответствие frontend env и реального порта backend
+
+- 2026-04-10: найден и исправлен кейс “пустой холст после выбора фото”.
+  - симптомы:
+    - сессия и документ создавались
+    - слева были размеры файла и рабочие панели
+    - но сам чертёж в центре не появлялся
+  - подтверждённая причина:
+    - основной документ грузился с backend-порта `8010` как `/storage/...`
+    - фронт был открыт на другом origin (`3010`)
+    - для storage-изображения не доезжал `Access-Control-Allow-Origin`
+    - из-за этого браузер блокировал загрузку изображения, и canvas оставался пустым
+  - что поменяно:
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/main.py`
+    - добавлен явный middleware, который проставляет CORS-заголовки для ответов `/storage/...`
+  - практический эффект:
+    - backend теперь отдаёт storage-файлы с `access-control-allow-origin: http://127.0.0.1:3010`
+    - это устраняет блокировку картинки на холсте при локальной разработке
+  - важный побочный эффект:
+    - backend сейчас in-memory, поэтому после его перезапуска старые сессии пропадают
+    - если экран был открыт на старой сессии, нужно заново создать сессию и снова выбрать файл
+
+- 2026-04-10: узкий экран workspace переведён в отдельный compact-режим, чтобы холст не зажимался боковыми колонками.
+  - что поменяно:
+    - `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`
+  - суть правки:
+    - на узкой ширине левый список точек больше не закреплён постоянно
+    - он открывается как плавающая панель по кнопке `Список`
+    - правая панель проверки в compact-режиме теперь по умолчанию закрыта, если ничего не выбрано
+    - открытие правой панели автоматически закрывает левую, и наоборот
+    - сам холст в compact-режиме больше не резервирует место под левую колонку
+    - нижний toolbar теперь не держит жёсткую ширину: он может горизонтально прокручиваться внутри экрана, а переключатель типа точки ужат
+    - модалки `Сводка` и `История` в compact-режиме используют ширину от viewport, а не от ширины левой колонки
+  - зачем это полезно:
+    - на небольшом окне пользователь сначала видит именно холст, а не две съедающие его боковые панели
+    - интерфейс больше похож на “canvas first”, а вспомогательные панели открываются по запросу
+  - проверки:
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run test:web` -> `7 passed`
+    - `C:/projects/sites/blueprint-rec-2`: `cmd /c npm.cmd run build --workspace @blueprint-rec/web` -> успешно
+  - важная локальная особенность для следующих агентов:
+    - в системе оставались старые фоновые dev-серверы на случайных портах (`3001`, `3004`, `57302`, `57303`)
+    - для чистой локальной проверки надёжнее поднимать отдельный фронт/production-server на новом порту, а не доверять уже висящим процессам
+
+- 2026-04-10: найден ложный кейс “бесконечно висит Открываю рабочее поле...” на стартовом экране.
+  - реальная причина:
+    - это был не баг формы создания как таковой
+    - локально использовался фронт на `3030`, а backend на `8010` в один из моментов был недоступен
+    - из-за этого browser fetch падал сетевой ошибкой, и пользователь видел поведение как будто форма “зависла”
+  - что подтверждено:
+    - при живом backend сценарий `выбор файла -> POST /api/sessions -> upload document -> переход в /sessions/...` проходит
+    - скрытая проверка на `http://127.0.0.1:3030` открыла рабочий экран без frontend console errors
+  - практический вывод:
+    - если на домашнем экране снова видно вечное ожидание/непереход после выбора файла, первым делом проверять `http://127.0.0.1:8010/api/health`
+    - если health не отвечает, нужно просто заново поднять inference backend, а не искать баг в `session-home.tsx`
+
+- 2026-04-10: на `3030` ловился кейс “голый HTML без стилей”.
+  - реальная причина:
+    - ранее на `3030` попадал битый/смешанный запуск со старыми chunk-именами
+    - HTML и JS-чанки были из разных состояний сборки, из-за чего браузер получал `400` на `/_next/static/chunks/app/...`
+  - актуальное рабочее состояние:
+    - на `http://127.0.0.1:3030` сейчас поднят чистый `next dev`
+    - скрытая проверка подтвердила:
+      - домашний экран отображается со стилями
+      - выбор файла переводит на `/sessions/...`
+      - рабочий экран открывается
+  - практический вывод:
+    - для локальной демонстрации на этом этапе лучше использовать именно живой dev-сервер на `3030`, а не production-эксперименты на соседних портах
+
+- 2026-04-10: compact-режим workspace сделан менее агрессивным.
+  - что поменяно:
+    - `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/annotation-workspace.tsx`
+  - суть:
+    - раньше compact-режим включался просто по ширине контейнера `< 1180`, из-за чего на экранах с высоким системным масштабом прятались боковые панели даже там, где холст ещё спокойно помещался
+    - теперь решение принимается по реальной доступной ширине холста в desktop-раскладке
+    - если холст остаётся достаточно широким, интерфейс остаётся в нормальном desktop-виде с двумя боковыми панелями
+    - compact включается только когда без этого холст уже становится действительно тесным
+  - что подтверждено скрытой проверкой:
+    - на ширине `1024` рабочий экран снова открывается в desktop-виде с левой и правой панелями
+
+- 2026-04-10: найден ложный след с “бесконечной надписью `Открываю рабочее поле...`” на домашнем экране.
+  - что оказалось на деле:
+    - сам create-flow в `C:/projects/sites/blueprint-rec-2/apps/web/components/annotation/session-home.tsx` рабочий: после выбора файла он создаёт сессию, загружает документ и делает `router.push('/sessions/:id')`
+    - зависание было вызвано не этой формой, а плохим локальным серверным состоянием:
+      - один локальный frontend на `3020` отдавал битую/несогласованную версию
+      - в отдельный момент backend на `8010` тоже был недоступен, и тогда create-запросы падали с `ERR_CONNECTION_REFUSED`
+  - подтверждение:
+    - скрытая проверка на `http://127.0.0.1:3020` воспроизводила `Failed to fetch` и client-side exception
+    - скрытая проверка на свежем сервере `http://127.0.0.1:3030` успешно проходила сценарий: после выбора файла страница переходила на `/sessions/<id>` и рабочее поле открывалось
+  - практический вывод:
+    - если домашний экран “висит” на `Открываю рабочее поле...`, сначала надо проверять не форму, а здоровье локального backend на `8010` и то, не открыт ли пользователь на устаревшем/stale frontend-порте

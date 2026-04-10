@@ -1,0 +1,3250 @@
+ ⚠ Cross origin request detected from 127.0.0.1 to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ ⨯ TypeError: __webpack_modules__[moduleId] is not a function
+    at __webpack_exec__ (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:345:39)
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:346:125)
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:346:47)
+    at Object.<anonymous> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:349:3) {
+  page: '/'
+}
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\vendor-chunks\@swc.js'
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js:63:47)
+    at Object.<anonymous> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js:66:3) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\vendor-chunks\\@swc.js'
+}
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\projects\sites\blueprint-rec-2\apps\web\.next\cache\webpack\client-development\0.pack.gz_' -> 'C:\projects\sites\blueprint-rec-2\apps\web\.next\cache\webpack\client-development\0.pack.gz'
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\vendor-chunks\@swc.js'
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js:260:47)
+    at Object.<anonymous> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js:263:3) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\vendor-chunks\\@swc.js'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+ ⨯ [Error [InvariantError]: Invariant: Expected clientReferenceManifest to be defined. This is a bug in Next.js.]
+ ⨯ [Error [InvariantError]: Invariant: Expected clientReferenceManifest to be defined. This is a bug in Next.js.] {
+  page: '/'
+}
+ ⨯ [Error [InvariantError]: Invariant: Expected clientReferenceManifest to be defined. This is a bug in Next.js.]
+ ⨯ [Error [InvariantError]: Invariant: Expected clientReferenceManifest to be defined. This is a bug in Next.js.] {
+  page: '/'
+}
+ ⨯ Error: Cannot find module './92.js'
+Require stack:
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\webpack-runtime.js
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\require.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\load-components.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\utils.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\options.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\index.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\next.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:2:10179)
+    at Object.<anonymous> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:2:10227) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array],
+  page: '/'
+}
+ ⨯ Error: Cannot find module './383.js'
+Require stack:
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\webpack-runtime.js
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\require.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\load-components.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\utils.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\options.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\index.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\next.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js:1:321)
+    at Object.<anonymous> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js:1:365) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+Error: Cannot find module './92.js'
+Require stack:
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\webpack-runtime.js
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\require.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\load-components.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\utils.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\options.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\index.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\next.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:2:10179)
+    at Object.<anonymous> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:2:10227) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array],
+  page: '/'
+}
+ ⨯ Error: Cannot find module './383.js'
+Require stack:
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\webpack-runtime.js
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\require.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\load-components.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\utils.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\options.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\index.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\next.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js:1:321)
+    at Object.<anonymous> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js:1:365) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ Error: Cannot find module './92.js'
+Require stack:
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\webpack-runtime.js
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\require.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\load-components.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\utils.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\options.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\index.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\next.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:2:10179)
+    at Object.<anonymous> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:2:10227) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array],
+  page: '/'
+}
+ ⨯ Error: Cannot find module './383.js'
+Require stack:
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\webpack-runtime.js
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\require.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\load-components.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\utils.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\options.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\index.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\next.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js:1:321)
+    at Object.<anonymous> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js:1:365) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+Error: Cannot find module './92.js'
+Require stack:
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\webpack-runtime.js
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\require.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\load-components.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\utils.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\options.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\index.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\next.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:2:10179)
+    at Object.<anonymous> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:2:10227) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array],
+  page: '/'
+}
+ ⨯ Error: Cannot find module './383.js'
+Require stack:
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\webpack-runtime.js
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\require.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\load-components.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\utils.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\options.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\index.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\next.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js:1:321)
+    at Object.<anonymous> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js:1:365) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ Error: Cannot find module './92.js'
+Require stack:
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\webpack-runtime.js
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\require.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\load-components.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\utils.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\options.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\index.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\next.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:2:10179)
+    at Object.<anonymous> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:2:10227) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array],
+  page: '/'
+}
+ ⨯ Error: Cannot find module './383.js'
+Require stack:
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\webpack-runtime.js
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\require.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\load-components.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\utils.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\options.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\index.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\next.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js:1:321)
+    at Object.<anonymous> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js:1:365) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+Error: Cannot find module './92.js'
+Require stack:
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\webpack-runtime.js
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\require.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\load-components.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\utils.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\options.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\index.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\next.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:2:10179)
+    at Object.<anonymous> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:2:10227) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array],
+  page: '/'
+}
+ ⨯ Error: Cannot find module './383.js'
+Require stack:
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\webpack-runtime.js
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\require.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\load-components.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\utils.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\options.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\index.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\next.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js:1:321)
+    at Object.<anonymous> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js:1:365) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ Error: Cannot find module './92.js'
+Require stack:
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\webpack-runtime.js
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\require.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\load-components.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\utils.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\options.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\index.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\next.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:2:10179)
+    at Object.<anonymous> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:2:10227) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array],
+  page: '/'
+}
+ ⨯ Error: Cannot find module './383.js'
+Require stack:
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\webpack-runtime.js
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\require.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\load-components.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\utils.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\options.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\index.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\next.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js:1:321)
+    at Object.<anonymous> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js:1:365) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+Error: Cannot find module './92.js'
+Require stack:
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\webpack-runtime.js
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\require.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\load-components.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\utils.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\options.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\index.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\next.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:2:10179)
+    at Object.<anonymous> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:2:10227) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array],
+  page: '/'
+}
+ ⨯ Error: Cannot find module './383.js'
+Require stack:
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\webpack-runtime.js
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\require.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\load-components.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\utils.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\options.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\index.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\next.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js:1:321)
+    at Object.<anonymous> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js:1:365) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ Error: Cannot find module './92.js'
+Require stack:
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\webpack-runtime.js
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\require.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\load-components.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\utils.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\options.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\index.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\next.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:2:10179)
+    at Object.<anonymous> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:2:10227) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array],
+  page: '/'
+}
+ ⨯ Error: Cannot find module './383.js'
+Require stack:
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\webpack-runtime.js
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\require.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\load-components.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\utils.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\options.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\index.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\next.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js:1:321)
+    at Object.<anonymous> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js:1:365) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+Error: Cannot find module './92.js'
+Require stack:
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\webpack-runtime.js
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\require.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\load-components.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\utils.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\options.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\index.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\next.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:2:10179)
+    at Object.<anonymous> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:2:10227) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array],
+  page: '/'
+}
+ ⨯ Error: Cannot find module './383.js'
+Require stack:
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\webpack-runtime.js
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\require.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\load-components.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\utils.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\options.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\index.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\next.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js:1:321)
+    at Object.<anonymous> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js:1:365) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ Error: Cannot find module './92.js'
+Require stack:
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\webpack-runtime.js
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\require.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\load-components.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\utils.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\options.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\index.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\next.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:2:10179)
+    at Object.<anonymous> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:2:10227) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array],
+  page: '/'
+}
+ ⨯ Error: Cannot find module './383.js'
+Require stack:
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\webpack-runtime.js
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\require.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\load-components.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\utils.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\options.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\index.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\next.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js:1:321)
+    at Object.<anonymous> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js:1:365) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+Error: Cannot find module './92.js'
+Require stack:
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\webpack-runtime.js
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\require.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\load-components.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\utils.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\options.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\index.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\next.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:2:10179)
+    at Object.<anonymous> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:2:10227) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array],
+  page: '/'
+}
+ ⨯ Error: Cannot find module './383.js'
+Require stack:
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\webpack-runtime.js
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\require.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\load-components.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\utils.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\options.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\index.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\next.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js:1:321)
+    at Object.<anonymous> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js:1:365) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array]
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\vendor-chunks\next.js'
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js:260:47)
+    at Object.<anonymous> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js:263:3) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\vendor-chunks\\next.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error [InvariantError]: Invariant: Expected clientReferenceManifest to be defined. This is a bug in Next.js.]
+ ⨯ [Error [InvariantError]: Invariant: Expected clientReferenceManifest to be defined. This is a bug in Next.js.] {
+  page: '/'
+}
+[Error: ENOENT: no such file or directory, stat 'C:\projects\sites\blueprint-rec-2\apps\web\.next\cache\webpack\server-development\1.pack.gz'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\cache\\webpack\\server-development\\1.pack.gz'
+}
+ ⨯ unhandledRejection: [Error: ENOENT: no such file or directory, stat 'C:\projects\sites\blueprint-rec-2\apps\web\.next\cache\webpack\server-development\1.pack.gz'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\cache\\webpack\\server-development\\1.pack.gz'
+}
+ ⨯ unhandledRejection:  [Error: ENOENT: no such file or directory, stat 'C:\projects\sites\blueprint-rec-2\apps\web\.next\cache\webpack\server-development\1.pack.gz'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\cache\\webpack\\server-development\\1.pack.gz'
+}
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, stat 'C:\projects\sites\blueprint-rec-2\apps\web\.next\cache\webpack\server-development\1.pack.gz'
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\sessions\[sessionId]\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\sessions\\[sessionId]\\page.js',
+  page: '/sessions/test-ambiguity'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\sessions\[sessionId]\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\sessions\\[sessionId]\\page.js',
+  page: '/sessions/test-ambiguity'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\sessions\[sessionId]\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\sessions\\[sessionId]\\page.js',
+  page: '/sessions/test-ambiguity'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\sessions\[sessionId]\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\sessions\\[sessionId]\\page.js',
+  page: '/sessions/test-ambiguity'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\sessions\[sessionId]\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\sessions\\[sessionId]\\page.js',
+  page: '/sessions/test-ambiguity'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\sessions\[sessionId]\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\sessions\\[sessionId]\\page.js',
+  page: '/sessions/test-ambiguity'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error [InvariantError]: Invariant: Expected clientReferenceManifest to be defined. This is a bug in Next.js.]
+ ⨯ [Error [InvariantError]: Invariant: Expected clientReferenceManifest to be defined. This is a bug in Next.js.] {
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app-paths-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app-paths-manifest.json',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app-paths-manifest.json'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app-paths-manifest.json',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\page.js',
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\pages\\_document.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error [InvariantError]: Invariant: Expected clientReferenceManifest to be defined. This is a bug in Next.js.]
+ ⨯ [Error [InvariantError]: Invariant: Expected clientReferenceManifest to be defined. This is a bug in Next.js.] {
+  page: '/'
+}
+ ⨯ [Error [InvariantError]: Invariant: Expected clientReferenceManifest to be defined. This is a bug in Next.js.]
+ ⨯ [Error [InvariantError]: Invariant: Expected clientReferenceManifest to be defined. This is a bug in Next.js.] {
+  page: '/'
+}
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [Error: ENOENT: no such file or directory, open 'C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\_not-found\page.js'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\server\\app\\_not-found\\page.js'
+}
+[TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+ ⨯ [TypeError: Cannot read properties of undefined (reading '/_app')]
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\projects\sites\blueprint-rec-2\apps\web\.next\cache\webpack\client-development\0.pack.gz_' -> 'C:\projects\sites\blueprint-rec-2\apps\web\.next\cache\webpack\client-development\0.pack.gz'
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\projects\sites\blueprint-rec-2\apps\web\.next\cache\webpack\server-development\0.pack.gz_' -> 'C:\projects\sites\blueprint-rec-2\apps\web\.next\cache\webpack\server-development\0.pack.gz'
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\projects\sites\blueprint-rec-2\apps\web\.next\cache\webpack\client-development\0.pack.gz_' -> 'C:\projects\sites\blueprint-rec-2\apps\web\.next\cache\webpack\client-development\0.pack.gz'
+ ⨯ ./components/annotation/annotation-workspace.tsx
+Error:   [31mx[0m Expected '</', got '{'
+      ,-[[36;1;4mC:\projects\sites\blueprint-rec-2\apps\web\components\annotation\annotation-workspace.tsx[0m:4913:1]
+ [2m4910[0m |         )}
+ [2m4911[0m |       </aside>
+ [2m4912[0m | 
+ [2m4913[0m |       {isSummaryOpen && (
+      : [35;1m      ^[0m
+ [2m4914[0m |         <div
+ [2m4915[0m |           className="absolute left-4 top-4 z-40"
+ [2m4916[0m |           style={{ width: Math.min(Math.max(leftRailWidth + 72, 260), Math.max(measuredWidth - 24, 260), 344) }}
+      `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./components/annotation/annotation-workspace.tsx
+./app/sessions/[sessionId]/page.tsx
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\projects\sites\blueprint-rec-2\apps\web\.next\cache\webpack\server-development\0.pack.gz_' -> 'C:\projects\sites\blueprint-rec-2\apps\web\.next\cache\webpack\server-development\0.pack.gz'

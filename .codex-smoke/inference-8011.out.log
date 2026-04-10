@@ -1,0 +1,7 @@
+INFO:     127.0.0.1:64964 - "POST /api/sessions HTTP/1.1" 201 Created
+INFO:     127.0.0.1:64965 - "POST /api/sessions/f950bf3e-816c-4858-bb46-387d139b1874/document HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64974 - "POST /api/sessions/f950bf3e-816c-4858-bb46-387d139b1874/auto-annotate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65175 - "GET /api/sessions/f950bf3e-816c-4858-bb46-387d139b1874 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60332 - "OPTIONS /api/sessions/f950bf3e-816c-4858-bb46-387d139b1874 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60332 - "GET /api/sessions/f950bf3e-816c-4858-bb46-387d139b1874 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60335 - "GET /storage/f950bf3e-816c-4858-bb46-387d139b1874/20260409181500678833-test1.jpg HTTP/1.1" 200 OK

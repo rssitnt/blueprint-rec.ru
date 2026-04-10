@@ -1,0 +1,31 @@
+{
+  "session_id": "051bd922-e936-4840-97e2-1e52db045a90",
+  "session_url": "http://127.0.0.1:3003/sessions/051bd922-e936-4840-97e2-1e52db045a90",
+  "zip_path": "C:\\projects\\sites\\blueprint-rec-2\\exports\\one-shot-live-20260407-fix6\\test2\\test2-one-shot-fix6-export.zip",
+  "annotated_png": "C:\\projects\\sites\\blueprint-rec-2\\exports\\one-shot-live-20260407-fix6\\test2\\unzipped\\test2-one-shot-fix6\\annotated.png",
+  "markers_xlsx": "C:\\projects\\sites\\blueprint-rec-2\\exports\\one-shot-live-20260407-fix6\\test2\\unzipped\\test2-one-shot-fix6\\markers.xlsx",
+  "marker_rows": 12,
+  "labels": [
+    "7",
+    "8",
+    "6",
+    "9",
+    "1",
+    "6",
+    "9",
+    "5",
+    "20",
+    "10",
+    "3",
+    "60"
+  ],
+  "session_summary": {
+    "totalMarkers": 12,
+    "aiDetected": 11,
+    "aiReview": 1,
+    "humanConfirmed": 0,
+    "humanCorrected": 0,
+    "rejected": 0
+  },
+  "candidate_count": 18
+}

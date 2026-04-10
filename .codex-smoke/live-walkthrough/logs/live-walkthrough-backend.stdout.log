@@ -1,0 +1,10 @@
+INFO:     127.0.0.1:52265 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52265 - "POST /api/sessions HTTP/1.1" 201 Created
+INFO:     127.0.0.1:57626 - "POST /api/sessions/692e6637-61e8-40e5-8f7e-4e546e45c46c/document HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52265 - "POST /api/sessions/692e6637-61e8-40e5-8f7e-4e546e45c46c/auto-annotate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61743 - "POST /api/sessions HTTP/1.1" 201 Created
+INFO:     127.0.0.1:52265 - "POST /api/sessions/9ef19488-80e5-42b9-878d-1253752645b2/document HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61743 - "POST /api/sessions/9ef19488-80e5-42b9-878d-1253752645b2/auto-annotate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61750 - "OPTIONS /api/sessions/692e6637-61e8-40e5-8f7e-4e546e45c46c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61750 - "GET /api/sessions/692e6637-61e8-40e5-8f7e-4e546e45c46c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61753 - "GET /storage/692e6637-61e8-40e5-8f7e-4e546e45c46c/20260409195356775187-test1.jpg HTTP/1.1" 200 OK

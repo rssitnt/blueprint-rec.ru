@@ -1,0 +1,24 @@
+INFO:     127.0.0.1:58417 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58417 - "POST /api/sessions HTTP/1.1" 201 Created
+INFO:     127.0.0.1:58423 - "POST /api/sessions/437768f9-e337-4417-a55f-bd383ec62242/document HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58417 - "POST /api/sessions/437768f9-e337-4417-a55f-bd383ec62242/auto-annotate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58423 - "GET /api/sessions/437768f9-e337-4417-a55f-bd383ec62242/export HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64884 - "OPTIONS /api/sessions/437768f9-e337-4417-a55f-bd383ec62242 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64884 - "GET /api/sessions/437768f9-e337-4417-a55f-bd383ec62242 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64887 - "GET /storage/437768f9-e337-4417-a55f-bd383ec62242/20260410071511863504-image001.png HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64884 - "GET /storage/437768f9-e337-4417-a55f-bd383ec62242/20260410071511863504-image001.png HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:64896 - "POST /api/sessions HTTP/1.1" 201 Created
+INFO:     127.0.0.1:64897 - "POST /api/sessions/a301f258-727c-495b-b0e8-cdf17fd68530/document HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64896 - "POST /api/sessions/a301f258-727c-495b-b0e8-cdf17fd68530/auto-annotate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62059 - "GET /api/sessions/a301f258-727c-495b-b0e8-cdf17fd68530/export HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:62066 - "OPTIONS /api/sessions/a301f258-727c-495b-b0e8-cdf17fd68530 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62066 - "GET /api/sessions/a301f258-727c-495b-b0e8-cdf17fd68530 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62069 - "GET /storage/a301f258-727c-495b-b0e8-cdf17fd68530/20260410071523932105-test1.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62066 - "GET /storage/a301f258-727c-495b-b0e8-cdf17fd68530/20260410071523932105-test1.jpg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:53279 - "OPTIONS /api/sessions/3fd356a8-c87d-4605-a5b2-4a8f6102495a HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:52115 - "OPTIONS /api/sessions/eb4f0cd4-7719-465f-b4c7-90fbd9d11ba9 HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:52242 - "OPTIONS /api/sessions/f0b72858-cfa3-4e05-9b3e-f57252eb0ecd HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:49996 - "OPTIONS /api/sessions/f0b72858-cfa3-4e05-9b3e-f57252eb0ecd HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:57173 - "OPTIONS /api/sessions/f0b72858-cfa3-4e05-9b3e-f57252eb0ecd HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:63723 - "OPTIONS /api/sessions/9d5acf35-5164-48b6-bd42-674763e4691c HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:63725 - "OPTIONS /api/sessions/675ddaec-b774-4701-8a2f-23695d898911 HTTP/1.1" 400 Bad Request

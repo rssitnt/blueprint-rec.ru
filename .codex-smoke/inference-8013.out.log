@@ -1,0 +1,22 @@
+INFO:     127.0.0.1:56887 - "POST /api/sessions HTTP/1.1" 201 Created
+INFO:     127.0.0.1:56888 - "POST /api/sessions/b2a1d502-e569-4cd3-962e-3de4942759c8/document HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56887 - "POST /api/sessions/b2a1d502-e569-4cd3-962e-3de4942759c8/auto-annotate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56099 - "OPTIONS /api/sessions/b2a1d502-e569-4cd3-962e-3de4942759c8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56099 - "GET /api/sessions/b2a1d502-e569-4cd3-962e-3de4942759c8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56102 - "GET /storage/b2a1d502-e569-4cd3-962e-3de4942759c8/20260409183021086318-image001.png HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56099 - "GET /storage/b2a1d502-e569-4cd3-962e-3de4942759c8/20260409183021086318-image001.png HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:59169 - "GET /api/sessions/b2a1d502-e569-4cd3-962e-3de4942759c8/export HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52896 - "POST /api/sessions HTTP/1.1" 201 Created
+INFO:     127.0.0.1:52897 - "POST /api/sessions/855157e8-6e86-4934-bfd7-5e5cac77bce2/document HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52896 - "POST /api/sessions/855157e8-6e86-4934-bfd7-5e5cac77bce2/auto-annotate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65355 - "OPTIONS /api/sessions/bd1b1004-3219-47a1-ac75-9188022a67c5 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65355 - "GET /api/sessions/bd1b1004-3219-47a1-ac75-9188022a67c5 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:63535 - "OPTIONS /api/sessions/855157e8-6e86-4934-bfd7-5e5cac77bce2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63535 - "GET /api/sessions/855157e8-6e86-4934-bfd7-5e5cac77bce2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63538 - "GET /storage/855157e8-6e86-4934-bfd7-5e5cac77bce2/20260409183044344053-test1.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56288 - "POST /api/sessions HTTP/1.1" 201 Created
+INFO:     127.0.0.1:56289 - "POST /api/sessions/012acec8-d898-4d85-9bd6-0357446c57b6/document HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56288 - "POST /api/sessions/012acec8-d898-4d85-9bd6-0357446c57b6/auto-annotate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65291 - "POST /api/sessions HTTP/1.1" 201 Created
+INFO:     127.0.0.1:64984 - "POST /api/sessions/1ee59c1b-2262-4aeb-8502-da2584da0616/document HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65291 - "POST /api/sessions/1ee59c1b-2262-4aeb-8502-da2584da0616/auto-annotate HTTP/1.1" 200 OK

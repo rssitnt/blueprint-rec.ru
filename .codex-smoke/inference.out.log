@@ -1,0 +1,2 @@
+INFO:     127.0.0.1:61284 - "POST /api/sessions HTTP/1.1" 201 Created
+INFO:     127.0.0.1:61285 - "POST /api/sessions/97d6cb6d-1c89-4610-87ea-c67058a6fa1b/document HTTP/1.1" 200 OK

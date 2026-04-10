@@ -1,0 +1,85 @@
+
+> @blueprint-rec/web@0.1.0 dev
+> next dev --hostname 127.0.0.1 --port 3002
+
+   ▲ Next.js 15.5.14
+   - Local:        http://127.0.0.1:3002
+   - Network:      http://127.0.0.1:3002
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 1646ms
+ ○ Compiling / ...
+ ✓ Compiled / in 654ms (609 modules)
+ GET / 200 in 950ms
+ ○ Compiling /sessions/[sessionId] ...
+ ✓ Compiled /sessions/[sessionId] in 983ms (666 modules)
+ GET /sessions/437768f9-e337-4417-a55f-bd383ec62242 200 in 1588ms
+ GET /sessions/a301f258-727c-495b-b0e8-cdf17fd68530 200 in 71ms
+ ○ Compiling /_not-found ...
+ GET / 404 in 3058ms
+ GET / 404 in 573387ms
+ GET / 404 in 9986ms
+ GET / 404 in 513317ms
+ ✓ Compiled in 3.1s (1005 modules)
+   Reload env: .env.local
+   Reload env: .env.local
+ ✓ Compiled in 327ms (991 modules)
+ ✓ Compiled in 850ms (1005 modules)
+ ✓ Compiled / in 205ms (591 modules)
+ GET / 200 in 552ms
+ GET / 200 in 41ms
+ ✓ Compiled in 738ms (1012 modules)
+ GET / 200 in 240ms
+ ✓ Compiled in 788ms (1012 modules)
+ ✓ Compiled in 751ms (1012 modules)
+ ✓ Compiled in 654ms (1012 modules)
+ ✓ Compiled in 609ms (1012 modules)
+ ✓ Compiled in 822ms (1012 modules)
+ ✓ Compiled in 1051ms (1012 modules)
+ ✓ Compiled in 548ms (1012 modules)
+ ✓ Compiled in 648ms (1012 modules)
+ ✓ Compiled in 573ms (1012 modules)
+ ✓ Compiled in 701ms (1012 modules)
+ ✓ Compiled in 601ms (1012 modules)
+ ✓ Compiled in 560ms (1012 modules)
+ ✓ Compiled in 1429ms (1012 modules)
+ ✓ Compiled in 1138ms (1012 modules)
+ ✓ Compiled in 783ms (1012 modules)
+ ✓ Compiled in 687ms (1012 modules)
+ ✓ Compiled in 1156ms (1012 modules)
+ ✓ Compiled in 4.1s (1012 modules)
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 648ms (1017 modules)
+ GET /api/reports?limit=1 500 in 26ms
+ GET /api/reports?limit=1 500 in 43ms
+ GET /api/reports?limit=1 500 in 21ms
+ GET /api/reports?limit=1 500 in 21ms
+ GET /api/reports?limit=1 500 in 25ms
+ GET /api/reports?limit=1 500 in 23ms
+ GET /api/reports?limit=1 500 in 22ms
+ GET /api/reports?limit=1 500 in 23ms
+ GET /api/reports?limit=1 500 in 27ms
+ GET /api/reports?limit=1 500 in 39ms
+ GET /api/reports?limit=1 500 in 36ms
+ GET /api/reports?limit=1 500 in 23ms
+ GET /api/reports?limit=1 500 in 25ms
+ GET /api/reports?limit=1 500 in 29ms
+ GET /api/reports?limit=1 500 in 26ms
+ GET /api/reports?limit=1 500 in 23ms
+ GET /api/reports?limit=1 500 in 23ms
+ GET /api/reports?limit=1 500 in 24ms
+ GET /api/reports?limit=1 500 in 26ms
+ GET /api/reports?limit=1 500 in 28ms
+ GET /api/reports?limit=1 500 in 28ms
+ GET /api/reports?limit=1 500 in 30ms
+ GET /api/reports?limit=1 500 in 19ms
+ GET /api/reports?limit=1 500 in 19ms
+ GET /api/reports?limit=1 500 in 21ms
+ GET /api/reports?limit=1 500 in 19ms
+ GET /api/reports?limit=1 500 in 20ms
+ GET /api/reports?limit=1 500 in 21ms
+ GET /api/reports?limit=1 500 in 31ms
+ GET / 200 in 389ms
+ GET / 200 in 68ms
+ GET / 200 in 66ms

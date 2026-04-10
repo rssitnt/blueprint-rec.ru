@@ -1,0 +1,37 @@
+{
+  "session_id": "6b9b5d16-a3d0-4e45-a1c3-e8328683fd7c",
+  "marker_count": 15,
+  "labels": [
+    "3",
+    "2",
+    "8",
+    "8",
+    "6",
+    "1",
+    "6",
+    "9",
+    "9",
+    "20",
+    "8",
+    "10",
+    "18",
+    "3",
+    "60"
+  ],
+  "source_counts": {
+    "gemini-vlm:gemini-2.5-flash": 1,
+    "easy-circle-inner6x": 1,
+    "sharp2x": 2,
+    "tile-sharp-0-0+circle": 1,
+    "tile-adapt-340-0+circle": 1,
+    "tile-bw-340-0+circle": 1,
+    "tile-sharp-0-0|cluster-2+circle": 1,
+    "tile-sharp-0-380+circle": 2,
+    "easy-circle-inner-adapt8x": 1,
+    "tile-adapt-0-380+circle": 1,
+    "tile-adapt-340-500+circle": 1,
+    "tile-sharp-340-500+circle": 2
+  },
+  "zip_path": "C:\\projects\\sites\\blueprint-rec-2\\exports\\one-shot-openai\\test2-gemini-v3-20260407-191850\\test2-gemini-vlm-export.zip",
+  "unzipped": "C:\\projects\\sites\\blueprint-rec-2\\exports\\one-shot-openai\\test2-gemini-v3-20260407-191850\\unzipped"
+}

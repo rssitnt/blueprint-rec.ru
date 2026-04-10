@@ -1,0 +1,31 @@
+# Node
+node_modules/
+.next/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Editors / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Local runtime artifacts
+services/inference/var/
+uploads/
+artifacts/
+tmp/
+tmp-test-storage/
+tmp_test_storage/

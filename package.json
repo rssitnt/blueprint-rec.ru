@@ -1,0 +1,25 @@
+{
+  "name": "blueprint-rec-2",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n web,inference -c cyan,yellow \"npm run dev:web\" \"npm run dev:inference\"",
+    "dev:web": "npm run dev --workspace @blueprint-rec/web",
+    "build:web": "npm run build --workspace @blueprint-rec/web",
+    "lint:web": "npm run lint --workspace @blueprint-rec/web",
+    "test:web": "npm run test --workspace @blueprint-rec/web",
+    "test:web:e2e": "npx playwright test",
+    "test:live-smoke": "node ./scripts/live_smoke_annotation.mjs",
+    "test:headless-manual-qa": "node ./scripts/headless_manual_qa.mjs",
+    "dev:inference": "py -3.11 -m uvicorn app.main:app --reload --app-dir services/inference --env-file services/inference/.env.local --port 8010",
+    "test:inference": "set INFERENCE_ENABLE_GEMINI=false&& set INFERENCE_ENABLE_OPENAI_VISION=false&& py -3.11 -m pytest services/inference/tests"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.51.1",
+    "concurrently": "^9.2.1"
+  }
+}

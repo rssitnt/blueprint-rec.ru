@@ -1,0 +1,13 @@
+
+> @blueprint-rec/web@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.5.14
+   - Local:        http://localhost:3001
+   - Network:      http://172.16.0.1:3001
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 1755ms
+   Reload env: .env.local
+[?25h

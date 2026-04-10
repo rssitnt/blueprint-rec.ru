@@ -1,0 +1,56 @@
+[
+  {
+    "filePath": "C:\\projects\\sites\\blueprint-rec-2\\blueprints-test\\image001.png",
+    "sessionId": "437768f9-e337-4417-a55f-bd383ec62242",
+    "elapsedSeconds": 1.55,
+    "totalCandidates": 3,
+    "totalMarkers": 3,
+    "aiDetected": 3,
+    "aiReview": 0,
+    "pipelineConflicts": 0,
+    "missingLabels": 0,
+    "export": {
+      "ok": true,
+      "status": 200,
+      "contentType": "application/zip",
+      "contentDisposition": "attachment; filename*=UTF-8''Codex-live-smoke-image001.png-2026-04-10T07-15-11.848Z-437768f9-export.zip",
+      "body": null
+    },
+    "ui": {
+      "hasReviewSummary": true,
+      "hasWorkspaceSummary": true,
+      "hasAiReviewPanel": false,
+      "hasConflictReviewSurface": false,
+      "hasHistoryDialog": true,
+      "historyHasAutoAnnotateEntry": true,
+      "screenshotPath": "C:\\projects\\sites\\blueprint-rec-2\\.codex-smoke\\live-smoke\\437768f9-e337-4417-a55f-bd383ec62242.png"
+    }
+  },
+  {
+    "filePath": "C:\\projects\\sites\\blueprint-rec-2\\blueprints-test\\test1.jpg",
+    "sessionId": "a301f258-727c-495b-b0e8-cdf17fd68530",
+    "elapsedSeconds": 75.42,
+    "totalCandidates": 39,
+    "totalMarkers": 32,
+    "aiDetected": 25,
+    "aiReview": 7,
+    "pipelineConflicts": 10,
+    "missingLabels": 2,
+    "export": {
+      "ok": false,
+      "status": 400,
+      "contentType": "application/json",
+      "contentDisposition": null,
+      "body": "{\"detail\":\"Export blocked until pipeline conflicts are resolved: association_ambiguity; duplicate_label_nearby:17; duplicate_label_nearby:18; missing_vocab_label:21; +1 more\"}"
+    },
+    "ui": {
+      "hasReviewSummary": true,
+      "hasWorkspaceSummary": true,
+      "hasAiReviewPanel": true,
+      "hasConflictReviewSurface": false,
+      "hasHistoryDialog": true,
+      "historyHasAutoAnnotateEntry": true,
+      "screenshotPath": "C:\\projects\\sites\\blueprint-rec-2\\.codex-smoke\\live-smoke\\a301f258-727c-495b-b0e8-cdf17fd68530.png"
+    }
+  }
+]

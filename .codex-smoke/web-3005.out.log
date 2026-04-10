@@ -1,0 +1,33 @@
+
+> @blueprint-rec/web@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.5.14
+   - Local:        http://localhost:3005
+   - Network:      http://172.16.0.1:3005
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 3.8s
+ ○ Compiling /sessions/[sessionId] ...
+ ✓ Compiled /sessions/[sessionId] in 1029ms (642 modules)
+ GET /sessions/b2a1d502-e569-4cd3-962e-3de4942759c8 200 in 1921ms
+ GET /sessions/855157e8-6e86-4934-bfd7-5e5cac77bce2 200 in 49ms
+ ✓ Compiled in 2s (656 modules)
+ ✓ Compiled in 468ms (656 modules)
+ ✓ Compiled in 424ms (656 modules)
+ ✓ Compiled in 479ms (656 modules)
+ ✓ Compiled in 721ms (656 modules)
+ ✓ Compiled in 418ms (656 modules)
+ ✓ Compiled in 330ms (656 modules)
+ ✓ Compiled in 309ms (656 modules)
+ ✓ Compiled in 655ms (656 modules)
+ ✓ Compiled in 728ms (656 modules)
+ ✓ Compiled in 593ms (656 modules)
+ ✓ Compiled in 587ms (656 modules)
+ ✓ Compiled in 478ms (656 modules)
+ ✓ Compiled in 544ms (656 modules)
+ ✓ Compiled in 661ms (656 modules)
+ ✓ Compiled in 533ms (656 modules)
+ ✓ Compiled in 547ms (656 modules)
+   Reload env: .env.local

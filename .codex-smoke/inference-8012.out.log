@@ -1,0 +1,13 @@
+INFO:     127.0.0.1:65046 - "POST /api/sessions HTTP/1.1" 201 Created
+INFO:     127.0.0.1:65047 - "POST /api/sessions/d297cba1-a1e2-469e-a222-a241205a756c/document HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65048 - "POST /api/sessions/d297cba1-a1e2-469e-a222-a241205a756c/auto-annotate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65257 - "OPTIONS /api/sessions/d297cba1-a1e2-469e-a222-a241205a756c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65257 - "GET /api/sessions/d297cba1-a1e2-469e-a222-a241205a756c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65260 - "GET /storage/d297cba1-a1e2-469e-a222-a241205a756c/20260409181555583599-test1.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65299 - "OPTIONS /api/sessions/f950bf3e-816c-4858-bb46-387d139b1874 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65299 - "GET /api/sessions/f950bf3e-816c-4858-bb46-387d139b1874 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:59686 - "OPTIONS /api/sessions/f950bf3e-816c-4858-bb46-387d139b1874 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59686 - "GET /api/sessions/f950bf3e-816c-4858-bb46-387d139b1874 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:60281 - "OPTIONS /api/sessions/d297cba1-a1e2-469e-a222-a241205a756c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60281 - "GET /api/sessions/d297cba1-a1e2-469e-a222-a241205a756c HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60284 - "GET /storage/d297cba1-a1e2-469e-a222-a241205a756c/20260409181555583599-test1.jpg HTTP/1.1" 200 OK

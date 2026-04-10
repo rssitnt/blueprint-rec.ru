@@ -1,0 +1,5 @@
+
+> @blueprint-rec/web@0.1.0 dev
+> next dev --hostname 127.0.0.1 --port 3004
+
+[?25h
