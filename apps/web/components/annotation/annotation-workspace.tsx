@@ -4675,7 +4675,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
         </div>
 
         <div className="border-t border-white/8 px-4 py-3">
-          <div className={classNames("flex gap-3", isCompactWorkspace ? "flex-col items-start" : "items-start justify-between")}>
+          <div className={classNames("flex flex-wrap gap-2", isCompactWorkspace ? "flex-col items-start" : "items-start justify-between")}>
             <div>
               <p className={railSectionTitleClass}>{isImportedJobPreviewSession ? "Результат AI" : "Авторазметка"}</p>
               <p className="mt-1 text-sm text-[#eadccd]">
@@ -4692,7 +4692,10 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
             ) : (
               <button
                 type="button"
-                className="inline-flex min-h-8 items-center rounded-full border border-white/10 bg-white/5 px-2.5 text-[11px] font-medium text-white transition disabled:opacity-40"
+                className={classNames(
+                  "inline-flex min-h-8 max-w-full items-center rounded-full border border-white/10 bg-white/5 px-2.5 text-[11px] font-medium text-white transition disabled:opacity-40",
+                  isCompactWorkspace && "w-full justify-center"
+                )}
                 disabled={!document || isWorkspaceBusy}
                 onClick={() => void runAutoAnnotate()}
               >
@@ -4700,7 +4703,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
               </button>
             )}
           </div>
-          <div className={classNames("mt-3 gap-2 text-xs", isCompactWorkspace ? "grid grid-cols-2" : "grid grid-cols-3")}>
+          <div className="mt-3 grid grid-cols-2 gap-2 text-xs lg:grid-cols-3">
             <div className="rounded-[0.85rem] border border-white/8 bg-white/[0.03] px-3 py-2">
               <div className="text-[#b39d8a]">AI</div>
               <div className="mt-1 font-semibold text-white">{session.summary.aiDetected + session.summary.aiReview}</div>

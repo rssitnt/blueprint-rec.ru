@@ -91,6 +91,7 @@ Last updated: 2026-04-13
 - Batch completion sound was removed from the UI.
 - Browser notification popup on batch completion was removed from the UI.
 - Compact preview workspace rail was widened and repacked for mobile-like widths; warm theme applied there too.
+- Annotation rail buttons now wrap instead of clipping; AI summary chips wrap on small widths.
 - Global drag-and-drop on the home screen auto-detects:
   - archive
   - drawing
