@@ -97,6 +97,7 @@ Last updated: 2026-04-13
 - Bottom toolbar palette aligned to the warm dark theme.
 - Center/angle switch palette aligned to warm dark theme.
 - Left rail separators removed; rail now scrolls to avoid clipped text.
+- Conflict banner text color increased for readability.
 - Global drag-and-drop on the home screen auto-detects:
   - archive
   - drawing

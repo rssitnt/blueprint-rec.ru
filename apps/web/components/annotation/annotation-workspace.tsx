@@ -4485,13 +4485,13 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
 
       {(selectedCandidateConflict.length > 1 || activeConflict) && (
         <div className="absolute top-3 z-40 -translate-x-1/2" style={{ left: canvasCenterX }}>
-          <div className="flex items-center gap-2 rounded-full border border-[#8a5535] bg-[#251814]/96 px-3 py-2 text-white shadow-[0_18px_44px_rgba(8,10,14,0.34)] backdrop-blur">
+          <div className="flex items-center gap-2 rounded-full border border-[#9a6b4a] bg-[#f5eee6] px-3 py-2 text-[#3a2b22] shadow-[0_18px_44px_rgba(8,10,14,0.22)] backdrop-blur">
             <span className="inline-flex h-2.5 w-2.5 rounded-full bg-[#f59e0b]" />
-            <span className="text-sm font-semibold text-[#fff1d6]">
+            <span className="text-sm font-semibold text-[#3a2b22]">
               {selectedCandidateConflict.length > 1 ? "Сначала разберём конфликт кандидатов" : `Конфликт: ${activeConflict?.label}`}
             </span>
             {(selectedCandidateConflict.length > 1 || (activeConflict?.markers.length ?? 0) > 1) && (
-              <span className="rounded-full border border-white/10 bg-white/[0.06] px-2 py-0.5 text-[11px] font-medium text-[#eceff5]">
+              <span className="rounded-full border border-[#c7b6a6] bg-[#fdf7f1] px-2 py-0.5 text-[11px] font-medium text-[#5a4638]">
                 {selectedCandidateConflict.length > 1 ? `${selectedCandidateConflict.length} рядом` : `${activeConflict?.markers.length ?? 0} точки`}
               </span>
             )}
