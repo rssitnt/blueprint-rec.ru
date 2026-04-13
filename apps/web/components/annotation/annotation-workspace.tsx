@@ -263,10 +263,10 @@ function HistoryQueueChip({
   return (
     <span
       className={classNames(
-        "inline-flex min-h-6 items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em]",
+        "inline-flex min-h-6 items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em]",
         queueContext === "review"
-          ? "border-[#7a5a23] bg-[#2e2418] text-[#f5d0a8]"
-          : "border-[#2b4b67] bg-[#162433] text-[#bfe1ff]"
+          ? "bg-[#2e2418] text-[#f5d0a8]"
+          : "bg-[#162433] text-[#bfe1ff]"
       )}
     >
       {historyQueueContextLabels[queueContext]}
@@ -287,25 +287,25 @@ function HistorySummaryChips({
       key: "confirmed",
       count: summary.confirmed,
       label: "подтверждено",
-      className: "border-[#3e5f2b] bg-[#1c2718] text-[#d7f5c9]"
+      className: "bg-[#1c2718] text-[#d7f5c9]"
     },
     {
       key: "deleted",
       count: summary.deleted,
       label: "ложных",
-      className: "border-[#7b2d2d] bg-[#331d1e] text-[#ffcccc]"
+      className: "bg-[#331d1e] text-[#ffcccc]"
     },
     {
       key: "skipped",
       count: summary.skipped,
       label: "отложено",
-      className: "border-[#5a5f69] bg-[#1d2026] text-[#d7dbe2]"
+      className: "bg-[#1d2026] text-[#d7dbe2]"
     },
     {
       key: "restored",
       count: summary.restored,
       label: "возвращено",
-      className: "border-[#2b4b67] bg-[#162433] text-[#bfe1ff]"
+      className: "bg-[#162433] text-[#bfe1ff]"
     }
   ].filter((chip) => chip.count > 0);
 
@@ -319,7 +319,7 @@ function HistorySummaryChips({
         <span
           key={chip.key}
           className={classNames(
-            "inline-flex min-h-6 items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em]",
+            "inline-flex min-h-6 items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em]",
             chip.className
           )}
         >
@@ -356,7 +356,7 @@ function HistoryNextStepPanel({
   return (
     <div
       className={classNames(
-        "rounded-[0.85rem] border border-white/8 bg-black/10 transition-[padding,margin] duration-150",
+        "rounded-[0.85rem] bg-black/10 transition-[padding,margin] duration-150",
         compact ? "mt-1.5 px-2.5 py-1.5" : "mt-2 px-3 py-2"
       )}
     >
@@ -364,7 +364,7 @@ function HistoryNextStepPanel({
       {!compact && <p className="mt-1 text-[12px] text-[#aeb4be]">{hint}</p>}
       {hasQueueActions && (
         <div className={classNames("flex flex-wrap gap-2", compact ? "mt-0" : "mt-2")}>
-          <div className="inline-flex items-center gap-1.5 rounded-[0.7rem] border border-[#3e5f2b] bg-[#1c2718] px-1.5 py-1">
+          <div className="inline-flex items-center gap-1.5 rounded-[0.7rem] bg-[#1c2718] px-1.5 py-1">
             {primaryQueueContext && <HistoryQueueChip queueContext={primaryQueueContext} />}
             <button
               type="button"
@@ -377,7 +377,7 @@ function HistoryNextStepPanel({
           {currentPassCount > 0 && primaryQueueContext !== "review" && (
             <button
               type="button"
-              className="inline-flex min-h-7 items-center rounded-[0.7rem] border border-[#7a5a23] bg-[#2e2418] px-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8] transition"
+              className="inline-flex min-h-7 items-center rounded-[0.7rem] bg-[#2e2418] px-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8] transition"
               onClick={() => onOpenQueue("current")}
             >
               {historyActionLabels.toReview} {currentPassCount}
@@ -386,7 +386,7 @@ function HistoryNextStepPanel({
           {deferredCount > 0 && primaryQueueContext !== "deferred" && (
             <button
               type="button"
-              className="inline-flex min-h-7 items-center rounded-[0.7rem] border border-[#2b4b67] bg-[#162433] px-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#bfe1ff] transition"
+              className="inline-flex min-h-7 items-center rounded-[0.7rem] bg-[#162433] px-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#bfe1ff] transition"
               onClick={() => onOpenQueue("deferred")}
             >
               {historyActionLabels.toDeferred} {deferredCount}
@@ -435,7 +435,7 @@ function HistoryStickyToolbar({
     <div className={classNames("flex items-center justify-between gap-3", compact ? "mt-2" : "mt-3")}>
       <div className="flex items-center gap-2">
         {hasUnresolved && (
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-[#3e5f2b] bg-[#1c2718] px-1.5 py-1">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-[#1c2718] px-1.5 py-1">
             {primaryQueueContext && <HistoryQueueChip queueContext={primaryQueueContext} count={nextUnresolvedCount} />}
             <button
               type="button"
@@ -449,7 +449,7 @@ function HistoryStickyToolbar({
         {historyAlternateQueueAction && (
           <button
             type="button"
-            className="inline-flex min-h-8 items-center rounded-full border border-[#2b4b67] bg-[#162433] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#bfe1ff] transition"
+            className="inline-flex min-h-8 items-center rounded-full bg-[#162433] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#bfe1ff] transition"
             onClick={() => onOpenQueue(historyAlternateQueueAction.mode)}
           >
             {historyAlternateQueueAction.label}
@@ -459,10 +459,10 @@ function HistoryStickyToolbar({
           <button
             type="button"
             className={classNames(
-              "inline-flex min-h-8 items-center rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] transition",
+              "inline-flex min-h-8 items-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] transition",
               showOnlyAmbiguityHistory
-                ? "border-[#7a5a23] bg-[#2e2418] text-[#f5d0a8]"
-                : "border-white/10 bg-white/5 text-[#c8ccd3]"
+                ? "bg-[#2e2418] text-[#f5d0a8]"
+                : "bg-white/5 text-[#c8ccd3]"
             )}
             onClick={onToggleScope}
           >
@@ -475,10 +475,10 @@ function HistoryStickyToolbar({
           type="button"
           aria-pressed={isCompactPinned}
           className={classNames(
-            "inline-flex min-h-8 items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] transition",
+            "inline-flex min-h-8 items-center rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] transition",
             isCompactPinned
-              ? "border-[#2b4b67] bg-[#162433] text-[#bfe1ff]"
-              : "border-white/10 bg-white/5 text-[#c8ccd3]"
+              ? "bg-[#162433] text-[#bfe1ff]"
+              : "bg-white/5 text-[#c8ccd3]"
           )}
           onClick={onToggleCompactPinned}
         >
@@ -576,17 +576,17 @@ function HistoryCardHeader({
         {canJumpToMarker && entry.markerId && (
           <button
             type="button"
-            className="inline-flex min-h-6 items-center gap-1 rounded-full border border-white/10 bg-white/5 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white transition"
+            className="inline-flex min-h-6 items-center gap-1 rounded-full bg-white/5 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white transition"
             onClick={() => onJumpToMarker(entry.markerId)}
           >
             <span
               className={classNames(
-                "inline-flex min-h-5 items-center rounded-full border px-1.5 py-0 text-[9px] font-semibold uppercase tracking-[0.12em]",
+                "inline-flex min-h-5 items-center rounded-full px-1.5 py-0 text-[9px] font-semibold uppercase tracking-[0.12em]",
                 historyJumpContext === "review"
-                  ? "border-[#7a5a23] bg-[#2e2418] text-[#f5d0a8]"
+                  ? "bg-[#2e2418] text-[#f5d0a8]"
                   : historyJumpContext === "deferred"
-                    ? "border-[#2b4b67] bg-[#162433] text-[#bfe1ff]"
-                    : "border-white/10 bg-[#1c2026] text-[#d0d4db]"
+                    ? "bg-[#162433] text-[#bfe1ff]"
+                    : "bg-[#1c2026] text-[#d0d4db]"
               )}
             >
               {historyQueueContextLabels[historyJumpContext]}
@@ -717,8 +717,8 @@ function HistoryEntryCard({
         onJumpToMarker={onJumpToMarker}
       />
       {nextStepHint && (
-        <div className="mt-1 flex items-start gap-1.5 rounded-[0.75rem] border border-white/8 bg-black/10 px-2 py-1.5">
-          <span className="inline-flex min-h-5 shrink-0 items-center rounded-full border border-white/10 bg-white/5 px-1.5 py-0 text-[9px] font-semibold uppercase tracking-[0.12em] text-[#d7dbe2]">
+        <div className="mt-1 flex items-start gap-1.5 rounded-[0.75rem] bg-black/10 px-2 py-1.5">
+          <span className="inline-flex min-h-5 shrink-0 items-center rounded-full bg-white/5 px-1.5 py-0 text-[9px] font-semibold uppercase tracking-[0.12em] text-[#d7dbe2]">
             дальше
           </span>
           <p className="text-[11px] leading-4 text-[#aeb4be]">{nextStepHint}</p>
@@ -791,12 +791,12 @@ function MarkerListItem({
       type="button"
       onClick={onSelect}
       className={classNames(
-        "block w-full rounded-[0.9rem] border px-3 py-2 text-left transition",
+        "block w-full rounded-[0.9rem] px-3 py-2 text-left transition",
         selected
-          ? "border-[#474c55] bg-[#22262d] shadow-[0_10px_24px_rgba(10,12,16,0.28)]"
-          : "border-transparent bg-transparent",
-        (isConflict || hasAmbiguityReview) && "border-[#6d4a1a] bg-[#231d15]/70",
-        hasNearTieReview && "border-[#7b3aed] bg-[#221933]/75"
+          ? "bg-[#22262d] shadow-[0_10px_24px_rgba(10,12,16,0.28)]"
+          : "bg-[#171310]",
+        (isConflict || hasAmbiguityReview) && "bg-[#231d15]/70",
+        hasNearTieReview && "bg-[#221933]/75"
       )}
     >
       <div className="flex items-start gap-3">
@@ -812,14 +812,14 @@ function MarkerListItem({
               {marker.label ?? "Без ярлыка"}
             </p>
             {marker.status === "human_draft" && (
-              <span className="inline-flex items-center rounded-full border border-[#6d4a1a] bg-[#2a2118] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8]">
+              <span className="inline-flex items-center rounded-full bg-[#2a2118] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8]">
                 черновик
               </span>
             )}
             {hasAmbiguityReview && (
               <span
                 title={ambiguityTooltip || "Есть спор по AI-разметке"}
-                className="inline-flex items-center rounded-full border border-[#7a5a23] bg-[#2e2418] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8]"
+                className="inline-flex items-center rounded-full bg-[#2e2418] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8]"
               >
                 AI review
               </span>
@@ -827,13 +827,13 @@ function MarkerListItem({
             {hasNearTieReview && (
               <span
                 title="Один bbox содержит почти равный OCR-спор между двумя цифрами"
-                className="inline-flex items-center rounded-full border border-[#7c3aed] bg-[#271a3f] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#dcc8ff]"
+                className="inline-flex items-center rounded-full bg-[#271a3f] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#dcc8ff]"
               >
                 OCR split
               </span>
             )}
             {isConflict && (
-              <span className="inline-flex items-center rounded-full border border-[#6d4a1a] bg-[#2a2118] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8]">
+              <span className="inline-flex items-center rounded-full bg-[#2a2118] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8]">
                 конфликт
               </span>
             )}
@@ -859,7 +859,7 @@ function AmbiguityReviewCandidateCard({
   const { candidate, linkedConflict, distanceToMarker, sameSuggestedLabel, associationCount } = item;
 
   return (
-    <div className="rounded-[0.9rem] border border-white/8 bg-black/10 px-3 py-2.5">
+    <div className="rounded-[0.9rem] bg-[#171310] px-3 py-2.5 shadow-[0_12px_26px_rgba(8,6,4,0.3)]">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate text-[12px] font-semibold text-white">
@@ -882,14 +882,14 @@ function AmbiguityReviewCandidateCard({
         <div className="flex shrink-0 flex-col gap-1.5">
           <button
             type="button"
-            className="inline-flex min-h-7 items-center justify-center rounded-[0.7rem] border border-white/10 bg-white/[0.05] px-2.5 text-[11px] font-medium text-white transition"
+            className="inline-flex min-h-7 items-center justify-center rounded-[0.7rem] bg-white/[0.05] px-2.5 text-[11px] font-medium text-white transition"
             onClick={() => onSelectCandidate(candidate.candidateId)}
           >
             К кандидату
           </button>
           <button
             type="button"
-            className="inline-flex min-h-7 items-center justify-center rounded-[0.7rem] border border-[#3e5f2b] bg-[#1c2718] px-2.5 text-[11px] font-medium text-[#d7f5c9] transition"
+            className="inline-flex min-h-7 items-center justify-center rounded-[0.7rem] bg-[#1c2718] px-2.5 text-[11px] font-medium text-[#d7f5c9] transition"
             onClick={() => onMoveMarker(candidate.centerX, candidate.centerY)}
           >
             Поставить сюда
@@ -940,7 +940,7 @@ function AmbiguityReviewPanel({
   onConfirm: () => void;
 }) {
   return (
-    <div className="space-y-3 rounded-[1rem] border border-[#5f461c] bg-[#231d15] p-3">
+    <div className="space-y-3 rounded-[1rem] bg-[#231d15] p-3 shadow-[0_16px_34px_rgba(8,6,4,0.32)]">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#f5d0a8]">AI review</p>
@@ -948,12 +948,12 @@ function AmbiguityReviewPanel({
             Точка помечена как спорная. Рядом показаны причины и ближайшие альтернативы для быстрой проверки.
           </p>
         </div>
-        <span className="inline-flex min-h-8 items-center rounded-full border border-[#7a5a23] bg-[#2e2418] px-3 text-[11px] font-semibold text-[#f5d0a8]">
+        <span className="inline-flex min-h-8 items-center rounded-full bg-[#2e2418] px-3 text-[11px] font-semibold text-[#f5d0a8]">
           {reviewCandidates.length || reviewConflictCount} варианта
         </span>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 rounded-[0.85rem] border border-white/8 bg-black/10 px-3 py-2">
+      <div className="flex flex-wrap items-center gap-2 rounded-[0.85rem] bg-black/10 px-3 py-2">
         <span
           className={classNames(
             "inline-flex min-h-7 items-center rounded-full px-2.5 text-[10px] font-semibold uppercase tracking-[0.12em]",
@@ -966,7 +966,7 @@ function AmbiguityReviewPanel({
       </div>
 
       {hasNearTieAmbiguity && (
-        <div className="rounded-[0.9rem] border border-[#7c3aed] bg-[#221933] px-3 py-2.5">
+        <div className="rounded-[0.9rem] bg-[#221933] px-3 py-2.5 shadow-[0_12px_26px_rgba(10,6,18,0.3)]">
           <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#dcc8ff]">OCR split</p>
           <p className="mt-1 text-[12px] leading-5 text-[#efe5ff]">
             Один bbox содержит почти равный OCR-спор между двумя цифрами. Это не две реальные детали на листе, а два варианта чтения одного и того же места.
@@ -979,7 +979,7 @@ function AmbiguityReviewPanel({
           {reviewTypeLabels.map((label) => (
             <span
               key={label}
-              className="inline-flex min-h-7 items-center rounded-full border border-[#7a5a23] bg-[#2e2418] px-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8]"
+              className="inline-flex min-h-7 items-center rounded-full bg-[#2e2418] px-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8]"
             >
               {label}
             </span>
@@ -987,7 +987,7 @@ function AmbiguityReviewPanel({
           {hasConflictFocus && (
             <button
               type="button"
-              className="inline-flex min-h-7 items-center rounded-full border border-white/10 bg-white/[0.05] px-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white transition"
+              className="inline-flex min-h-7 items-center rounded-full bg-white/[0.05] px-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white transition"
               onClick={onFocusConflict}
             >
               показать зону спора
@@ -1024,7 +1024,7 @@ function AmbiguityReviewPanel({
       )}
 
       {showDeferredPass && (
-        <div className="rounded-[0.85rem] border border-[#5a5f69] bg-[#1d2026] px-3 py-2">
+        <div className="rounded-[0.85rem] bg-[#1d2026] px-3 py-2 shadow-[0_12px_26px_rgba(8,6,4,0.28)]">
           <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#d7dbe2]">
             Финальное решение
           </p>
@@ -1037,7 +1037,7 @@ function AmbiguityReviewPanel({
       <div className="grid grid-cols-3 gap-2">
         <button
           type="button"
-          className="inline-flex h-9 w-full items-center justify-center rounded-[0.8rem] border border-white/10 bg-white/[0.05] px-3 text-[12px] font-semibold text-[#d7dbe2] transition disabled:cursor-not-allowed disabled:opacity-35"
+          className="inline-flex h-9 w-full items-center justify-center rounded-[0.8rem] bg-white/[0.05] px-3 text-[12px] font-semibold text-[#d7dbe2] transition disabled:cursor-not-allowed disabled:opacity-35"
           disabled={!canSkip || busy}
           onClick={onSkip}
         >
@@ -1045,7 +1045,7 @@ function AmbiguityReviewPanel({
         </button>
         <button
           type="button"
-          className="inline-flex h-9 w-full items-center justify-center rounded-[0.8rem] border border-[#7b2d2d] bg-[#331d1e] px-3 text-[12px] font-semibold text-[#ffcccc] transition disabled:cursor-not-allowed disabled:opacity-35"
+          className="inline-flex h-9 w-full items-center justify-center rounded-[0.8rem] bg-[#331d1e] px-3 text-[12px] font-semibold text-[#ffcccc] transition disabled:cursor-not-allowed disabled:opacity-35"
           disabled={busy}
           onClick={onDelete}
         >
@@ -1053,7 +1053,7 @@ function AmbiguityReviewPanel({
         </button>
         <button
           type="button"
-          className="inline-flex h-9 w-full items-center justify-center rounded-[0.8rem] border border-[#3e5f2b] bg-[#1c2718] px-3 text-[12px] font-semibold text-[#d7f5c9] transition disabled:cursor-not-allowed disabled:opacity-35"
+          className="inline-flex h-9 w-full items-center justify-center rounded-[0.8rem] bg-[#1c2718] px-3 text-[12px] font-semibold text-[#d7f5c9] transition disabled:cursor-not-allowed disabled:opacity-35"
           disabled={!canConfirm || busy}
           onClick={onConfirm}
         >
@@ -1103,7 +1103,7 @@ function CandidateReviewNotice({
         : null;
 
   return (
-    <div className="rounded-[1rem] border border-[#2b4b67] bg-[#162433] p-3">
+    <div className="rounded-[1rem] bg-[#162433] p-3 shadow-[0_16px_34px_rgba(8,6,4,0.28)]">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#bfe1ff]">Почему открыт этот режим</p>
@@ -1112,12 +1112,12 @@ function CandidateReviewNotice({
         </div>
         <div className="flex flex-wrap justify-end gap-2">
           {candidateQueuePosition !== null && totalPendingCandidates > 0 && (
-            <span className="inline-flex min-h-8 items-center rounded-full border border-[#2b4b67] bg-[#10202e] px-3 text-[11px] font-semibold text-[#bfe1ff]">
+            <span className="inline-flex min-h-8 items-center rounded-full bg-[#10202e] px-3 text-[11px] font-semibold text-[#bfe1ff]">
               кандидат {candidateQueuePosition} из {totalPendingCandidates}
             </span>
           )}
           {(conflictCount > 1 || hasAssociations) && (
-            <span className="inline-flex min-h-8 items-center rounded-full border border-[#2b4b67] bg-[#10202e] px-3 text-[11px] font-semibold text-[#bfe1ff]">
+            <span className="inline-flex min-h-8 items-center rounded-full bg-[#10202e] px-3 text-[11px] font-semibold text-[#bfe1ff]">
               {conflictCount > 1 ? `конфликт ${conflictCount}` : "есть связи"}
             </span>
           )}
@@ -1129,7 +1129,7 @@ function CandidateReviewNotice({
           {currentPassCount > 0 && (
             <button
               type="button"
-              className="inline-flex min-h-8 items-center rounded-full border border-[#7a5a23] bg-[#2e2418] px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8] transition"
+              className="inline-flex min-h-8 items-center rounded-full bg-[#2e2418] px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8] transition"
               onClick={onOpenReview}
             >
               к AI review {currentPassCount}
@@ -1138,7 +1138,7 @@ function CandidateReviewNotice({
           {deferredCount > 0 && (
             <button
               type="button"
-              className="inline-flex min-h-8 items-center rounded-full border border-[#2b4b67] bg-[#10202e] px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#bfe1ff] transition"
+              className="inline-flex min-h-8 items-center rounded-full bg-[#10202e] px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#bfe1ff] transition"
               onClick={onOpenDeferred}
             >
               к отложенным ai {deferredCount}
@@ -1200,7 +1200,7 @@ function MarkerRailFooter({
   onFocusAmbiguityMarker: (delta: -1 | 1) => void;
 }) {
   return (
-    <div className="flex items-center justify-between border-t border-white/8 px-4 py-3">
+    <div className="flex items-center justify-between px-4 py-3">
       <div>
         <p className={sectionTitleClass}>Точки</p>
         <p className="mt-1 text-sm text-[#c8ccd3]">
@@ -1246,7 +1246,7 @@ function MarkerRailFooter({
       <div className="flex flex-wrap items-center justify-end gap-2">
         {(currentPassCount > 0 || deferredCount > 0) && (
           <>
-            <div className="inline-flex items-center rounded-full border border-white/10 bg-white/5 p-1">
+            <div className="inline-flex items-center rounded-full bg-white/5 p-1">
               <button
                 type="button"
                 className={classNames(
@@ -1281,7 +1281,7 @@ function MarkerRailFooter({
               </button>
             </div>
             {activeQueueLength > 0 && (
-              <div className="inline-flex items-center rounded-full border border-white/10 bg-white/5 p-1">
+              <div className="inline-flex items-center rounded-full bg-white/5 p-1">
                 <button
                   type="button"
                   aria-label="Предыдущая спорная точка"
@@ -1311,7 +1311,7 @@ function MarkerRailFooter({
           <div
             className={classNames(
               "rounded-[0.85rem] px-3 py-2 text-right",
-              hasDeferred ? "border border-[#5a5f69] bg-[#1d2026]" : "border border-[#3e5f2b] bg-[#1c2718]"
+              hasDeferred ? "bg-[#1d2026]" : "bg-[#1c2718]"
             )}
           >
             <p
@@ -1331,7 +1331,7 @@ function MarkerRailFooter({
               <div className="mt-2 flex justify-end">
                 <button
                   type="button"
-                  className="inline-flex min-h-8 items-center rounded-full border border-[#5a5f69] bg-white/5 px-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#d7dbe2] transition"
+                  className="inline-flex min-h-8 items-center rounded-full bg-white/5 px-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#d7dbe2] transition"
                   onClick={() => onSetMode("deferred")}
                 >
                   открыть отложенные {deferredCount}
@@ -1341,7 +1341,7 @@ function MarkerRailFooter({
           </div>
         )}
         {hasDeferred && !reviewCompleted && (
-          <div className="rounded-[0.85rem] border border-[#5a5f69] bg-[#1d2026] px-3 py-2 text-right">
+          <div className="rounded-[0.85rem] bg-[#1d2026] px-3 py-2 text-right">
             <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#d7dbe2]">
               Отложено на потом
             </p>
@@ -1352,20 +1352,20 @@ function MarkerRailFooter({
         )}
 
         {selectedMarkerLabel && (
-          <span className="inline-flex min-h-8 items-center rounded-full border border-white/10 bg-white/5 px-2.5 text-xs font-medium text-white">
+          <span className="inline-flex min-h-8 items-center rounded-full bg-white/5 px-2.5 text-xs font-medium text-white">
             {selectedMarkerLabel}
           </span>
         )}
         {hasSelectedAmbiguityReview && (
           <span
             title={selectedReviewTooltip || "Есть спор по AI-разметке"}
-            className="inline-flex min-h-8 items-center rounded-full border border-[#7a5a23] bg-[#2e2418] px-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8]"
+            className="inline-flex min-h-8 items-center rounded-full bg-[#2e2418] px-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8]"
           >
             AI review
           </span>
         )}
         {selectedMarkerIsDraft && (
-          <span className="inline-flex min-h-8 items-center rounded-full border border-[#6d4a1a] bg-[#2a2118] px-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8]">
+          <span className="inline-flex min-h-8 items-center rounded-full bg-[#2a2118] px-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8]">
             черновик
           </span>
         )}
@@ -1399,7 +1399,7 @@ function AmbiguityWorkspaceBanner({
       <div
         role="status"
         aria-live="polite"
-        className="mt-3 rounded-[1rem] border border-[#3e5f2b] bg-[#182018] px-3 py-3 text-white"
+        className="mt-3 rounded-[1rem] bg-[#182018] px-3 py-3 text-white shadow-[0_16px_34px_rgba(8,6,4,0.28)]"
       >
         <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#d7f5c9]">ambiguity-review завершён</p>
         <p className="mt-1 text-sm text-[#c6d8be]">Спорных AI-точек больше не осталось.</p>
@@ -1418,7 +1418,7 @@ function AmbiguityWorkspaceBanner({
     <div
       role="status"
       aria-live="polite"
-      className="mt-3 rounded-[1rem] border border-[#6d4a1a] bg-[#231d15] px-3 py-3 text-white"
+      className="mt-3 rounded-[1rem] bg-[#231d15] px-3 py-3 text-white shadow-[0_16px_34px_rgba(8,6,4,0.3)]"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
@@ -1431,7 +1431,7 @@ function AmbiguityWorkspaceBanner({
         </div>
         <div className="flex shrink-0 flex-col items-end gap-2">
           {primaryQueueContext && (
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-[#3e5f2b] bg-[#1c2718] px-1.5 py-1">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-[#1c2718] px-1.5 py-1">
               <HistoryQueueChip queueContext={primaryQueueContext} />
               <button
                 type="button"
@@ -1445,7 +1445,7 @@ function AmbiguityWorkspaceBanner({
           {currentPassCount > 0 && deferredCount > 0 && (
             <button
               type="button"
-              className="inline-flex min-h-7 items-center rounded-full border border-[#2b4b67] bg-[#162433] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#bfe1ff] transition"
+              className="inline-flex min-h-7 items-center rounded-full bg-[#162433] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#bfe1ff] transition"
               onClick={onOpenDeferred}
             >
               {historyActionLabels.toDeferred} {deferredCount}
@@ -4181,7 +4181,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
 
   if (!session) {
     return (
-      <Card className="border-[#d8dade] bg-white/80">
+      <Card className="bg-white/90 shadow-[0_20px_50px_rgba(10,12,16,0.18)]">
         <div className="space-y-3">
           <div>
             <p className="text-sm font-semibold text-[#1f2937]">
@@ -4192,7 +4192,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
           {error && (
             <button
               type="button"
-              className="inline-flex min-h-9 items-center rounded-full border border-[#1f2937]/12 bg-white px-3 text-sm font-medium text-[#1f2937] transition disabled:opacity-50"
+              className="inline-flex min-h-9 items-center rounded-full bg-white px-3 text-sm font-medium text-[#1f2937] shadow-[inset_0_0_0_1px_rgba(31,41,55,0.08)] transition disabled:opacity-50"
               disabled={isSessionLoading || isReloadingSession}
               onClick={() => void reloadCurrentSession({ preferFit: true })}
             >
@@ -4295,13 +4295,13 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
   const sessionMarkerIds = new Set(session.markers.map((marker) => marker.markerId));
   const displayedHistoryEntries = showOnlyAmbiguityHistory ? ambiguityHistoryEntries : mergedRecentHistoryEntries;
   const railShellClass =
-    "absolute inset-y-0 z-30 flex min-h-0 flex-col overflow-hidden border-[#2f241d] bg-[#16120f] text-[#fff7ef] shadow-[0_26px_72px_rgba(8,6,5,0.34)]";
+    "absolute inset-y-0 z-30 flex min-h-0 flex-col overflow-hidden bg-[#16120f] text-[#fff7ef] shadow-[0_26px_72px_rgba(8,6,5,0.34)]";
   const railSectionClass = "px-3.5 py-3";
   const railSectionTitleClass = "text-[10px] font-semibold uppercase tracking-[0.18em] text-[#b7a28f]";
   const inspectorInputClass =
-    "h-9 w-full rounded-[0.8rem] border border-[#3a2d24] bg-[#120f0d] px-3 text-sm font-medium text-[#fff7ef] outline-none transition-none placeholder:text-[#7f7065] focus:border-[#7d6350] focus:ring-2 focus:ring-[#7d6350]/20";
+    "h-9 w-full rounded-[0.8rem] bg-[#120f0d] px-3 text-sm font-medium text-[#fff7ef] outline-none shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] transition-none placeholder:text-[#7f7065] focus:shadow-[inset_0_0_0_1px_rgba(245,208,168,0.45),0_0_0_3px_rgba(125,99,80,0.18)]";
   const toolbarButtonClass =
-    "inline-flex h-9 items-center justify-center rounded-[0.85rem] border border-[#3a2b22] bg-[#1a1410] px-3 text-[12px] font-medium text-[#f6efe7] transition-none disabled:cursor-not-allowed disabled:opacity-35";
+    "inline-flex h-9 items-center justify-center rounded-[0.85rem] bg-[#1a1410] px-3 text-[12px] font-medium text-[#f6efe7] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)] transition-none disabled:cursor-not-allowed disabled:opacity-35";
   const toolbarIconButtonClass = classNames(toolbarButtonClass, "w-9 px-0 text-[1.05rem] font-semibold");
   const toolbarSegmentClass =
     "inline-flex min-h-9 items-center justify-center rounded-[0.85rem] px-3 text-[12px] font-medium text-[#c7b9ad] transition-none";
@@ -4440,7 +4440,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
 
                 {selectedMarker && inlineEditorPosition && (
                   <form
-                    className="absolute z-50 flex items-center gap-2 rounded-[1rem] border border-[#d6d8de] bg-white/96 px-3 py-2 shadow-[0_20px_45px_rgba(12,14,18,0.16)] backdrop-blur"
+                    className="absolute z-50 flex items-center gap-2 rounded-[1rem] bg-white/96 px-3 py-2 shadow-[0_20px_45px_rgba(12,14,18,0.16)] backdrop-blur"
                     style={inlineEditorPosition}
                     onSubmit={(event) => {
                       event.preventDefault();
@@ -4455,18 +4455,18 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                       onChange={(event) => setDraftLabel(event.target.value)}
                       inputMode="numeric"
                       placeholder="Номер"
-                      className="h-10 w-24 rounded-[0.85rem] border border-[#d6d8de] bg-white px-3 text-sm font-semibold text-ink outline-none transition focus:border-[#6a7078] focus:ring-2 focus:ring-[#aeb3bb]"
+                      className="h-10 w-24 rounded-[0.85rem] bg-white px-3 text-sm font-semibold text-ink outline-none shadow-[inset_0_0_0_1px_rgba(15,23,42,0.12)] transition focus:shadow-[inset_0_0_0_1px_rgba(106,112,120,0.6),0_0_0_3px_rgba(174,179,187,0.35)]"
                     />
                     <button
                       type="submit"
-                      className="inline-flex h-10 w-10 items-center justify-center rounded-[0.85rem] border border-transparent bg-ink text-sm font-semibold text-white shadow-[0_10px_24px_rgba(15,18,32,0.18)] transition"
+                      className="inline-flex h-10 w-10 items-center justify-center rounded-[0.85rem] bg-ink text-sm font-semibold text-white shadow-[0_10px_24px_rgba(15,18,32,0.18)] transition"
                     >
                       &gt;
                     </button>
                     <button
                       type="button"
                       aria-label="Удалить точку"
-                      className="inline-flex h-10 w-10 items-center justify-center rounded-[0.85rem] border border-[#f2c2be] bg-[#fff4f3] text-[#c9362a] shadow-[0_10px_24px_rgba(201,54,42,0.08)] transition"
+                      className="inline-flex h-10 w-10 items-center justify-center rounded-[0.85rem] bg-[#fff4f3] text-[#c9362a] shadow-[0_10px_24px_rgba(201,54,42,0.08)] transition"
                       onClick={() => void deleteSelectedMarker()}
                     >
                       <TrashIcon />
@@ -4485,33 +4485,33 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
 
       {(selectedCandidateConflict.length > 1 || activeConflict) && (
         <div className="absolute top-3 z-40 -translate-x-1/2" style={{ left: canvasCenterX }}>
-          <div className="flex items-center gap-2 rounded-full border border-[#9a6b4a] bg-[#f5eee6] px-3 py-2 text-[#3a2b22] shadow-[0_18px_44px_rgba(8,10,14,0.22)] backdrop-blur">
+          <div className="flex items-center gap-2 rounded-full bg-[#f5eee6] px-3 py-2 text-[#3a2b22] shadow-[0_18px_44px_rgba(8,10,14,0.22)] backdrop-blur">
             <span className="inline-flex h-2.5 w-2.5 rounded-full bg-[#f59e0b]" />
             <span className="text-sm font-semibold text-[#3a2b22]">
               {selectedCandidateConflict.length > 1 ? "Сначала разберём конфликт кандидатов" : `Конфликт: ${activeConflict?.label}`}
             </span>
             {(selectedCandidateConflict.length > 1 || (activeConflict?.markers.length ?? 0) > 1) && (
-              <span className="rounded-full border border-[#c7b6a6] bg-[#fdf7f1] px-2 py-0.5 text-[11px] font-medium text-[#5a4638]">
+              <span className="rounded-full bg-[#fdf7f1] px-2 py-0.5 text-[11px] font-medium text-[#5a4638]">
                 {selectedCandidateConflict.length > 1 ? `${selectedCandidateConflict.length} рядом` : `${activeConflict?.markers.length ?? 0} точки`}
               </span>
             )}
             {currentPassAmbiguityMarkers.length > 0 ? (
               <button
                 type="button"
-                className="inline-flex h-8 items-center justify-center rounded-full border border-[#7a5a23] bg-[#2e2418] px-3 text-[11px] font-semibold text-[#f5d0a8] transition"
+                className="inline-flex h-8 items-center justify-center rounded-full bg-[#2e2418] px-3 text-[11px] font-semibold text-[#f5d0a8] transition"
                 onClick={() => setAmbiguityQueueMode("current", { focusFirst: true })}
               >
                 К AI review {currentPassAmbiguityMarkers.length}
               </button>
             ) : session.summary.aiReview > 0 ? (
-              <span className="rounded-full border border-[#7a5a23] bg-[#2e2418] px-2 py-0.5 text-[11px] font-medium text-[#f5d0a8]">
+              <span className="rounded-full bg-[#2e2418] px-2 py-0.5 text-[11px] font-medium text-[#f5d0a8]">
                 AI review отдельно: {session.summary.aiReview}
               </span>
             ) : null}
             {deferredAmbiguityMarkers.length > 0 && (
               <button
                 type="button"
-                className="inline-flex h-8 items-center justify-center rounded-full border border-[#2b4b67] bg-[#162433] px-3 text-[11px] font-semibold text-[#bfe1ff] transition"
+                className="inline-flex h-8 items-center justify-center rounded-full bg-[#162433] px-3 text-[11px] font-semibold text-[#bfe1ff] transition"
                 onClick={() => setAmbiguityQueueMode("deferred", { focusFirst: true })}
               >
                 К отложенным {deferredAmbiguityMarkers.length}
@@ -4519,7 +4519,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
             )}
             <button
               type="button"
-              className="inline-flex h-8 items-center justify-center rounded-full border border-[#7c4734] bg-[#2b1d18] px-3 text-xs font-semibold text-white transition"
+              className="inline-flex h-8 items-center justify-center rounded-full bg-[#2b1d18] px-3 text-xs font-semibold text-white transition"
               onClick={() => {
                 if (selectedCandidate) {
                   selectCandidate(selectedCandidate.candidateId, { focus: true });
@@ -4539,7 +4539,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
       {isCompactWorkspace && (
         <button
           type="button"
-          className="absolute left-3 top-3 z-40 inline-flex min-h-10 items-center rounded-full border border-[#30343c] bg-[#17191f]/94 px-3 text-[12px] font-semibold text-white shadow-[0_16px_36px_rgba(8,10,14,0.28)] backdrop-blur transition"
+          className="absolute left-3 top-3 z-40 inline-flex min-h-10 items-center rounded-full bg-[#17191f]/94 px-3 text-[12px] font-semibold text-white shadow-[0_16px_36px_rgba(8,10,14,0.28)] backdrop-blur transition"
           onClick={() => {
             setIsMarkerRailOpen((current) => {
               const nextState = !current;
@@ -4558,7 +4558,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
       <aside
         className={classNames(
           railShellClass,
-          isCompactWorkspace ? "bottom-24 left-3 right-auto top-16 z-40 rounded-[1.1rem] border" : "left-0 border-r"
+          isCompactWorkspace ? "bottom-24 left-3 right-auto top-16 z-40 rounded-[1.1rem]" : "left-0"
         )}
         style={{ width: isCompactWorkspace ? floatingMarkerRailWidth : leftRailWidth }}
       >
@@ -4570,7 +4570,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
               <button
                 type="button"
                 aria-label="Скрыть список точек"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[#d0d4db] transition"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-[#d0d4db] transition"
                 onClick={() => setIsMarkerRailOpen(false)}
               >
                 <CloseIcon />
@@ -4592,13 +4592,13 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
           </div>
 
           {error && (
-            <div className="mt-3 rounded-[0.95rem] border border-[#7b2d2d] bg-[#241617] px-3 py-2.5">
+            <div className="mt-3 rounded-[0.95rem] bg-[#241617] px-3 py-2.5 shadow-[0_14px_28px_rgba(8,6,4,0.32)]">
               <p className="text-sm font-medium text-[#ffcdcd]">Не получилось синхронизировать сессию.</p>
               <p className="mt-1 text-xs leading-5 text-[#f3b8b8]">{error}</p>
               <div className="mt-2 flex flex-wrap gap-2">
                 <button
                   type="button"
-                  className="inline-flex min-h-8 items-center rounded-full border border-white/10 bg-white/5 px-2.5 text-[11px] font-medium text-white transition disabled:opacity-40"
+                  className="inline-flex min-h-8 items-center rounded-full bg-white/5 px-2.5 text-[11px] font-medium text-white transition disabled:opacity-40"
                   disabled={isReloadingSession}
                   onClick={() =>
                     void reloadCurrentSession({
@@ -4611,7 +4611,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                 </button>
                 <button
                   type="button"
-                  className="inline-flex min-h-8 items-center rounded-full border border-white/10 bg-transparent px-2.5 text-[11px] font-medium text-[#f6d3d3] transition"
+                  className="inline-flex min-h-8 items-center rounded-full bg-[#2a1717] px-2.5 text-[11px] font-medium text-[#f6d3d3] transition"
                   onClick={() => setError(null)}
                 >
                   Скрыть
@@ -4657,7 +4657,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
             {isExporting ? "Готовлю ZIP…" : "Экспорт ZIP"}
           </button>
           {(hardPipelineConflictCount > 0 || missingLabels.length > 0) && (
-            <div className="mt-2 rounded-[0.95rem] border border-[#6d4a1a] bg-[#2a2118] px-3 py-2.5">
+            <div className="mt-2 rounded-[0.95rem] bg-[#2a2118] px-3 py-2.5 shadow-[0_14px_28px_rgba(8,6,4,0.3)]">
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#f5d0a8]">Экспорт пока заблокирован</p>
               <p className="mt-1 text-sm leading-5 text-[#f1ddc1]">
                 {hardPipelineConflictCount > 0 && missingLabels.length > 0
@@ -4685,7 +4685,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
             </div>
             {isImportedJobPreviewSession ? (
               <span className={classNames(
-                "inline-flex min-h-8 items-center rounded-full border border-[#5a4435] bg-[#241c17] px-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f0d4b7]",
+                "inline-flex min-h-8 items-center rounded-full bg-[#241c17] px-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f0d4b7]",
                 isCompactWorkspace && "w-full justify-center"
               )}>
                 импортировано
@@ -4694,7 +4694,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
               <button
                 type="button"
                 className={classNames(
-                  "inline-flex min-h-8 max-w-full items-center rounded-full border border-white/10 bg-white/5 px-2.5 text-[11px] font-medium text-white transition disabled:opacity-40",
+                  "inline-flex min-h-8 max-w-full items-center rounded-full bg-white/5 px-2.5 text-[11px] font-medium text-white transition disabled:opacity-40",
                   isCompactWorkspace && "w-full justify-center"
                 )}
                 disabled={!document || isWorkspaceBusy}
@@ -4704,16 +4704,16 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
               </button>
             )}
           </div>
-          <div className="mt-3 grid grid-cols-2 gap-2 text-xs lg:grid-cols-3">
-            <div className="min-w-0 rounded-[0.85rem] border border-white/8 bg-white/[0.03] px-3 py-2">
+              <div className="mt-3 grid grid-cols-2 gap-2 text-xs lg:grid-cols-3">
+            <div className="min-w-0 rounded-[0.85rem] bg-[#171310] px-3 py-2 shadow-[0_10px_24px_rgba(8,6,4,0.28)]">
               <div className="text-[11px] leading-tight text-[#b39d8a]">AI</div>
               <div className="mt-1 font-semibold text-white">{session.summary.aiDetected + session.summary.aiReview}</div>
             </div>
-            <div className="min-w-0 rounded-[0.85rem] border border-white/8 bg-white/[0.03] px-3 py-2">
+            <div className="min-w-0 rounded-[0.85rem] bg-[#171310] px-3 py-2 shadow-[0_10px_24px_rgba(8,6,4,0.28)]">
               <div className="text-[11px] leading-tight text-[#b39d8a] break-words">Кандидаты</div>
               <div className="mt-1 font-semibold text-white">{pendingCandidates.length}</div>
             </div>
-            <div className={classNames("min-w-0 rounded-[0.85rem] border border-white/8 bg-white/[0.03] px-3 py-2", isCompactWorkspace && "col-span-2")}>
+            <div className={classNames("min-w-0 rounded-[0.85rem] bg-[#171310] px-3 py-2 shadow-[0_10px_24px_rgba(8,6,4,0.28)]", isCompactWorkspace && "col-span-2")}>
               <div className="text-[11px] leading-tight text-[#b39d8a] break-words">Блокеры</div>
               <div className="mt-1 font-semibold text-white">{hardPipelineConflictCount}</div>
             </div>
@@ -4730,7 +4730,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
               </p>
             </div>
             {missingLabels.length > 0 && (
-              <span className="inline-flex min-h-8 items-center rounded-full border border-[#6d4a1a] bg-[#2a2118] px-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8]">
+              <span className="inline-flex min-h-8 items-center rounded-full bg-[#2a2118] px-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8]">
                 Пропущено: {missingLabels.length}
               </span>
             )}
@@ -4741,13 +4741,13 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
               {missingLabels.slice(0, 10).map((label) => (
                 <span
                   key={label}
-                  className="inline-flex min-h-6 items-center rounded-full border border-[#5b2020] bg-[#2a1717] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#ffb4b4]"
+                  className="inline-flex min-h-6 items-center rounded-full bg-[#2a1717] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#ffb4b4]"
                 >
                   {label}
                 </span>
               ))}
               {missingLabels.length > 10 && (
-                <span className="inline-flex min-h-6 items-center rounded-full border border-white/8 bg-white/[0.03] px-2 py-0.5 text-[10px] font-medium text-[#aeb4be]">
+                <span className="inline-flex min-h-6 items-center rounded-full bg-[#171310] px-2 py-0.5 text-[10px] font-medium text-[#aeb4be]">
                   +{missingLabels.length - 10}
                 </span>
               )}
@@ -4756,7 +4756,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
 
           <div className="mt-3">
             {pipelineConflicts.length === 0 ? (
-              <div className="rounded-[0.9rem] border border-[#224532] bg-[#14251d] px-3 py-2 text-sm text-[#b8e7c8]">
+              <div className="rounded-[0.9rem] bg-[#14251d] px-3 py-2 text-sm text-[#b8e7c8] shadow-[0_10px_22px_rgba(8,6,4,0.28)]">
                 Жёстких конфликтов сейчас нет.
               </div>
             ) : (
@@ -4767,10 +4767,10 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                     type="button"
                     onClick={() => focusPipelineConflict(conflict)}
                     className={classNames(
-                      "block w-full rounded-[0.9rem] border px-3 py-2 text-left transition",
+                      "block w-full rounded-[0.9rem] px-3 py-2 text-left transition",
                       conflict.severity === "error"
-                        ? "border-[#6d2a2a] bg-[#241617]"
-                        : "border-[#5a4a1a] bg-[#231d15]"
+                        ? "bg-[#241617]"
+                        : "bg-[#231d15]"
                     )}
                   >
                     <div className="flex items-center justify-between gap-3">
@@ -4781,8 +4781,8 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                         className={classNames(
                           "inline-flex min-h-6 items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em]",
                           conflict.severity === "error"
-                            ? "border border-[#7b2d2d] bg-[#331d1e] text-[#ffb4b4]"
-                            : "border border-[#6d4a1a] bg-[#2a2118] text-[#f5d0a8]"
+                            ? "bg-[#331d1e] text-[#ffb4b4]"
+                            : "bg-[#2a2118] text-[#f5d0a8]"
                         )}
                       >
                         {conflict.severity === "error" ? "error" : "warning"}
@@ -4828,11 +4828,11 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                     type="button"
                     onClick={() => selectCandidate(candidate.candidateId, { focus: true })}
                     className={classNames(
-                      "block w-full rounded-[0.9rem] border px-3 py-2 text-left transition",
+                      "block w-full rounded-[0.9rem] px-3 py-2 text-left transition",
                       selected
-                        ? "border-[#474c55] bg-[#22262d] shadow-[0_10px_24px_rgba(10,12,16,0.28)]"
-                        : "border-transparent bg-transparent",
-                      isConflict && "border-[#6d4a1a] bg-[#231d15]/70"
+                        ? "bg-[#22262d] shadow-[0_10px_24px_rgba(10,12,16,0.28)]"
+                        : "bg-[#171310]",
+                      isConflict && "bg-[#231d15]/70"
                     )}
                   >
                     <div className="flex items-start gap-3">
@@ -4852,7 +4852,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                             {candidate.suggestedLabel ? `№ ${candidate.suggestedLabel}` : `${candidateKindLabels[candidate.kind]} ${index + 1}`}
                           </p>
                           {isConflict && (
-                            <span className="inline-flex items-center rounded-full border border-[#6d4a1a] bg-[#2a2118] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8]">
+                            <span className="inline-flex items-center rounded-full bg-[#2a2118] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8]">
                               конфликт
                             </span>
                           )}
@@ -4873,17 +4873,17 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                         {(candidate.suggestedLabel || candidate.suggestedSource) && (
                           <div className="mt-1.5 flex flex-wrap gap-1.5">
                             {candidate.suggestedLabel && (
-                              <span className="inline-flex min-h-6 items-center rounded-full border border-[#3e5f2b] bg-[#1c2718] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#d7f5c9]">
+                              <span className="inline-flex min-h-6 items-center rounded-full bg-[#1c2718] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#d7f5c9]">
                                 найден номер {candidate.suggestedLabel}
                               </span>
                             )}
                             {candidate.suggestedSource && (
-                              <span className="inline-flex min-h-6 items-center rounded-full border border-white/8 bg-white/[0.03] px-2 py-0.5 text-[10px] font-medium text-[#aeb4be]">
+                              <span className="inline-flex min-h-6 items-center rounded-full bg-[#171310] px-2 py-0.5 text-[10px] font-medium text-[#aeb4be]">
                                 источник: {candidate.suggestedSource}
                               </span>
                             )}
                             {associationCount > 0 && (
-                              <span className="inline-flex min-h-6 items-center rounded-full border border-[#2b4b67] bg-[#162433] px-2 py-0.5 text-[10px] font-medium text-[#bfe1ff]">
+                              <span className="inline-flex min-h-6 items-center rounded-full bg-[#162433] px-2 py-0.5 text-[10px] font-medium text-[#bfe1ff]">
                                 связей {associationCount}
                               </span>
                             )}
@@ -4965,10 +4965,10 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
         </div>
 
         {!document && (
-          <div className="border-t border-white/8 px-5 py-4">
+          <div className="px-5 py-4">
             <div className="space-y-3">
               <p className={railSectionTitleClass}>Загрузить чертёж</p>
-              <label className="flex cursor-pointer items-center justify-between rounded-[1rem] border border-white/10 bg-[#111317] px-4 py-3 text-sm text-[#c8ccd3]">
+              <label className="flex cursor-pointer items-center justify-between rounded-[1rem] bg-[#111317] px-4 py-3 text-sm text-[#c8ccd3] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)]">
                 <span className="truncate">{uploadFile ? uploadFile.name : "Выбери изображение"}</span>
                 <input
                   type="file"
@@ -4997,13 +4997,13 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
           className="absolute left-4 top-4 z-40"
           style={{ width: isCompactWorkspace ? floatingOverlayWidth : Math.min(Math.max(leftRailWidth + 72, 260), 344) }}
         >
-          <div className="rounded-[1.1rem] border border-[#2b2e35] bg-[#17191f] p-4 text-white shadow-[0_24px_60px_rgba(8,10,14,0.38)]">
+          <div className="rounded-[1.1rem] bg-[#17191f] p-4 text-white shadow-[0_24px_60px_rgba(8,10,14,0.38)]">
             <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="text-base font-semibold text-white">Сводка</h2>
               <button
                 type="button"
                 aria-label="Закрыть сводку"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[#d0d4db] transition"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-[#d0d4db] transition"
                 onClick={() => setIsSummaryOpen(false)}
               >
                 <CloseIcon />
@@ -5012,7 +5012,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
 
             <div className="grid grid-cols-2 gap-2 text-sm">
               {summaryStats.map(([label, value]) => (
-                <div key={label} className="rounded-[0.95rem] border border-white/8 bg-[#111317] p-3">
+                <div key={label} className="rounded-[0.95rem] bg-[#111317] p-3 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)]">
                   <p className="text-[11px] uppercase tracking-[0.16em] text-[#9499a3]">{label}</p>
                   <p className="mt-2 text-lg font-semibold text-white">{value}</p>
                 </div>
@@ -5031,7 +5031,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="annotation-history-title"
-            className="flex max-h-[min(68vh,620px)] flex-col rounded-[1.1rem] border border-[#2b2e35] bg-[#17191f] p-4 text-white shadow-[0_24px_60px_rgba(8,10,14,0.38)]"
+            className="flex max-h-[min(68vh,620px)] flex-col rounded-[1.1rem] bg-[#17191f] p-4 text-white shadow-[0_24px_60px_rgba(8,10,14,0.38)]"
           >
             <div className="mb-3 flex items-center justify-between gap-3">
               <div className="min-w-0">
@@ -5042,7 +5042,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
               <button
                 type="button"
                 aria-label="Закрыть историю"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[#d0d4db] transition"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-[#d0d4db] transition"
                 onClick={() => setIsHistoryOpen(false)}
               >
                 <CloseIcon />
@@ -5058,7 +5058,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
               >
                 <div
                   className={classNames(
-                    "sticky top-0 z-10 -mx-1 border-b border-white/8 bg-[#17191f]/95 px-1 backdrop-blur transition-[padding,margin] duration-150",
+                    "sticky top-0 z-10 -mx-1 bg-[#17191f]/95 px-1 backdrop-blur transition-[padding,margin] duration-150",
                     isHistoryHeaderCompactActive ? "mb-2 pb-2" : "mb-3 pb-3"
                   )}
                 >
@@ -5095,7 +5095,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                   />
                 </div>
                 {displayedHistoryEntries.length === 0 && (
-                  <div className="rounded-[1rem] border border-white/8 bg-[#111317] px-3 py-4 text-sm text-[#969ba5]">
+                  <div className="rounded-[1rem] bg-[#111317] px-3 py-4 text-sm text-[#969ba5] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.03)]">
                     {showOnlyAmbiguityHistory ? (
                       <>
                         <p>В последних действиях нет ambiguity-решений.</p>
@@ -5138,7 +5138,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
       {isCompactWorkspace && (hasInspectorContentFocus || isInspectorOpen) && (
         <button
           type="button"
-          className="absolute right-3 top-3 z-40 inline-flex min-h-10 items-center rounded-full border border-[#30343c] bg-[#17191f]/94 px-3 text-[12px] font-semibold text-white shadow-[0_16px_36px_rgba(8,10,14,0.28)] backdrop-blur transition"
+          className="absolute right-3 top-3 z-40 inline-flex min-h-10 items-center rounded-full bg-[#17191f]/94 px-3 text-[12px] font-semibold text-white shadow-[0_16px_36px_rgba(8,10,14,0.28)] backdrop-blur transition"
           onClick={() => {
             setIsInspectorOpen((current) => {
               const nextState = !current;
@@ -5157,7 +5157,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
       <aside
         className={classNames(
           railShellClass,
-          isCompactWorkspace ? "bottom-24 right-3 left-auto top-16 z-40 rounded-[1.1rem] border" : "right-0 border-l"
+          isCompactWorkspace ? "bottom-24 right-3 left-auto top-16 z-40 rounded-[1.1rem]" : "right-0"
         )}
         style={{ width: isCompactWorkspace ? floatingInspectorWidth : rightRailWidth }}
       >
@@ -5169,7 +5169,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                 <button
                   type="button"
                   aria-label="Скрыть панель проверки"
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[#d0d4db] transition"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-[#d0d4db] transition"
                   onClick={() => setIsInspectorOpen(false)}
                 >
                   <CloseIcon />
@@ -5195,7 +5195,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                       {candidateKindLabels[selectedCandidate.kind]} • уверенность {Math.round(selectedCandidate.score)}
                     </span>
                   </div>
-                  <div className="overflow-hidden rounded-[1rem] border border-[#30343c] bg-[#111317]">
+                  <div className="overflow-hidden rounded-[1rem] bg-[#111317] shadow-[0_16px_34px_rgba(8,6,4,0.35)]">
                     {selectedCandidate.cropUrl ? (
                       <Image
                         loader={passthroughImageLoader}
@@ -5213,32 +5213,32 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {selectedCandidate.conflictCount > 1 && (
-                      <span className="inline-flex min-h-8 items-center rounded-full border border-[#6d4a1a] bg-[#2a2118] px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8]">
+                      <span className="inline-flex min-h-8 items-center rounded-full bg-[#2a2118] px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8]">
                         конфликт рядом
                       </span>
                     )}
                     {selectedCandidate.suggestedLabel && (
-                      <span className="inline-flex min-h-8 items-center rounded-full border border-[#3e5f2b] bg-[#1c2718] px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#d7f5c9]">
+                      <span className="inline-flex min-h-8 items-center rounded-full bg-[#1c2718] px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#d7f5c9]">
                         найден номер {selectedCandidate.suggestedLabel}
                       </span>
                     )}
                     {selectedCandidate.suggestedConfidence != null && (
-                      <span className="inline-flex min-h-8 items-center rounded-full border border-white/10 bg-white/5 px-3 text-[11px] font-medium text-white">
+                      <span className="inline-flex min-h-8 items-center rounded-full bg-white/5 px-3 text-[11px] font-medium text-white">
                         уверенность {formatCandidateConfidence(selectedCandidate.suggestedConfidence)}
                       </span>
                     )}
                     {selectedCandidate.suggestedSource && (
-                      <span className="inline-flex min-h-8 items-center rounded-full border border-white/10 bg-white/5 px-3 text-[11px] font-medium text-[#c8ccd3]">
+                      <span className="inline-flex min-h-8 items-center rounded-full bg-white/5 px-3 text-[11px] font-medium text-[#c8ccd3]">
                         источник: {selectedCandidate.suggestedSource}
                       </span>
                     )}
-                    <span className="inline-flex min-h-8 items-center rounded-full border border-white/10 bg-white/5 px-3 text-[11px] font-medium text-white">
+                    <span className="inline-flex min-h-8 items-center rounded-full bg-white/5 px-3 text-[11px] font-medium text-white">
                       x {Math.round(selectedCandidate.centerX)} • y {Math.round(selectedCandidate.centerY)}
                     </span>
                   </div>
                 </div>
 
-                <div className="rounded-[1rem] border border-[#3a3022] bg-[#1b1712] px-3 py-3">
+                <div className="rounded-[1rem] bg-[#1b1712] px-3 py-3 shadow-[0_16px_34px_rgba(8,6,4,0.32)]">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#f5d0a8]">Что сделать сейчас</p>
                   <p className="mt-1 text-sm leading-5 text-[#d8dbe1]">
                     Сейчас нужно решить, это реальная точка или лишний вариант рядом.
@@ -5261,7 +5261,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                   </p>
                 </div>
 
-                <div className="space-y-2 rounded-[1rem] border border-[#30343c] bg-[#13161b] p-3">
+                <div className="space-y-2 rounded-[1rem] bg-[#13161b] p-3 shadow-[0_16px_34px_rgba(8,6,4,0.32)]">
                   <div className="flex items-center justify-between gap-3">
                     <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8f949d]">Похожие варианты рядом</span>
                     <span className="text-[11px] font-medium text-[#c8ccd3]">{selectedCandidateAssociations.length}</span>
@@ -5280,7 +5280,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                           <button
                             key={association.associationId}
                             type="button"
-                            className="block w-full rounded-[0.9rem] border border-white/8 bg-white/[0.03] px-3 py-2 text-left transition"
+                            className="block w-full rounded-[0.9rem] bg-[#171310] px-3 py-2 text-left transition"
                             onClick={() => selectCandidate(linkedCandidateId, { focus: true })}
                           >
                             <div className="flex items-start justify-between gap-3">
@@ -5294,7 +5294,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                                   {association.topologyScore != null ? ` • рядом ${Math.round(association.topologyScore * 100)}%` : ""}
                                 </p>
                               </div>
-                              <span className="inline-flex min-h-7 items-center rounded-full border border-[#2b4b67] bg-[#162433] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#bfe1ff]">
+                              <span className="inline-flex min-h-7 items-center rounded-full bg-[#162433] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#bfe1ff]">
                                 перейти
                               </span>
                             </div>
@@ -5389,7 +5389,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                     <div className="flex items-center gap-1.5">
                       <button
                         type="button"
-                        className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-sm font-semibold text-white transition"
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/[0.03] text-sm font-semibold text-white transition"
                         onClick={() => setPrecisionZoomLevel((current) => Number(clamp(current - 0.5, 2, 12).toFixed(1)))}
                         aria-label="Уменьшить увеличение лупы"
                       >
@@ -5400,7 +5400,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                       </span>
                       <button
                         type="button"
-                        className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-sm font-semibold text-white transition"
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/[0.03] text-sm font-semibold text-white transition"
                         onClick={() => setPrecisionZoomLevel((current) => Number(clamp(current + 0.5, 2, 12).toFixed(1)))}
                         aria-label="Увеличить увеличение лупы"
                       >
@@ -5411,7 +5411,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                   <p className="text-[11px] text-[#9196a0]">клик по лупе двигает точку</p>
                   <div
                     className={classNames(
-                      "relative block overflow-hidden rounded-[1rem] border border-[#30343c] bg-[#111317] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
+                      "relative block overflow-hidden rounded-[1rem] bg-[#111317] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
                       isWorkspaceBusy ? "opacity-50" : ""
                     )}
                     style={{
@@ -5446,7 +5446,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                           key={`${candidate.source}-${index}`}
                           type="button"
                           aria-label={`Вариант ${index + 1}`}
-                          className="absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white bg-[#f59e0b] shadow-[0_4px_14px_rgba(245,158,11,0.45)] transition"
+                          className="absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#f59e0b] shadow-[0_4px_14px_rgba(245,158,11,0.45)] transition"
                           style={{ left, top }}
                           onClick={(event) => {
                             event.stopPropagation();
@@ -5465,7 +5465,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                   {selectedMarker.status === "human_draft" && (
                     <button
                       type="button"
-                      className="inline-flex h-9 w-full items-center justify-center rounded-[0.8rem] border border-[#3e5f2b] bg-[#1c2718] px-3 text-[12px] font-semibold text-[#d7f5c9] transition disabled:cursor-not-allowed disabled:opacity-35"
+                      className="inline-flex h-9 w-full items-center justify-center rounded-[0.8rem] bg-[#1c2718] px-3 text-[12px] font-semibold text-[#d7f5c9] transition disabled:cursor-not-allowed disabled:opacity-35"
                       disabled={!draftLabel.trim() || isWorkspaceBusy}
                       onClick={() => void confirmSelectedMarker()}
                     >
@@ -5478,7 +5478,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                         <button
                           key={`candidate-chip-${candidate.source}-${index}`}
                           type="button"
-                          className="inline-flex h-7 items-center rounded-full border border-white/10 bg-white/[0.03] px-2.5 text-[11px] font-medium text-[#d2d6dd] transition"
+                          className="inline-flex h-7 items-center rounded-full bg-white/[0.03] px-2.5 text-[11px] font-medium text-[#d2d6dd] transition"
                           disabled={isWorkspaceBusy}
                           onClick={() => void moveMarkerToCoordinates(candidate.x, candidate.y)}
                         >
@@ -5583,7 +5583,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
               )}
 
               {selectedMarker && selectedMarker.status === "human_draft" && (
-                <div className="rounded-[0.95rem] border border-[#6d4a1a] bg-[#2a2118] px-3 py-2 text-[12px] text-[#f5d0a8]">
+                <div className="rounded-[0.95rem] bg-[#2a2118] px-3 py-2 text-[12px] text-[#f5d0a8] shadow-[0_12px_26px_rgba(8,6,4,0.3)]">
                   Точка пока черновая. Проверь место через лупу и потом подтверди.
                 </div>
               )}
@@ -5597,7 +5597,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
         className="pointer-events-none absolute bottom-3 z-40"
         style={{ left: canvasLeftInset, right: canvasRightInset }}
       >
-        <div className="scrollbar-hidden pointer-events-auto mx-auto flex max-w-full items-center gap-1.5 overflow-x-auto rounded-[1rem] border border-[#2f241d] bg-[#15110e] p-1.5 text-white shadow-[0_26px_70px_rgba(10,8,6,0.45)]">
+        <div className="scrollbar-hidden pointer-events-auto mx-auto flex max-w-full items-center gap-1.5 overflow-x-auto rounded-[1rem] bg-[#15110e] p-1.5 text-white shadow-[0_26px_70px_rgba(10,8,6,0.45)]">
           <div className="inline-flex items-center rounded-[0.95rem] bg-[#1f1814] p-1">
             <button
               type="button"

@@ -114,6 +114,7 @@ Last updated: 2026-04-13
   - `tar.bz2` / `tbz2`
   - `tar.xz` / `txz`
 - Result UI no longer exposes raw internal OCR/pipeline text or raw filesystem paths to the user.
+- Annotation workspace theme refreshed: removed most borders in left/right rails, history/summary overlays, candidate cards, and canvas banners; replaced with warm backgrounds and subtle shadows for separation.
 
 ## Public deploy notes
 
