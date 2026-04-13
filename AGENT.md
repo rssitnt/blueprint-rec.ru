@@ -17,7 +17,14 @@ These rules override the older spec below whenever they conflict with it.
   - render frames in the background;
   - assemble them into `mp4`;
   - save the result to disk;
-  - avoid showing the automation window on screen.
+- avoid showing the automation window on screen.
+
+## GitHub access rule
+
+- If the user asks to push or set up GitHub access, first try local `gh`:
+  - check `gh auth status`;
+  - attempt repo create if needed;
+  - only ask the user when `gh` requires login or lacks permission.
 
 ## Source-of-truth rule for markup
 
@@ -46,21 +53,12 @@ These rules override the older spec below whenever they conflict with it.
   - conflict marking
   - optional review UI
 - `page4.png` is already strong in one-shot mode.
-- `test2.jpg` remains the main hard case.
-- Current root issue on `test2` is no longer candidate explosion or UI:
-  - circles are found;
-  - labels are still misread on tiny low-res circle crops.
 - Recent fixes already in code:
   - reduced low-res circle-only OCR from multiple candidates per cluster to 1 best candidate;
   - added pruning for oversized low-res numeric circles;
   - skipped low-res shape fallback when enough candidates already exist;
   - made low-res final OCR rerun only on suspicious candidates;
   - allowed tiny-circle `88 -> 8` style correction when inner circle OCR clearly sees a single digit.
-- Measured local `test2` candidate build time improved from roughly `219s` to roughly `89-91s`.
-- Latest live one-shot `test2` export path:
-  - `C:/projects/sites/blueprint-rec-2/exports/one-shot-live-20260407-fix5/test2/unzipped/test2-one-shot-20260407-fix5b/annotated.png`
-- Current `test2` output is faster and less noisy than before, but still not good enough for full one-shot quality:
-  - false/misaligned semantics remain (`10`, `60`, duplicate `8/9/6`, etc.)
 - There is currently no external VLM key in env:
   - `OPENAI_API_KEY` missing
   - `GEMINI_API_KEY` missing
@@ -733,8 +731,6 @@ Then add:
 - Before giving the user a final export path, always open the exact exported artifact and verify it is not empty or obviously wrong.
 - Never report a candidate-review export as a final result if it still has `0` confirmed markers.
 - Real provider keys now exist only in the ignored local file `C:/projects/sites/blueprint-rec-2/services/inference/.env.local`; never print them.
-- For `test2.jpg`, low-res one-shot currently still fails even after `context tile + local OCR cross-check + dual-view VLM + OpenAI/Gemini/Claude consensus`; do not overclaim quality.
-- Do not use `C:/projects/sites/blueprint-rec-2/blueprints-test/test2.jpg` as the main benchmark anymore; treat it only as a stress-case because the source image quality itself is too poor even for a human in many spots.
 - Treat `C:/projects/sites/blueprint-rec-2/blueprints-test/test1.jpg` as the single production gate. `image001.png` and `page4.png` are already considered solved benchmarks; optimize the pipeline against `test1.jpg`.
 
 ---
