@@ -4301,11 +4301,11 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
   const inspectorInputClass =
     "h-9 w-full rounded-[0.8rem] border border-[#3a2d24] bg-[#120f0d] px-3 text-sm font-medium text-[#fff7ef] outline-none transition-none placeholder:text-[#7f7065] focus:border-[#7d6350] focus:ring-2 focus:ring-[#7d6350]/20";
   const toolbarButtonClass =
-    "inline-flex h-9 items-center justify-center rounded-[0.8rem] border border-[#3a2d24] bg-[#1d1713] px-3 text-[12px] font-medium text-[#f5ede4] transition-none disabled:cursor-not-allowed disabled:opacity-35";
+    "inline-flex h-9 items-center justify-center rounded-[0.85rem] border border-[#3a2b22] bg-[#1a1410] px-3 text-[12px] font-medium text-[#f6efe7] transition-none disabled:cursor-not-allowed disabled:opacity-35";
   const toolbarIconButtonClass = classNames(toolbarButtonClass, "w-9 px-0 text-[1.05rem] font-semibold");
   const toolbarSegmentClass =
-    "inline-flex min-h-9 items-center justify-center rounded-[0.8rem] px-3 text-[12px] font-medium text-[#b6bcc6] transition";
-  const toolbarSegmentActiveClass = "bg-[#f3f4f6] text-[#15171b] shadow-[0_10px_24px_rgba(8,10,14,0.22)]";
+    "inline-flex min-h-9 items-center justify-center rounded-[0.85rem] px-3 text-[12px] font-medium text-[#c7b9ad] transition-none";
+  const toolbarSegmentActiveClass = "bg-[#f5eee6] text-[#1c1713] shadow-[0_12px_26px_rgba(12,10,8,0.3)]";
 
   return (
     <div className="relative h-full min-h-0 overflow-hidden bg-[#d7dade]">
@@ -5595,8 +5595,8 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
         className="pointer-events-none absolute bottom-3 z-40"
         style={{ left: canvasLeftInset, right: canvasRightInset }}
       >
-        <div className="scrollbar-hidden pointer-events-auto mx-auto flex max-w-full items-center gap-1.5 overflow-x-auto rounded-[1rem] border border-[#30343c] bg-[#17191f] p-1.5 text-white shadow-[0_24px_70px_rgba(8,10,14,0.4)]">
-          <div className="inline-flex items-center rounded-[0.95rem] bg-white/5 p-1">
+        <div className="scrollbar-hidden pointer-events-auto mx-auto flex max-w-full items-center gap-1.5 overflow-x-auto rounded-[1rem] border border-[#2f241d] bg-[#15110e] p-1.5 text-white shadow-[0_26px_70px_rgba(10,8,6,0.45)]">
+          <div className="inline-flex items-center rounded-[0.95rem] bg-[#1f1814] p-1">
             <button
               type="button"
               className={classNames(toolbarSegmentClass, mode === "pan" && toolbarSegmentActiveClass)}
