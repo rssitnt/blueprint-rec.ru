@@ -70,6 +70,9 @@ Last updated: 2026-04-13
   - files:
     - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/job_store.py`
     - `C:/projects/sites/blueprint-rec-2/services/inference/app/main.py`
+- Dense-sheet recovery now keeps same-label neighbors and expands low-res recovery search.
+  - files:
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/session_store.py`
 
 ## Important batch fixes already present
 

@@ -565,7 +565,9 @@ class InMemorySessionStore:
                     if candidate.kind == CandidateKind.CIRCLE
                     and 14 <= min(candidate.bbox_width, candidate.bbox_height) <= 60
                 )
-                low_res_recovery_target = max(12, min(28, max(1, low_res_circle_pool_size // 2)))
+                low_res_recovery_target = max(16, min(48, max(1, low_res_circle_pool_size // 2)))
+                if label_vocabulary:
+                    low_res_recovery_target = max(low_res_recovery_target, min(48, max(12, len(label_vocabulary) // 2)))
 
                 allow_expensive_low_res_tile_passes = (
                     not normalized_label_vocabulary
@@ -657,7 +659,6 @@ class InMemorySessionStore:
                     label_vocabulary,
                 )
                 self._apply_label_vocabulary(candidates, label_vocabulary)
-                candidates = self._dedupe_nearby_equal_labels(candidates)
             self._mark_candidates_against_existing_markers(candidates, accepted_markers)
 
         self._assign_candidate_conflicts(candidates)
@@ -1345,7 +1346,8 @@ class InMemorySessionStore:
             return []
 
         accepted: list[CalloutCandidate] = []
-        for candidate in sorted(pool, key=self._low_res_circle_geometry_priority, reverse=True)[:96]:
+        limit = 96 if len(allowed_labels) <= 20 else 160
+        for candidate in sorted(pool, key=self._low_res_circle_geometry_priority, reverse=True)[:limit]:
             crop = self._build_candidate_ocr_crop(preview_image, candidate)
             suggestion = self._candidate_recognizer.recognize(crop, candidate.kind.value)
             coerced_label = self._coerce_to_allowed_label(allowed_labels, suggestion.label)
