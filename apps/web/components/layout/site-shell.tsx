@@ -26,7 +26,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
       className={classNames(
         "text-ink",
         isWorkspaceRoute ? "h-[100dvh] overflow-hidden" : "min-h-[100dvh] overflow-y-auto",
-        isWorkspaceRoute ? "bg-[#d7dade]" : "bg-[#13100d]",
+        isWorkspaceRoute ? "bg-[#d7dade]" : "bg-[#0f0c0a]",
         headline.variable,
         body.variable
       )}
