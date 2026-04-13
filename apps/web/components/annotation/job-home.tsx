@@ -38,7 +38,7 @@ function formatConfidence(value: number | null | undefined) {
 
 function downloadLinkClass(isMuted = false) {
   return [
-    "inline-flex min-h-10 items-center justify-center rounded-full px-3.5 text-sm font-medium",
+    "inline-flex min-h-8 items-center justify-center rounded-full px-3 text-xs font-semibold",
     isMuted
       ? "bg-[#1c1714] text-[#a89b90]"
       : "bg-[#27201c] text-[#f6efe8]"
@@ -1112,7 +1112,7 @@ export function JobHome() {
                     type="button"
                     variant="outline"
                     disabled={!canOpenPreview || openingPreviewJobId === activeJob.jobId}
-                    className="min-h-9 rounded-full border-0 bg-[#2b221d] px-3.5 text-sm font-semibold text-[#fff4ea] shadow-none"
+                    className="min-h-8 rounded-full border-0 bg-[#2b221d] px-3 text-xs font-semibold text-[#fff4ea] shadow-none"
                     onClick={() => void handleOpenPreview(activeJob.jobId, selectedResultPage?.pageIndex)}
                   >
                     Preview / исправить
@@ -1131,11 +1131,17 @@ export function JobHome() {
                 )}
 
                 {activeSummary && (
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    <div className="rounded-[0.9rem] bg-[#1d1713] px-3 py-2 text-xs text-[#e7dbce]">Найдено: {activeSummary.foundCount}</div>
-                    <div className="rounded-[0.9rem] bg-[#1d1713] px-3 py-2 text-xs text-[#e7dbce]">Не найдены: {activeSummary.missingCount}</div>
-                    <div className="rounded-[0.9rem] bg-[#1d1713] px-3 py-2 text-xs text-[#e7dbce]">Неуверенно: {activeSummary.uncertainCount}</div>
-                    <div className="rounded-[0.9rem] bg-[#1d1713] px-3 py-2 text-xs text-[#e7dbce]">Удержано: {activeSummary.heldBackCount}</div>
+                  <div className="flex flex-wrap gap-2 text-xs text-[#e7dbce]">
+                    {[
+                      ["Найдено", activeSummary.foundCount],
+                      ["Не найдены", activeSummary.missingCount],
+                      ["Неуверенно", activeSummary.uncertainCount],
+                      ["Удержано", activeSummary.heldBackCount]
+                    ].map(([label, value]) => (
+                      <div key={label} className="rounded-full bg-[#1d1713] px-3 py-1">
+                        {label}: {value}
+                      </div>
+                    ))}
                   </div>
                 )}
 
