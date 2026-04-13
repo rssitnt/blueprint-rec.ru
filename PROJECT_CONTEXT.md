@@ -117,6 +117,7 @@ Last updated: 2026-04-13
 - Annotation workspace theme refreshed: removed most borders in left/right rails, history/summary overlays, candidate cards, and canvas banners; replaced with warm backgrounds and subtle shadows for separation.
 - Frontend API calls now use a 20s timeout and return a clear “backend not responding” error instead of hanging on submit.
 - Annotation rails now default to compact mode with popover lists for candidates/markers and collapsible inspector blocks to avoid vertical scrolling in left/right panels.
+- Left rail condensed mode now hides long AI/vocabulary blocks and replaces them with a short summary plus quick-open buttons for overlays.
 
 ## Public deploy notes
 

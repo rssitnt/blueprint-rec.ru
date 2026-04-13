@@ -4687,126 +4687,163 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
           )}
         </div>
 
-        <div className="px-4 py-3">
-          <div className={classNames("flex flex-wrap gap-2", isCompactWorkspace ? "flex-col items-start" : "items-start justify-between")}>
-            <div>
-              <p className={railSectionTitleClass}>{isImportedJobPreviewSession ? "Результат AI" : "Авторазметка"}</p>
-              <p className="mt-1 text-sm text-[#eadccd]">
-                {isImportedJobPreviewSession ? `${autoMarkerCount} точек перенесено из распознавания` : `${autoMarkerCount} точек уже выставлено`}
-              </p>
-            </div>
-            {isImportedJobPreviewSession ? (
-              <span className={classNames(
-                "inline-flex min-h-8 items-center rounded-full bg-[#241c17] px-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f0d4b7]",
-                isCompactWorkspace && "w-full justify-center"
-              )}>
-                импортировано
-              </span>
-            ) : (
-              <button
-                type="button"
-                className={classNames(
-                  "inline-flex min-h-8 max-w-full items-center rounded-full bg-white/5 px-2.5 text-[11px] font-medium text-white transition disabled:opacity-40",
-                  isCompactWorkspace && "w-full justify-center"
-                )}
-                disabled={!document || isWorkspaceBusy}
-                onClick={() => void runAutoAnnotate()}
-              >
-                {isAutoAnnotating ? "Идёт…" : "Прогнать"}
-              </button>
-            )}
-          </div>
-              <div className="mt-3 grid grid-cols-2 gap-2 text-xs lg:grid-cols-3">
-            <div className="min-w-0 rounded-[0.85rem] bg-[#171310] px-3 py-2 shadow-[0_10px_24px_rgba(8,6,4,0.28)]">
-              <div className="text-[11px] leading-tight text-[#b39d8a]">AI</div>
-              <div className="mt-1 font-semibold text-white">{session.summary.aiDetected + session.summary.aiReview}</div>
-            </div>
-            <div className="min-w-0 rounded-[0.85rem] bg-[#171310] px-3 py-2 shadow-[0_10px_24px_rgba(8,6,4,0.28)]">
-              <div className="text-[11px] leading-tight text-[#b39d8a] break-words">Кандидаты</div>
-              <div className="mt-1 font-semibold text-white">{pendingCandidates.length}</div>
-            </div>
-            <div className={classNames("min-w-0 rounded-[0.85rem] bg-[#171310] px-3 py-2 shadow-[0_10px_24px_rgba(8,6,4,0.28)]", isCompactWorkspace && "col-span-2")}>
-              <div className="text-[11px] leading-tight text-[#b39d8a] break-words">Блокеры</div>
-              <div className="mt-1 font-semibold text-white">{hardPipelineConflictCount}</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="px-4 py-3">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className={railSectionTitleClass}>Словарь страницы</p>
-              <p className="mt-1 text-sm text-[#eadccd]">{pageVocabulary.length} меток найдено по странице</p>
-              <p className="mt-1 text-xs text-[#ae9886]">
-                {candidateAssociations.length} связей между номером и фигурой{associationConflictCount > 0 ? ` • ${associationConflictCount} спорных` : ""}
-              </p>
-            </div>
-            {missingLabels.length > 0 && (
-              <span className="inline-flex min-h-8 items-center rounded-full bg-[#2a2118] px-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8]">
-                Пропущено: {missingLabels.length}
-              </span>
-            )}
-          </div>
-
-          {missingLabels.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {missingLabels.slice(0, 10).map((label) => (
-                <span
-                  key={label}
-                  className="inline-flex min-h-6 items-center rounded-full bg-[#2a1717] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#ffb4b4]"
-                >
-                  {label}
-                </span>
-              ))}
-              {missingLabels.length > 10 && (
-                <span className="inline-flex min-h-6 items-center rounded-full bg-[#171310] px-2 py-0.5 text-[10px] font-medium text-[#aeb4be]">
-                  +{missingLabels.length - 10}
-                </span>
-              )}
-            </div>
-          )}
-
-          <div className="mt-3">
-            {pipelineConflicts.length === 0 ? (
-              <div className="rounded-[0.9rem] bg-[#14251d] px-3 py-2 text-sm text-[#b8e7c8] shadow-[0_10px_22px_rgba(8,6,4,0.28)]">
-                Жёстких конфликтов сейчас нет.
-              </div>
-            ) : (
-              <div className="space-y-1.5">
-                {pipelineConflicts.slice(0, 6).map((conflict) => (
+        {!isRailCondensed && (
+          <>
+            <div className="px-4 py-3">
+              <div className={classNames("flex flex-wrap gap-2", isCompactWorkspace ? "flex-col items-start" : "items-start justify-between")}>
+                <div>
+                  <p className={railSectionTitleClass}>{isImportedJobPreviewSession ? "Результат AI" : "Авторазметка"}</p>
+                  <p className="mt-1 text-sm text-[#eadccd]">
+                    {isImportedJobPreviewSession ? `${autoMarkerCount} точек перенесено из распознавания` : `${autoMarkerCount} точек уже выставлено`}
+                  </p>
+                </div>
+                {isImportedJobPreviewSession ? (
+                  <span className={classNames(
+                    "inline-flex min-h-8 items-center rounded-full bg-[#241c17] px-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f0d4b7]",
+                    isCompactWorkspace && "w-full justify-center"
+                  )}>
+                    импортировано
+                  </span>
+                ) : (
                   <button
-                    key={conflict.conflictId}
                     type="button"
-                    onClick={() => focusPipelineConflict(conflict)}
                     className={classNames(
-                      "block w-full rounded-[0.9rem] px-3 py-2 text-left transition",
-                      conflict.severity === "error"
-                        ? "bg-[#241617]"
-                        : "bg-[#231d15]"
+                      "inline-flex min-h-8 max-w-full items-center rounded-full bg-white/5 px-2.5 text-[11px] font-medium text-white transition disabled:opacity-40",
+                      isCompactWorkspace && "w-full justify-center"
                     )}
+                    disabled={!document || isWorkspaceBusy}
+                    onClick={() => void runAutoAnnotate()}
                   >
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="truncate text-[12px] font-semibold text-white">
-                        {conflict.label ? `Конфликт ${conflict.label}` : "Неоднозначное место"}
-                      </p>
-                      <span
+                    {isAutoAnnotating ? "Идёт…" : "Прогнать"}
+                  </button>
+                )}
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-2 text-xs lg:grid-cols-3">
+                <div className="min-w-0 rounded-[0.85rem] bg-[#171310] px-3 py-2 shadow-[0_10px_24px_rgba(8,6,4,0.28)]">
+                  <div className="text-[11px] leading-tight text-[#b39d8a]">AI</div>
+                  <div className="mt-1 font-semibold text-white">{session.summary.aiDetected + session.summary.aiReview}</div>
+                </div>
+                <div className="min-w-0 rounded-[0.85rem] bg-[#171310] px-3 py-2 shadow-[0_10px_24px_rgba(8,6,4,0.28)]">
+                  <div className="text-[11px] leading-tight text-[#b39d8a] break-words">Кандидаты</div>
+                  <div className="mt-1 font-semibold text-white">{pendingCandidates.length}</div>
+                </div>
+                <div className={classNames("min-w-0 rounded-[0.85rem] bg-[#171310] px-3 py-2 shadow-[0_10px_24px_rgba(8,6,4,0.28)]", isCompactWorkspace && "col-span-2")}>
+                  <div className="text-[11px] leading-tight text-[#b39d8a] break-words">Блокеры</div>
+                  <div className="mt-1 font-semibold text-white">{hardPipelineConflictCount}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="px-4 py-3">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className={railSectionTitleClass}>Словарь страницы</p>
+                  <p className="mt-1 text-sm text-[#eadccd]">{pageVocabulary.length} меток найдено по странице</p>
+                  <p className="mt-1 text-xs text-[#ae9886]">
+                    {candidateAssociations.length} связей между номером и фигурой{associationConflictCount > 0 ? ` • ${associationConflictCount} спорных` : ""}
+                  </p>
+                </div>
+                {missingLabels.length > 0 && (
+                  <span className="inline-flex min-h-8 items-center rounded-full bg-[#2a2118] px-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8]">
+                    Пропущено: {missingLabels.length}
+                  </span>
+                )}
+              </div>
+
+              {missingLabels.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {missingLabels.slice(0, 10).map((label) => (
+                    <span
+                      key={label}
+                      className="inline-flex min-h-6 items-center rounded-full bg-[#2a1717] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#ffb4b4]"
+                    >
+                      {label}
+                    </span>
+                  ))}
+                  {missingLabels.length > 10 && (
+                    <span className="inline-flex min-h-6 items-center rounded-full bg-[#171310] px-2 py-0.5 text-[10px] font-medium text-[#aeb4be]">
+                      +{missingLabels.length - 10}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              <div className="mt-3">
+                {pipelineConflicts.length === 0 ? (
+                  <div className="rounded-[0.9rem] bg-[#14251d] px-3 py-2 text-sm text-[#b8e7c8] shadow-[0_10px_22px_rgba(8,6,4,0.28)]">
+                    Жёстких конфликтов сейчас нет.
+                  </div>
+                ) : (
+                  <div className="space-y-1.5">
+                    {pipelineConflicts.slice(0, 6).map((conflict) => (
+                      <button
+                        key={conflict.conflictId}
+                        type="button"
+                        onClick={() => focusPipelineConflict(conflict)}
                         className={classNames(
-                          "inline-flex min-h-6 items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em]",
+                          "block w-full rounded-[0.9rem] px-3 py-2 text-left transition",
                           conflict.severity === "error"
-                            ? "bg-[#331d1e] text-[#ffb4b4]"
-                            : "bg-[#2a2118] text-[#f5d0a8]"
+                            ? "bg-[#241617]"
+                            : "bg-[#231d15]"
                         )}
                       >
-                        {conflict.severity === "error" ? "error" : "warning"}
-                      </span>
-                    </div>
-                    <p className="mt-1 text-xs text-[#c8ccd3]">{conflict.message}</p>
-                  </button>
-                ))}
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="truncate text-[12px] font-semibold text-white">
+                            {conflict.label ? `Конфликт ${conflict.label}` : "Неоднозначное место"}
+                          </p>
+                          <span
+                            className={classNames(
+                              "inline-flex min-h-6 items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em]",
+                              conflict.severity === "error"
+                                ? "bg-[#331d1e] text-[#ffb4b4]"
+                                : "bg-[#2a2118] text-[#f5d0a8]"
+                            )}
+                          >
+                            {conflict.severity === "error" ? "error" : "warning"}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-xs text-[#c8ccd3]">{conflict.message}</p>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
+            </div>
+          </>
+        )}
+
+        {isRailCondensed && (
+          <div className="px-4 pb-3">
+            <div className="rounded-[0.95rem] bg-[#15110e] px-3 py-2.5 text-sm text-[#c8ccd3]">
+              <p className="text-[11px] uppercase tracking-[0.16em] text-[#a99b8e]">Сводка панели</p>
+              <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-[#efe6dc]">
+                <span className="rounded-full bg-[#1c1714] px-2.5 py-1">AI {session.summary.aiDetected + session.summary.aiReview}</span>
+                <span className="rounded-full bg-[#1c1714] px-2.5 py-1">Кандидаты {pendingCandidates.length}</span>
+                <span className="rounded-full bg-[#1c1714] px-2.5 py-1">Блокеры {hardPipelineConflictCount}</span>
+                <span className="rounded-full bg-[#1c1714] px-2.5 py-1">Метки {pageVocabulary.length}</span>
+                {missingLabels.length > 0 && (
+                  <span className="rounded-full bg-[#2a1717] px-2.5 py-1 text-[#ffb4b4]">Пропущено {missingLabels.length}</span>
+                )}
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className="inline-flex min-h-8 items-center rounded-full bg-[#1f1814] px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f6efe7]"
+                  onClick={() => setIsCandidateOverlayOpen(true)}
+                >
+                  Кандидаты
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex min-h-8 items-center rounded-full bg-[#1f1814] px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f6efe7]"
+                  onClick={() => setIsMarkerOverlayOpen(true)}
+                >
+                  Точки
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="flex items-center justify-between px-4 py-3">
           <div>
