@@ -24,14 +24,15 @@ export function SiteShell({ children }: { children: ReactNode }) {
   return (
     <div
       className={classNames(
-        "h-[100dvh] overflow-hidden text-ink",
-        isWorkspaceRoute ? "bg-[#d7dade]" : "bg-[#111317]",
+        "text-ink",
+        isWorkspaceRoute ? "h-[100dvh] overflow-hidden" : "min-h-[100dvh] overflow-y-auto",
+        isWorkspaceRoute ? "bg-[#d7dade]" : "bg-[#13100d]",
         headline.variable,
         body.variable
       )}
     >
-      <div className={classNames("flex h-full w-full flex-col", isWorkspaceRoute ? "" : "px-3 py-3 md:px-4 md:py-4")}>
-        <main className="flex-1 min-h-0 overflow-hidden">{children}</main>
+      <div className={classNames("flex h-full w-full flex-col", isWorkspaceRoute ? "" : "px-3 py-3 md:px-5 md:py-5")}>
+        <main className={classNames("flex-1", isWorkspaceRoute ? "min-h-0 overflow-hidden" : "")}>{children}</main>
       </div>
     </div>
   );
