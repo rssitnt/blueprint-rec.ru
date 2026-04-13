@@ -108,6 +108,7 @@ Last updated: 2026-04-13
 ## Public deploy notes
 
 - Domain traffic goes through Cloudflare tunnel to local frontend/backend.
+- Cloudflare 1033 resolved by restarting the `cloudflared` tunnel for `blueprint-rec`.
 - Active project path for site and API is:
   - `C:/projects/sites/blueprint-rec-2`
 - Old mirror tree is gone; local services and tunnel must not reference `C:/projects/sites/blueprint-rec` anymore.
