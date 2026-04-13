@@ -96,7 +96,7 @@ Last updated: 2026-04-13
 - AI summary tiles now wrap long labels and avoid clipping on narrow rails.
 - Bottom toolbar palette aligned to the warm dark theme.
 - Center/angle switch palette aligned to warm dark theme.
-- Left rail separators removed; rail now scrolls to avoid clipped text.
+- Left/right rails now run in condensed mode with minimal summaries and collapsible sections to avoid vertical scrolling.
 - Conflict banner text color increased for readability.
 - Global drag-and-drop on the home screen auto-detects:
   - archive
@@ -118,6 +118,7 @@ Last updated: 2026-04-13
 - Frontend API calls now use a 20s timeout and return a clear “backend not responding” error instead of hanging on submit.
 - Annotation rails now default to compact mode with popover lists for candidates/markers and collapsible inspector blocks to avoid vertical scrolling in left/right panels.
 - Left rail condensed mode now hides long AI/vocabulary blocks and replaces them with a short summary plus quick-open buttons for overlays.
+- Right rail condensed mode now collapses guidance, related-candidate lists, and coordinate fields behind toggles.
 
 ## Public deploy notes
 

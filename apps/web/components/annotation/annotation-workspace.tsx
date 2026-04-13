@@ -1966,6 +1966,9 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
   const [isMarkerOverlayOpen, setIsMarkerOverlayOpen] = useState(false);
   const [isInspectorDetailsOpen, setIsInspectorDetailsOpen] = useState(false);
   const [isInspectorLensOpen, setIsInspectorLensOpen] = useState(false);
+  const [isInspectorFieldsOpen, setIsInspectorFieldsOpen] = useState(false);
+  const [isInspectorGuidanceOpen, setIsInspectorGuidanceOpen] = useState(false);
+  const [isInspectorRelatedOpen, setIsInspectorRelatedOpen] = useState(false);
   const [isHistoryHeaderCompact, setIsHistoryHeaderCompact] = useState(false);
   const [isHistoryHeaderCompactPinned, setIsHistoryHeaderCompactPinned] = useState(false);
   const [showOnlyAmbiguityHistory, setShowOnlyAmbiguityHistory] = useState(false);
@@ -4632,13 +4635,15 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
             </div>
           )}
 
-          <AmbiguityWorkspaceBanner
-            currentPassCount={currentPassAmbiguityMarkers.length}
-            deferredCount={deferredAmbiguityMarkers.length}
-            reviewCompleted={ambiguityReviewCompleted}
-            onContinue={continueAmbiguityReviewFromHistory}
-            onOpenDeferred={() => setAmbiguityQueueMode("deferred", { focusFirst: true })}
-          />
+          {!isRailCondensed && (
+            <AmbiguityWorkspaceBanner
+              currentPassCount={currentPassAmbiguityMarkers.length}
+              deferredCount={deferredAmbiguityMarkers.length}
+              reviewCompleted={ambiguityReviewCompleted}
+              onContinue={continueAmbiguityReviewFromHistory}
+              onOpenDeferred={() => setAmbiguityQueueMode("deferred", { focusFirst: true })}
+            />
+          )}
 
           <div className={classNames("mt-4 grid gap-2", isUltraCompactWorkspace ? "grid-cols-1" : "grid-cols-2")}>
             <div className="min-w-0">
@@ -4671,18 +4676,26 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
           {(hardPipelineConflictCount > 0 || missingLabels.length > 0) && (
             <div className="mt-2 rounded-[0.95rem] bg-[#2a2118] px-3 py-2.5 shadow-[0_14px_28px_rgba(8,6,4,0.3)]">
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#f5d0a8]">Экспорт пока заблокирован</p>
-              <p className="mt-1 text-sm leading-5 text-[#f1ddc1]">
-                {hardPipelineConflictCount > 0 && missingLabels.length > 0
-                  ? `Нужно закрыть ${hardPipelineConflictCount} блокеров проверки и ${missingLabels.length} пропущенных меток.`
-                  : hardPipelineConflictCount > 0
-                    ? `Нужно закрыть ${hardPipelineConflictCount} блокеров проверки.`
-                    : `Нужно закрыть ${missingLabels.length} пропущенных меток.`}
-              </p>
-              <p className="mt-1 text-xs leading-5 text-[#d5b78b]">
-                {isImportedJobPreviewSession
-                  ? "Подсказки ниже в блоках «Результат AI» и «Словарь страницы»."
-                  : "Подсказки ниже в блоках «Авторазметка» и «Словарь страницы»."}
-              </p>
+              {isRailCondensed ? (
+                <p className="mt-1 text-sm leading-5 text-[#f1ddc1]">
+                  Блокеры: {hardPipelineConflictCount} · Пропущено: {missingLabels.length}
+                </p>
+              ) : (
+                <>
+                  <p className="mt-1 text-sm leading-5 text-[#f1ddc1]">
+                    {hardPipelineConflictCount > 0 && missingLabels.length > 0
+                      ? `Нужно закрыть ${hardPipelineConflictCount} блокеров проверки и ${missingLabels.length} пропущенных меток.`
+                      : hardPipelineConflictCount > 0
+                        ? `Нужно закрыть ${hardPipelineConflictCount} блокеров проверки.`
+                        : `Нужно закрыть ${missingLabels.length} пропущенных меток.`}
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-[#d5b78b]">
+                    {isImportedJobPreviewSession
+                      ? "Подсказки ниже в блоках «Результат AI» и «Словарь страницы»."
+                      : "Подсказки ниже в блоках «Авторазметка» и «Словарь страницы»."}
+                  </p>
+                </>
+              )}
             </div>
           )}
         </div>
@@ -4848,14 +4861,18 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
         <div className="flex items-center justify-between px-4 py-3">
           <div>
             <p className={railSectionTitleClass}>{isImportedJobPreviewSession ? "Очередь проверки" : "Кандидаты на проверку"}</p>
-            <p className="mt-1 text-sm text-[#c8ccd3]">
-              {isImportedJobPreviewSession ? `${pendingCandidates.length} точек и кандидатов ждут решения` : `${pendingCandidates.length} кандидатов ждут решения`}
-            </p>
-            <p className="mt-1 text-xs leading-5 text-[#8f949d]">
-              {isImportedJobPreviewSession
-                ? "Здесь лежат кандидаты и спорные места, которые стоит проверить перед финальным экспортом."
-                : "Здесь сначала разбираются найденные варианты по номеру и фигуре. Спорные AI-точки идут отдельной очередью в списке точек ниже."}
-            </p>
+            {!isRailCondensed && (
+              <p className="mt-1 text-sm text-[#c8ccd3]">
+                {isImportedJobPreviewSession ? `${pendingCandidates.length} точек и кандидатов ждут решения` : `${pendingCandidates.length} кандидатов ждут решения`}
+              </p>
+            )}
+            {!isRailCondensed && (
+              <p className="mt-1 text-xs leading-5 text-[#8f949d]">
+                {isImportedJobPreviewSession
+                  ? "Здесь лежат кандидаты и спорные места, которые стоит проверить перед финальным экспортом."
+                  : "Здесь сначала разбираются найденные варианты по номеру и фигуре. Спорные AI-точки идут отдельной очередью в списке точек ниже."}
+              </p>
+            )}
           </div>
           {isRailCondensed && (
             <button
@@ -5024,32 +5041,6 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
               )}
             </div>
           </>
-        )}
-
-        {isRailCondensed && (
-          <div className="px-4 pb-3">
-            <div className="rounded-[0.95rem] bg-[#15110e] px-3 py-2.5 text-sm text-[#c8ccd3]">
-              <p className="text-[11px] uppercase tracking-[0.16em] text-[#a99b8e]">Коротко</p>
-              <p className="mt-1">Кандидаты: {pendingCandidates.length}</p>
-              <p className="mt-0.5">Точки: {displayedMarkers.length} из {session.markers.length}</p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  className="inline-flex min-h-8 items-center rounded-full bg-[#1f1814] px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f6efe7]"
-                  onClick={() => setIsCandidateOverlayOpen(true)}
-                >
-                  Кандидаты
-                </button>
-                <button
-                  type="button"
-                  className="inline-flex min-h-8 items-center rounded-full bg-[#1f1814] px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f6efe7]"
-                  onClick={() => setIsMarkerOverlayOpen(true)}
-                >
-                  Точки
-                </button>
-              </div>
-            </div>
-          </div>
         )}
 
         {!document && (
@@ -5533,75 +5524,173 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                   </div>
                 </div>
 
-                <div className="rounded-[1rem] bg-[#1b1712] px-3 py-3 shadow-[0_16px_34px_rgba(8,6,4,0.32)]">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#f5d0a8]">Что сделать сейчас</p>
-                  <p className="mt-1 text-sm leading-5 text-[#d8dbe1]">
-                    Сейчас нужно решить, это реальная точка или лишний вариант рядом.
-                  </p>
-                  <div className="mt-2 space-y-1.5 text-xs leading-5 text-[#d8dbe1]">
-                    <p>Если это нужная точка - «Создать точку».</p>
-                    <p>Если это ошибка или шум - «Ложный».</p>
+                {isRailCondensed ? (
+                  <div className="space-y-2">
+                    <button
+                      type="button"
+                      className="inline-flex min-h-9 w-full items-center justify-between rounded-[0.9rem] bg-[#15110e] px-3 text-sm font-medium text-[#efe6dc]"
+                      onClick={() => setIsInspectorGuidanceOpen((current) => !current)}
+                    >
+                      <span>Что сделать сейчас</span>
+                      <span className="text-xs text-[#b7a28f]">{isInspectorGuidanceOpen ? "Скрыть" : "Открыть"}</span>
+                    </button>
+                    {isInspectorGuidanceOpen && (
+                      <div className="rounded-[1rem] bg-[#1b1712] px-3 py-3 shadow-[0_16px_34px_rgba(8,6,4,0.32)]">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#f5d0a8]">Что сделать сейчас</p>
+                        <p className="mt-1 text-sm leading-5 text-[#d8dbe1]">
+                          Сейчас нужно решить, это реальная точка или лишний вариант рядом.
+                        </p>
+                        <div className="mt-2 space-y-1.5 text-xs leading-5 text-[#d8dbe1]">
+                          <p>Если это нужная точка - «Создать точку».</p>
+                          <p>Если это ошибка или шум - «Ложный».</p>
+                        </div>
+                        <p className="mt-2 text-xs leading-5 text-[#aeb4be]">
+                          Спорные AI-точки не потеряны: они идут отдельной очередью в списке точек как AI review.
+                        </p>
+                        <p className="mt-1 text-xs leading-5 text-[#aeb4be]">
+                          {pendingCandidates.length > 1
+                            ? "После решения этого кандидата откроется следующий кандидат из очереди."
+                            : currentPassAmbiguityMarkers.length > 0
+                              ? "После решения этого кандидата можно сразу вернуться к очереди AI review кнопкой выше."
+                              : deferredAmbiguityMarkers.length > 0
+                                ? "После решения этого кандидата останутся только отложенные AI-точки."
+                                : "После решения этого кандидата в сессии не останется незакрытых шагов этого типа."}
+                        </p>
+                      </div>
+                    )}
                   </div>
-                  <p className="mt-2 text-xs leading-5 text-[#aeb4be]">
-                    Спорные AI-точки не потеряны: они идут отдельной очередью в списке точек как AI review.
-                  </p>
-                  <p className="mt-1 text-xs leading-5 text-[#aeb4be]">
-                    {pendingCandidates.length > 1
-                      ? "После решения этого кандидата откроется следующий кандидат из очереди."
-                      : currentPassAmbiguityMarkers.length > 0
-                        ? "После решения этого кандидата можно сразу вернуться к очереди AI review кнопкой выше."
-                        : deferredAmbiguityMarkers.length > 0
-                          ? "После решения этого кандидата останутся только отложенные AI-точки."
-                          : "После решения этого кандидата в сессии не останется незакрытых шагов этого типа."}
-                  </p>
-                </div>
-
-                <div className="space-y-2 rounded-[1rem] bg-[#13161b] p-3 shadow-[0_16px_34px_rgba(8,6,4,0.32)]">
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8f949d]">Похожие варианты рядом</span>
-                    <span className="text-[11px] font-medium text-[#c8ccd3]">{selectedCandidateAssociations.length}</span>
-                  </div>
-                  {selectedCandidateAssociations.length === 0 ? (
-                    <p className="text-sm text-[#9196a0]">Для этого места пока нет явных связанных вариантов.</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {selectedCandidateAssociations.slice(0, 4).map((association) => {
-                        const linkedCandidateId =
-                          selectedCandidate.kind === "text" ? association.shapeCandidateId : association.textCandidateId;
-                        const linkedCandidate = candidatesById.get(linkedCandidateId) ?? null;
-                        const linkedKindLabel = linkedCandidate ? candidateKindLabels[linkedCandidate.kind] : "Связанный кандидат";
-
-                        return (
-                          <button
-                            key={association.associationId}
-                            type="button"
-                            className="block w-full rounded-[0.9rem] bg-[#171310] px-3 py-2 text-left transition"
-                            onClick={() => selectCandidate(linkedCandidateId, { focus: true })}
-                          >
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="min-w-0">
-                                <p className="truncate text-[12px] font-semibold text-white">
-                                  {linkedKindLabel}
-                                  {association.label ? ` • ${association.label}` : ""}
-                                </p>
-                                <p className="mt-1 text-xs text-[#aeb4be]">
-                                  похожесть {Math.round(association.score * 100)}%
-                                  {association.topologyScore != null ? ` • рядом ${Math.round(association.topologyScore * 100)}%` : ""}
-                                </p>
-                              </div>
-                              <span className="inline-flex min-h-7 items-center rounded-full bg-[#162433] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#bfe1ff]">
-                                перейти
-                              </span>
-                            </div>
-                          </button>
-                        );
-                      })}
-                      {selectedCandidateAssociations.length > 4 && (
-                        <p className="text-xs text-[#8f949d]">Ещё {selectedCandidateAssociations.length - 4} похожих вариантов скрыто.</p>
-                      )}
+                ) : (
+                  <div className="rounded-[1rem] bg-[#1b1712] px-3 py-3 shadow-[0_16px_34px_rgba(8,6,4,0.32)]">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#f5d0a8]">Что сделать сейчас</p>
+                    <p className="mt-1 text-sm leading-5 text-[#d8dbe1]">
+                      Сейчас нужно решить, это реальная точка или лишний вариант рядом.
+                    </p>
+                    <div className="mt-2 space-y-1.5 text-xs leading-5 text-[#d8dbe1]">
+                      <p>Если это нужная точка - «Создать точку».</p>
+                      <p>Если это ошибка или шум - «Ложный».</p>
                     </div>
-                  )}
-                </div>
+                    <p className="mt-2 text-xs leading-5 text-[#aeb4be]">
+                      Спорные AI-точки не потеряны: они идут отдельной очередью в списке точек как AI review.
+                    </p>
+                    <p className="mt-1 text-xs leading-5 text-[#aeb4be]">
+                      {pendingCandidates.length > 1
+                        ? "После решения этого кандидата откроется следующий кандидат из очереди."
+                        : currentPassAmbiguityMarkers.length > 0
+                          ? "После решения этого кандидата можно сразу вернуться к очереди AI review кнопкой выше."
+                          : deferredAmbiguityMarkers.length > 0
+                            ? "После решения этого кандидата останутся только отложенные AI-точки."
+                            : "После решения этого кандидата в сессии не останется незакрытых шагов этого типа."}
+                    </p>
+                  </div>
+                )}
+
+                {isRailCondensed ? (
+                  <div className="space-y-2">
+                    <button
+                      type="button"
+                      className="inline-flex min-h-9 w-full items-center justify-between rounded-[0.9rem] bg-[#15110e] px-3 text-sm font-medium text-[#efe6dc]"
+                      onClick={() => setIsInspectorRelatedOpen((current) => !current)}
+                    >
+                      <span>Похожие варианты рядом</span>
+                      <span className="text-xs text-[#b7a28f]">{isInspectorRelatedOpen ? "Скрыть" : "Открыть"}</span>
+                    </button>
+                    {isInspectorRelatedOpen && (
+                      <div className="space-y-2 rounded-[1rem] bg-[#13161b] p-3 shadow-[0_16px_34px_rgba(8,6,4,0.32)]">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8f949d]">Похожие варианты рядом</span>
+                          <span className="text-[11px] font-medium text-[#c8ccd3]">{selectedCandidateAssociations.length}</span>
+                        </div>
+                        {selectedCandidateAssociations.length === 0 ? (
+                          <p className="text-sm text-[#9196a0]">Для этого места пока нет явных связанных вариантов.</p>
+                        ) : (
+                          <div className="space-y-2">
+                            {selectedCandidateAssociations.slice(0, 4).map((association) => {
+                              const linkedCandidateId =
+                                selectedCandidate.kind === "text" ? association.shapeCandidateId : association.textCandidateId;
+                              const linkedCandidate = candidatesById.get(linkedCandidateId) ?? null;
+                              const linkedKindLabel = linkedCandidate ? candidateKindLabels[linkedCandidate.kind] : "Связанный кандидат";
+
+                              return (
+                                <button
+                                  key={association.associationId}
+                                  type="button"
+                                  className="block w-full rounded-[0.9rem] bg-[#171310] px-3 py-2 text-left transition"
+                                  onClick={() => selectCandidate(linkedCandidateId, { focus: true })}
+                                >
+                                  <div className="flex items-start justify-between gap-3">
+                                    <div className="min-w-0">
+                                      <p className="truncate text-[12px] font-semibold text-white">
+                                        {linkedKindLabel}
+                                        {association.label ? ` • ${association.label}` : ""}
+                                      </p>
+                                      <p className="mt-1 text-xs text-[#aeb4be]">
+                                        похожесть {Math.round(association.score * 100)}%
+                                        {association.topologyScore != null ? ` • рядом ${Math.round(association.topologyScore * 100)}%` : ""}
+                                      </p>
+                                    </div>
+                                    <span className="inline-flex min-h-7 items-center rounded-full bg-[#162433] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#bfe1ff]">
+                                      перейти
+                                    </span>
+                                  </div>
+                                </button>
+                              );
+                            })}
+                            {selectedCandidateAssociations.length > 4 && (
+                              <p className="text-xs text-[#8f949d]">Ещё {selectedCandidateAssociations.length - 4} похожих вариантов скрыто.</p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-2 rounded-[1rem] bg-[#13161b] p-3 shadow-[0_16px_34px_rgba(8,6,4,0.32)]">
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8f949d]">Похожие варианты рядом</span>
+                      <span className="text-[11px] font-medium text-[#c8ccd3]">{selectedCandidateAssociations.length}</span>
+                    </div>
+                    {selectedCandidateAssociations.length === 0 ? (
+                      <p className="text-sm text-[#9196a0]">Для этого места пока нет явных связанных вариантов.</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {selectedCandidateAssociations.slice(0, 4).map((association) => {
+                          const linkedCandidateId =
+                            selectedCandidate.kind === "text" ? association.shapeCandidateId : association.textCandidateId;
+                          const linkedCandidate = candidatesById.get(linkedCandidateId) ?? null;
+                          const linkedKindLabel = linkedCandidate ? candidateKindLabels[linkedCandidate.kind] : "Связанный кандидат";
+
+                          return (
+                            <button
+                              key={association.associationId}
+                              type="button"
+                              className="block w-full rounded-[0.9rem] bg-[#171310] px-3 py-2 text-left transition"
+                              onClick={() => selectCandidate(linkedCandidateId, { focus: true })}
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                  <p className="truncate text-[12px] font-semibold text-white">
+                                    {linkedKindLabel}
+                                    {association.label ? ` • ${association.label}` : ""}
+                                  </p>
+                                  <p className="mt-1 text-xs text-[#aeb4be]">
+                                    похожесть {Math.round(association.score * 100)}%
+                                    {association.topologyScore != null ? ` • рядом ${Math.round(association.topologyScore * 100)}%` : ""}
+                                  </p>
+                                </div>
+                                <span className="inline-flex min-h-7 items-center rounded-full bg-[#162433] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#bfe1ff]">
+                                  перейти
+                                </span>
+                              </div>
+                            </button>
+                          );
+                        })}
+                        {selectedCandidateAssociations.length > 4 && (
+                          <p className="text-xs text-[#8f949d]">Ещё {selectedCandidateAssociations.length - 4} похожих вариантов скрыто.</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <div className="grid grid-cols-2 gap-2">
                   <button
@@ -5818,95 +5907,107 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
           </section>
 
           <section className={railSectionClass}>
-            <div className="space-y-3 text-sm text-[#c8ccd3]">
-              {selectedMarker ? (
+            {isRailCondensed && (
+              <button
+                type="button"
+                className="mb-2 inline-flex min-h-9 w-full items-center justify-between rounded-[0.9rem] bg-[#15110e] px-3 text-sm font-medium text-[#efe6dc]"
+                onClick={() => setIsInspectorFieldsOpen((current) => !current)}
+              >
+                <span>Параметры точки</span>
+                <span className="text-xs text-[#b7a28f]">{isInspectorFieldsOpen ? "Скрыть" : "Открыть"}</span>
+              </button>
+            )}
+            {(!isRailCondensed || isInspectorFieldsOpen) && (
+              <div className="space-y-3 text-sm text-[#c8ccd3]">
+                {selectedMarker ? (
+                  <form
+                    className="space-y-3"
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      void applyMarkerCoordinates();
+                    }}
+                  >
+                    <label className="flex items-center gap-3">
+                      <span className="w-14 shrink-0 text-sm font-medium text-white">x -</span>
+                      <input value={draftMarkerX} onChange={(event) => setDraftMarkerX(event.target.value)} inputMode="numeric" className={inspectorInputClass} />
+                    </label>
+                    <label className="flex items-center gap-3">
+                      <span className="w-14 shrink-0 text-sm font-medium text-white">y -</span>
+                      <input value={draftMarkerY} onChange={(event) => setDraftMarkerY(event.target.value)} inputMode="numeric" className={inspectorInputClass} />
+                    </label>
+                  </form>
+                ) : (
+                  <form
+                    className="space-y-3"
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      applyViewportFields();
+                    }}
+                  >
+                    <label className="flex items-center gap-3">
+                      <span className="w-14 shrink-0 text-sm font-medium text-white">x -</span>
+                      <input value={draftViewportX} onChange={(event) => setDraftViewportX(event.target.value)} inputMode="numeric" className={inspectorInputClass} />
+                    </label>
+                    <label className="flex items-center gap-3">
+                      <span className="w-14 shrink-0 text-sm font-medium text-white">y -</span>
+                      <input value={draftViewportY} onChange={(event) => setDraftViewportY(event.target.value)} inputMode="numeric" className={inspectorInputClass} />
+                    </label>
+                  </form>
+                )}
+
                 <form
-                  className="space-y-3"
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    void applyMarkerCoordinates();
-                  }}
-                >
-                  <label className="flex items-center gap-3">
-                    <span className="w-14 shrink-0 text-sm font-medium text-white">x -</span>
-                    <input value={draftMarkerX} onChange={(event) => setDraftMarkerX(event.target.value)} inputMode="numeric" className={inspectorInputClass} />
-                  </label>
-                  <label className="flex items-center gap-3">
-                    <span className="w-14 shrink-0 text-sm font-medium text-white">y -</span>
-                    <input value={draftMarkerY} onChange={(event) => setDraftMarkerY(event.target.value)} inputMode="numeric" className={inspectorInputClass} />
-                  </label>
-                </form>
-              ) : (
-                <form
-                  className="space-y-3"
                   onSubmit={(event) => {
                     event.preventDefault();
                     applyViewportFields();
                   }}
                 >
                   <label className="flex items-center gap-3">
-                    <span className="w-14 shrink-0 text-sm font-medium text-white">x -</span>
-                    <input value={draftViewportX} onChange={(event) => setDraftViewportX(event.target.value)} inputMode="numeric" className={inspectorInputClass} />
-                  </label>
-                  <label className="flex items-center gap-3">
-                    <span className="w-14 shrink-0 text-sm font-medium text-white">y -</span>
-                    <input value={draftViewportY} onChange={(event) => setDraftViewportY(event.target.value)} inputMode="numeric" className={inspectorInputClass} />
+                    <span className="w-14 shrink-0 text-sm font-medium text-white">zoom -</span>
+                    <input value={draftViewportZoom} onChange={(event) => setDraftViewportZoom(event.target.value)} className={inspectorInputClass} />
                   </label>
                 </form>
-              )}
 
-              <form
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  applyViewportFields();
-                }}
-              >
-                <label className="flex items-center gap-3">
-                  <span className="w-14 shrink-0 text-sm font-medium text-white">zoom -</span>
-                  <input value={draftViewportZoom} onChange={(event) => setDraftViewportZoom(event.target.value)} className={inspectorInputClass} />
-                </label>
-              </form>
+                {selectedMarker && (
+                  <form
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      void saveMarkerChanges();
+                    }}
+                  >
+                    <label className="flex items-center gap-3">
+                      <span className="w-14 shrink-0 text-sm font-medium text-white">ярлык -</span>
+                      <input value={draftLabel} onChange={(event) => setDraftLabel(event.target.value)} className={inspectorInputClass} />
+                    </label>
+                  </form>
+                )}
 
-              {selectedMarker && (
-                <form
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    void saveMarkerChanges();
-                  }}
-                >
-                  <label className="flex items-center gap-3">
-                    <span className="w-14 shrink-0 text-sm font-medium text-white">ярлык -</span>
-                    <input value={draftLabel} onChange={(event) => setDraftLabel(event.target.value)} className={inspectorInputClass} />
-                  </label>
-                </form>
-              )}
+                {selectedMarker && (
+                  <form
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      void saveMarkerPatch({ confidence: draftConfidence ? Number(draftConfidence) : null });
+                    }}
+                  >
+                    <label className="flex items-center gap-3">
+                      <span className="w-24 shrink-0 text-sm font-medium text-white">confidence -</span>
+                      <input
+                        value={draftConfidence}
+                        onChange={(event) => setDraftConfidence(event.target.value)}
+                        onBlur={() => void saveMarkerPatch({ confidence: draftConfidence ? Number(draftConfidence) : null })}
+                        placeholder="0.92"
+                        className={inspectorInputClass}
+                      />
+                    </label>
+                  </form>
+                )}
 
-              {selectedMarker && (
-                <form
-                  onSubmit={(event) => {
-                    event.preventDefault();
-                    void saveMarkerPatch({ confidence: draftConfidence ? Number(draftConfidence) : null });
-                  }}
-                >
-                  <label className="flex items-center gap-3">
-                    <span className="w-24 shrink-0 text-sm font-medium text-white">confidence -</span>
-                    <input
-                      value={draftConfidence}
-                      onChange={(event) => setDraftConfidence(event.target.value)}
-                      onBlur={() => void saveMarkerPatch({ confidence: draftConfidence ? Number(draftConfidence) : null })}
-                      placeholder="0.92"
-                      className={inspectorInputClass}
-                    />
-                  </label>
-                </form>
-              )}
-
-              {selectedMarker && selectedMarker.status === "human_draft" && (
-                <div className="rounded-[0.95rem] bg-[#2a2118] px-3 py-2 text-[12px] text-[#f5d0a8] shadow-[0_12px_26px_rgba(8,6,4,0.3)]">
-                  Точка пока черновая. Проверь место через лупу и потом подтверди.
-                </div>
-              )}
-            </div>
+                {selectedMarker && selectedMarker.status === "human_draft" && (
+                  <div className="rounded-[0.95rem] bg-[#2a2118] px-3 py-2 text-[12px] text-[#f5d0a8] shadow-[0_12px_26px_rgba(8,6,4,0.3)]">
+                    Точка пока черновая. Проверь место через лупу и потом подтверди.
+                  </div>
+                )}
+              </div>
+            )}
           </section>
         </div>
       </aside>
