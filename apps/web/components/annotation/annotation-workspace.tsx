@@ -1961,6 +1961,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isMarkerRailOpen, setIsMarkerRailOpen] = useState(false);
   const [isInspectorOpen, setIsInspectorOpen] = useState(true);
+  const [isRailCondensed, setIsRailCondensed] = useState(false);
   const [isHistoryHeaderCompact, setIsHistoryHeaderCompact] = useState(false);
   const [isHistoryHeaderCompactPinned, setIsHistoryHeaderCompactPinned] = useState(false);
   const [showOnlyAmbiguityHistory, setShowOnlyAmbiguityHistory] = useState(false);
@@ -1993,6 +1994,15 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
     startCenterY: number;
     moved: boolean;
   } | null>(null);
+
+  useEffect(() => {
+    const updateCondensed = () => {
+      setIsRailCondensed(window.innerHeight < 820);
+    };
+    updateCondensed();
+    window.addEventListener("resize", updateCondensed);
+    return () => window.removeEventListener("resize", updateCondensed);
+  }, []);
 
   const document = session?.document ?? null;
   const importedJobEntry =
@@ -4296,8 +4306,11 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
   const displayedHistoryEntries = showOnlyAmbiguityHistory ? ambiguityHistoryEntries : mergedRecentHistoryEntries;
   const railShellClass =
     "absolute inset-y-0 z-30 flex min-h-0 flex-col overflow-hidden bg-[#16120f] text-[#fff7ef] shadow-[0_26px_72px_rgba(8,6,5,0.34)]";
-  const railSectionClass = "px-3.5 py-3";
-  const railSectionTitleClass = "text-[10px] font-semibold uppercase tracking-[0.18em] text-[#b7a28f]";
+  const railSectionClass = classNames("px-3.5", isRailCondensed ? "py-2" : "py-3");
+  const railSectionTitleClass = classNames(
+    "text-[10px] font-semibold uppercase tracking-[0.18em] text-[#b7a28f]",
+    isRailCondensed && "text-[9px]"
+  );
   const inspectorInputClass =
     "h-9 w-full rounded-[0.8rem] bg-[#120f0d] px-3 text-sm font-medium text-[#fff7ef] outline-none shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] transition-none placeholder:text-[#7f7065] focus:shadow-[inset_0_0_0_1px_rgba(245,208,168,0.45),0_0_0_3px_rgba(125,99,80,0.18)]";
   const toolbarButtonClass =

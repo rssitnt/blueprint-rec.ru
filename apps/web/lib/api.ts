@@ -20,6 +20,7 @@ const configuredApiBaseUrl =
   "";
 
 const API_BASE_URL = configuredApiBaseUrl.trim().replace(/\/$/, "");
+const REQUEST_TIMEOUT_MS = 20000;
 
 function formatNetworkErrorMessage() {
   const target = API_BASE_URL || "same-origin /api";
@@ -46,9 +47,13 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const isFormData = init?.body instanceof FormData;
   let response: Response;
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
   try {
     response = await fetch(`${API_BASE_URL}${path}`, {
       ...init,
+      signal: controller.signal,
       cache: "no-store",
       headers: {
         ...(isFormData ? {} : { "Content-Type": "application/json" }),
@@ -56,10 +61,15 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       }
     });
   } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new Error("Сервис разметки не отвечает. Проверь, что backend запущен, и попробуй ещё раз.");
+    }
     if (error instanceof Error) {
       throw new Error(formatNetworkErrorMessage());
     }
     throw error;
+  } finally {
+    clearTimeout(timeoutId);
   }
 
   if (!response.ok) {
@@ -72,19 +82,28 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 async function requestWithoutBody(path: string, init?: RequestInit): Promise<void> {
   let response: Response;
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
   try {
     response = await fetch(`${API_BASE_URL}${path}`, {
       ...init,
+      signal: controller.signal,
       cache: "no-store",
       headers: {
         ...(init?.headers ?? {})
       }
     });
   } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new Error("Сервис разметки не отвечает. Проверь, что backend запущен, и попробуй ещё раз.");
+    }
     if (error instanceof Error) {
       throw new Error(formatNetworkErrorMessage());
     }
     throw error;
+  } finally {
+    clearTimeout(timeoutId);
   }
 
   if (!response.ok) {
