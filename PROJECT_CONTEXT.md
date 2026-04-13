@@ -86,6 +86,7 @@ Last updated: 2026-04-13
   - Right: sticky detail panel for the active job or batch, keeping exports/actions visible.
 - Non-workspace pages now allow vertical page scroll again (layout shell no longer locks overflow).
 - Global dark background tweaked slightly darker for better contrast.
+- Job list "Открыть" now opens a preview session for completed jobs (fallback to detail for unfinished).
 - Hover animations and hover color shifts were removed from the main UI.
 - Batch completion sound was removed from the UI.
 - Browser notification popup on batch completion was removed from the UI.

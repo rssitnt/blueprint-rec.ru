@@ -960,7 +960,13 @@ export function JobHome() {
                             type="button"
                             variant="outline"
                             className="min-h-7 rounded-full border-0 bg-[#2b221d] px-2.5 text-[11px] font-semibold text-[#fff4ea] shadow-none"
-                            onClick={() => void handleOpenJob(job.jobId)}
+                            onClick={() => {
+                              if (job.status === "completed") {
+                                void handleOpenPreview(job.jobId, 0);
+                                return;
+                              }
+                              void handleOpenJob(job.jobId);
+                            }}
                           >
                             Открыть
                           </Button>
