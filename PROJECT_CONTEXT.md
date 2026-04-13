@@ -92,6 +92,7 @@ Last updated: 2026-04-13
 - Browser notification popup on batch completion was removed from the UI.
 - Compact preview workspace rail was widened and repacked for mobile-like widths; warm theme applied there too.
 - Annotation rail buttons now wrap instead of clipping; AI summary chips wrap on small widths.
+- Bottom toolbar now respects left/right rail insets to avoid overlapping side panels.
 - Global drag-and-drop on the home screen auto-detects:
   - archive
   - drawing

@@ -5591,7 +5591,10 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
       </aside>
       )}
 
-      <div className="pointer-events-none absolute bottom-3 left-1/2 z-40 w-[calc(100%-1rem)] -translate-x-1/2">
+      <div
+        className="pointer-events-none absolute bottom-3 z-40"
+        style={{ left: canvasLeftInset, right: canvasRightInset }}
+      >
         <div className="scrollbar-hidden pointer-events-auto mx-auto flex max-w-full items-center gap-1.5 overflow-x-auto rounded-[1rem] border border-[#30343c] bg-[#17191f] p-1.5 text-white shadow-[0_24px_70px_rgba(8,10,14,0.4)]">
           <div className="inline-flex items-center rounded-[0.95rem] bg-white/5 p-1">
             <button
