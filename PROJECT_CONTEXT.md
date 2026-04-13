@@ -48,6 +48,8 @@ Last updated: 2026-04-13
   - `Gemini-first truth + local localization`
 - PaddleOCR is integrated as local detector/readout helper.
 - Heavy exploded-view sheets have a dedicated tiny-callout fallback path.
+- Vocabulary extraction no longer slices drawings into tiles.
+- Vocabulary prompt no longer asks for only "clearly" visible labels; it asks for all visible callout labels on the full drawing.
 - On dense benchmark `test1.jpg`, direct `gemini-2.5-flash` request failed, but OpenRouter Gemini 3.1 models proved the truth-extraction idea:
   - `google/gemini-3.1-pro-preview`
     - returned full label set `1..42` with `29A`, `29B`, `30A`
@@ -57,6 +59,7 @@ Last updated: 2026-04-13
   - dense exploded-view sheets like `test1.jpg`
   - truth-guided localization of small missing labels is still incomplete
   - next obvious upgrade path is wiring stronger Gemini 3.1 truth extraction into the backend, not relying on the current direct 2.5 vocab call
+  - after switching the vocab step to full-image Gemini 3.1 Pro, the vocab step itself now returns 43 labels on `test1.jpg`, but the final pipeline still lands at 25 unique labels, so the bottleneck moved clearly to localization / candidate generation / candidate-to-truth merge
 
 ## Important backend fixes already present
 
@@ -149,6 +152,11 @@ Last updated: 2026-04-13
   - `C:/projects/sites/blueprint-rec-2/.codex-smoke/gemini-model-compare/test1/gemini-2.5-flash-direct/overlay.png`
   - `C:/projects/sites/blueprint-rec-2/.codex-smoke/gemini-model-compare/test1/gemini-3.1-flash-image-preview/overlay.png`
   - `C:/projects/sites/blueprint-rec-2/.codex-smoke/gemini-model-compare/test1/gemini-3.1-pro-preview/overlay.png`
+- Full-image vocab + full pipeline rerun on `test1.jpg`:
+  - `C:/projects/sites/blueprint-rec-2/.codex-smoke/test1-full-run/vocabulary-step.json`
+  - `C:/projects/sites/blueprint-rec-2/.codex-smoke/test1-full-run/summary.json`
+  - `C:/projects/sites/blueprint-rec-2/.codex-smoke/test1-full-run/truth-compare.json`
+  - `C:/projects/sites/blueprint-rec-2/.codex-smoke/test1-full-run/markers-overlay.png`
 - No-table status fix:
   - `C:/projects/sites/blueprint-rec-2/.codex-smoke/no-table-status-fix/final-v2.json`
 - Legacy/no-table auto-repair:

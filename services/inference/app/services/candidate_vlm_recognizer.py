@@ -36,31 +36,24 @@ class VisionLLMCandidateRecognizer:
         if not self.is_enabled():
             return set()
 
-        tiles = self._build_vocabulary_tiles(image, max_tiles=max_tiles)
-        if not tiles:
-            return set()
-
         provider_calls: list[tuple[str, Callable[[Image.Image, str], set[str]]]] = []
-        if self._openai_enabled():
-            provider_calls.append(("openai", self._extract_vocabulary_with_openai))
         if self._openrouter_enabled():
             provider_calls.append(("openrouter", self._extract_vocabulary_with_openrouter))
         if self._gemini_enabled():
             provider_calls.append(("gemini", self._extract_vocabulary_with_gemini))
+        if self._openai_enabled():
+            provider_calls.append(("openai", self._extract_vocabulary_with_openai))
 
         if not provider_calls:
             return set()
 
-        _, primary_call = provider_calls[0]
-        aggregated: dict[str, int] = {}
-        for tile in tiles:
-            prompt = self._build_vocabulary_prompt()
-            # Vocabulary extraction is only a coarse hint for low-res recovery, so
-            # avoid multiplying latency by faning out every tile across every VLM.
-            for label in primary_call(tile, prompt):
-                aggregated[label] = aggregated.get(label, 0) + 1
+        payload_image = self._prepare_vocabulary_image(image)
+        if payload_image is None:
+            return set()
 
-        return {label for label, count in aggregated.items() if count >= 1}
+        _, primary_call = provider_calls[0]
+        prompt = self._build_vocabulary_prompt()
+        return set(primary_call(payload_image, prompt))
 
     def recognize(
         self,
@@ -481,37 +474,42 @@ class VisionLLMCandidateRecognizer:
             resolved.append((index, label, confidence))
         return resolved
 
-    def _build_vocabulary_tiles(self, image: Image.Image, max_tiles: int = 6) -> list[Image.Image]:
+    @staticmethod
+    def _prepare_vocabulary_image(image: Image.Image) -> Image.Image | None:
         width, height = image.size
         if width <= 0 or height <= 0:
-            return []
-
-        cols = 3
-        rows = 2
-        tile_w = max(220, int(width / cols))
-        tile_h = max(220, int(height / rows))
-        tiles: list[Image.Image] = []
-
-        for r in range(rows):
-            for c in range(cols):
-                left = int(c * tile_w)
-                top = int(r * tile_h)
-                right = int(min(width, left + tile_w))
-                bottom = int(min(height, top + tile_h))
-                if right - left < 40 or bottom - top < 40:
-                    continue
-                crop = image.crop((left, top, right, bottom)).convert("RGB")
-                tiles.append(self._prepare_crop(crop))
-
-        if len(tiles) > max_tiles:
-            tiles = tiles[:max_tiles]
-        return tiles
+            return None
+        rgb = image.convert("RGB")
+        gray = ImageOps.grayscale(rgb)
+        auto = ImageOps.autocontrast(gray, cutoff=1)
+        sharpened = auto.filter(ImageFilter.UnsharpMask(radius=1.2, percent=170, threshold=2))
+        max_side = max(sharpened.size)
+        if max_side < 1800:
+            scale = min(3.0, 1800.0 / max(max_side, 1))
+            if scale > 1.05:
+                sharpened = sharpened.resize(
+                    (
+                        max(1, int(round(sharpened.width * scale))),
+                        max(1, int(round(sharpened.height * scale))),
+                    ),
+                    RESAMPLE_LANCZOS,
+                )
+        elif max_side > 2200:
+            scale = 2200.0 / max_side
+            sharpened = sharpened.resize(
+                (
+                    max(1, int(round(sharpened.width * scale))),
+                    max(1, int(round(sharpened.height * scale))),
+                ),
+                RESAMPLE_LANCZOS,
+            )
+        return sharpened.convert("RGB")
 
     @staticmethod
     def _build_vocabulary_prompt() -> str:
         return (
-            "You are looking at a technical drawing tile. "
-            "List every callout label that is clearly visible within this tile. "
+            "You are looking at a technical drawing. "
+            "List every callout label that is visible in this drawing. "
             "Return JSON only in this exact shape: {\"labels\":[\"1\",\"14-1\",\"29A\",...]} "
             "Only include labels that are actually visible; do NOT guess missing numbers. "
             "Exclude page numbers or non-callout text."
