@@ -1898,10 +1898,10 @@ function CompactPointTypeSwitch({
   const activeIndex = options.findIndex((option) => option.value === value);
 
   return (
-    <div className="relative grid grid-cols-2 rounded-full bg-[#26292f] p-[3px] shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_0_0_1px_rgba(255,255,255,0.08)]">
+    <div className="relative grid grid-cols-2 rounded-full bg-[#1f1814] p-[3px] shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_0_0_1px_rgba(58,43,34,0.6)]">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-[3px] top-[3px] rounded-full bg-[#f3f4f6] shadow-[0_10px_24px_rgba(10,12,16,0.28),inset_0_1px_0_rgba(255,255,255,0.9)] transition-transform duration-200 ease-out"
+        className="pointer-events-none absolute bottom-[3px] top-[3px] rounded-full bg-[#f5eee6] shadow-[0_12px_26px_rgba(12,10,8,0.32),inset_0_1px_0_rgba(255,255,255,0.7)] transition-transform duration-200 ease-out"
         style={{
           left: 3,
           width: "calc(50% - 3px)",
@@ -4296,7 +4296,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
   const displayedHistoryEntries = showOnlyAmbiguityHistory ? ambiguityHistoryEntries : mergedRecentHistoryEntries;
   const railShellClass =
     "absolute inset-y-0 z-30 flex min-h-0 flex-col overflow-hidden border-[#2f241d] bg-[#16120f] text-[#fff7ef] shadow-[0_26px_72px_rgba(8,6,5,0.34)]";
-  const railSectionClass = "border-b border-[#2f241d] px-3.5 py-3";
+  const railSectionClass = "px-3.5 py-3";
   const railSectionTitleClass = "text-[10px] font-semibold uppercase tracking-[0.18em] text-[#b7a28f]";
   const inspectorInputClass =
     "h-9 w-full rounded-[0.8rem] border border-[#3a2d24] bg-[#120f0d] px-3 text-sm font-medium text-[#fff7ef] outline-none transition-none placeholder:text-[#7f7065] focus:border-[#7d6350] focus:ring-2 focus:ring-[#7d6350]/20";
@@ -4562,6 +4562,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
         )}
         style={{ width: isCompactWorkspace ? floatingMarkerRailWidth : leftRailWidth }}
       >
+        <div className="scrollbar-hidden flex-1 overflow-y-auto pb-6">
         <div className={railSectionClass}>
           {isCompactWorkspace && (
             <div className="mb-3 flex items-center justify-between gap-3">
@@ -4674,7 +4675,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
           )}
         </div>
 
-        <div className="border-t border-white/8 px-4 py-3">
+        <div className="px-4 py-3">
           <div className={classNames("flex flex-wrap gap-2", isCompactWorkspace ? "flex-col items-start" : "items-start justify-between")}>
             <div>
               <p className={railSectionTitleClass}>{isImportedJobPreviewSession ? "Результат AI" : "Авторазметка"}</p>
@@ -4719,7 +4720,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
           </div>
         </div>
 
-        <div className="border-t border-white/8 px-4 py-3">
+        <div className="px-4 py-3">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className={railSectionTitleClass}>Словарь страницы</p>
@@ -4987,6 +4988,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
             </div>
           </div>
         )}
+        </div>
       </aside>
       )}
 
