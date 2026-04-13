@@ -116,6 +116,7 @@ Last updated: 2026-04-13
 - Result UI no longer exposes raw internal OCR/pipeline text or raw filesystem paths to the user.
 - Annotation workspace theme refreshed: removed most borders in left/right rails, history/summary overlays, candidate cards, and canvas banners; replaced with warm backgrounds and subtle shadows for separation.
 - Frontend API calls now use a 20s timeout and return a clear “backend not responding” error instead of hanging on submit.
+- Annotation rails now default to compact mode with popover lists for candidates/markers and collapsible inspector blocks to avoid vertical scrolling in left/right panels.
 
 ## Public deploy notes
 

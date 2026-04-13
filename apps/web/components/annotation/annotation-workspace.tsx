@@ -1961,7 +1961,11 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isMarkerRailOpen, setIsMarkerRailOpen] = useState(false);
   const [isInspectorOpen, setIsInspectorOpen] = useState(true);
-  const [isRailCondensed, setIsRailCondensed] = useState(false);
+  const [isRailCondensed, setIsRailCondensed] = useState(true);
+  const [isCandidateOverlayOpen, setIsCandidateOverlayOpen] = useState(false);
+  const [isMarkerOverlayOpen, setIsMarkerOverlayOpen] = useState(false);
+  const [isInspectorDetailsOpen, setIsInspectorDetailsOpen] = useState(false);
+  const [isInspectorLensOpen, setIsInspectorLensOpen] = useState(false);
   const [isHistoryHeaderCompact, setIsHistoryHeaderCompact] = useState(false);
   const [isHistoryHeaderCompactPinned, setIsHistoryHeaderCompactPinned] = useState(false);
   const [showOnlyAmbiguityHistory, setShowOnlyAmbiguityHistory] = useState(false);
@@ -1996,12 +2000,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
   } | null>(null);
 
   useEffect(() => {
-    const updateCondensed = () => {
-      setIsRailCondensed(window.innerHeight < 820);
-    };
-    updateCondensed();
-    window.addEventListener("resize", updateCondensed);
-    return () => window.removeEventListener("resize", updateCondensed);
+    setIsRailCondensed(true);
   }, []);
 
   const document = session?.document ?? null;
@@ -4575,7 +4574,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
         )}
         style={{ width: isCompactWorkspace ? floatingMarkerRailWidth : leftRailWidth }}
       >
-        <div className="scrollbar-hidden flex-1 overflow-y-auto pb-6">
+        <div className="flex-1 overflow-hidden pb-4">
         <div className={railSectionClass}>
           {isCompactWorkspace && (
             <div className="mb-3 flex items-center justify-between gap-3">
@@ -4821,161 +4820,200 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                 : "Здесь сначала разбираются найденные варианты по номеру и фигуре. Спорные AI-точки идут отдельной очередью в списке точек ниже."}
             </p>
           </div>
+          {isRailCondensed && (
+            <button
+              type="button"
+              className="inline-flex min-h-8 items-center rounded-full bg-[#1f1814] px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f6efe7]"
+              onClick={() => setIsCandidateOverlayOpen(true)}
+            >
+              Открыть
+            </button>
+          )}
         </div>
 
-        <div className="scrollbar-hidden max-h-[28vh] overflow-y-auto px-2 py-2">
-          {pendingCandidates.length === 0 ? (
-            <div className="px-3 py-4 text-sm text-[#969ba5]">
-              {isImportedJobPreviewSession ? "Новых мест для обязательной проверки сейчас нет." : "Новых кандидатов пока нет."}
-            </div>
-          ) : (
-            <div className="space-y-1.5">
-              {pendingCandidates.map((candidate, index) => {
-                const selected = candidate.candidateId === selectedCandidateId;
-                const isConflict = (candidate.conflictCount ?? 0) > 1;
-                const associationCount = candidateAssociationCountById.get(candidate.candidateId) ?? 0;
+        {!isRailCondensed && (
+          <>
+            <div className="scrollbar-hidden max-h-[28vh] overflow-y-auto px-2 py-2">
+              {pendingCandidates.length === 0 ? (
+                <div className="px-3 py-4 text-sm text-[#969ba5]">
+                  {isImportedJobPreviewSession ? "Новых мест для обязательной проверки сейчас нет." : "Новых кандидатов пока нет."}
+                </div>
+              ) : (
+                <div className="space-y-1.5">
+                  {pendingCandidates.map((candidate, index) => {
+                    const selected = candidate.candidateId === selectedCandidateId;
+                    const isConflict = (candidate.conflictCount ?? 0) > 1;
+                    const associationCount = candidateAssociationCountById.get(candidate.candidateId) ?? 0;
 
-                return (
-                  <button
-                    key={candidate.candidateId}
-                    type="button"
-                    onClick={() => selectCandidate(candidate.candidateId, { focus: true })}
-                    className={classNames(
-                      "block w-full rounded-[0.9rem] px-3 py-2 text-left transition",
-                      selected
-                        ? "bg-[#22262d] shadow-[0_10px_24px_rgba(10,12,16,0.28)]"
-                        : "bg-[#171310]",
-                      isConflict && "bg-[#231d15]/70"
-                    )}
-                  >
-                    <div className="flex items-start gap-3">
-                      <span
+                    return (
+                      <button
+                        key={candidate.candidateId}
+                        type="button"
+                        onClick={() => selectCandidate(candidate.candidateId, { focus: true })}
                         className={classNames(
-                          "mt-1 h-2.5 w-2.5 rounded-full",
-                          candidate.kind === "box"
-                            ? "bg-[#16a34a]"
-                            : candidate.kind === "text"
-                              ? "bg-[#60a5fa]"
-                              : "bg-[#f59e0b]"
+                          "block w-full rounded-[0.9rem] px-3 py-2 text-left transition",
+                          selected
+                            ? "bg-[#22262d] shadow-[0_10px_24px_rgba(10,12,16,0.28)]"
+                            : "bg-[#171310]",
+                          isConflict && "bg-[#231d15]/70"
                         )}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="truncate text-[13px] font-semibold text-white">
-                            {candidate.suggestedLabel ? `№ ${candidate.suggestedLabel}` : `${candidateKindLabels[candidate.kind]} ${index + 1}`}
-                          </p>
-                          {isConflict && (
-                            <span className="inline-flex items-center rounded-full bg-[#2a2118] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8]">
-                              конфликт
-                            </span>
-                          )}
-                        </div>
-                        <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                          <span className="text-xs text-[#9ba1ab]">
-                            {Math.round(candidate.centerX)}, {Math.round(candidate.centerY)}
-                          </span>
-                          <span className="text-xs text-[#6f7681]">•</span>
-                          <span className="text-xs text-[#9ba1ab]">уверенность {Math.round(candidate.score)}</span>
-                          {candidate.suggestedConfidence != null && (
-                            <>
+                      >
+                        <div className="flex items-start gap-3">
+                          <span
+                            className={classNames(
+                              "mt-1 h-2.5 w-2.5 rounded-full",
+                              candidate.kind === "box"
+                                ? "bg-[#16a34a]"
+                                : candidate.kind === "text"
+                                  ? "bg-[#60a5fa]"
+                                  : "bg-[#f59e0b]"
+                            )}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="truncate text-[13px] font-semibold text-white">
+                                {candidate.suggestedLabel ? `№ ${candidate.suggestedLabel}` : `${candidateKindLabels[candidate.kind]} ${index + 1}`}
+                              </p>
+                              {isConflict && (
+                                <span className="inline-flex items-center rounded-full bg-[#2a2118] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8]">
+                                  конфликт
+                                </span>
+                              )}
+                            </div>
+                            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                              <span className="text-xs text-[#9ba1ab]">
+                                {Math.round(candidate.centerX)}, {Math.round(candidate.centerY)}
+                              </span>
                               <span className="text-xs text-[#6f7681]">•</span>
-                              <span className="text-xs text-[#d6dae1]">{formatCandidateConfidence(candidate.suggestedConfidence)}</span>
-                            </>
-                          )}
-                        </div>
-                        {(candidate.suggestedLabel || candidate.suggestedSource) && (
-                          <div className="mt-1.5 flex flex-wrap gap-1.5">
-                            {candidate.suggestedLabel && (
-                              <span className="inline-flex min-h-6 items-center rounded-full bg-[#1c2718] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#d7f5c9]">
-                                найден номер {candidate.suggestedLabel}
-                              </span>
-                            )}
-                            {candidate.suggestedSource && (
-                              <span className="inline-flex min-h-6 items-center rounded-full bg-[#171310] px-2 py-0.5 text-[10px] font-medium text-[#aeb4be]">
-                                источник: {candidate.suggestedSource}
-                              </span>
-                            )}
-                            {associationCount > 0 && (
-                              <span className="inline-flex min-h-6 items-center rounded-full bg-[#162433] px-2 py-0.5 text-[10px] font-medium text-[#bfe1ff]">
-                                связей {associationCount}
-                              </span>
+                              <span className="text-xs text-[#9ba1ab]">уверенность {Math.round(candidate.score)}</span>
+                              {candidate.suggestedConfidence != null && (
+                                <>
+                                  <span className="text-xs text-[#6f7681]">•</span>
+                                  <span className="text-xs text-[#d6dae1]">{formatCandidateConfidence(candidate.suggestedConfidence)}</span>
+                                </>
+                              )}
+                            </div>
+                            {(candidate.suggestedLabel || candidate.suggestedSource) && (
+                              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                                {candidate.suggestedLabel && (
+                                  <span className="inline-flex min-h-6 items-center rounded-full bg-[#1c2718] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#d7f5c9]">
+                                    найден номер {candidate.suggestedLabel}
+                                  </span>
+                                )}
+                                {candidate.suggestedSource && (
+                                  <span className="inline-flex min-h-6 items-center rounded-full bg-[#171310] px-2 py-0.5 text-[10px] font-medium text-[#aeb4be]">
+                                    источник: {candidate.suggestedSource}
+                                  </span>
+                                )}
+                                {associationCount > 0 && (
+                                  <span className="inline-flex min-h-6 items-center rounded-full bg-[#162433] px-2 py-0.5 text-[10px] font-medium text-[#bfe1ff]">
+                                    связей {associationCount}
+                                  </span>
+                                )}
+                              </div>
                             )}
                           </div>
-                        )}
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        <MarkerRailFooter
-          sectionTitleClass={railSectionTitleClass}
-          displayedCount={displayedMarkers.length}
-          totalCount={session.markers.length}
-          showAmbiguityMarkersOnly={showAmbiguityMarkersOnly}
-          activeQueueLength={activeAmbiguityQueueMarkers.length}
-          activeQueueLabel={activeAmbiguityQueueLabel}
-          totalAmbiguityCount={ambiguityReviewMarkers.length}
-          showDeferredAmbiguityMarkersOnly={showDeferredAmbiguityMarkersOnly}
-          skippedCount={skippedAmbiguityMarkerIds.length}
-          currentPassCount={currentPassAmbiguityMarkers.length}
-          currentPosition={ambiguityReviewCurrentPosition}
-          progress={ambiguityReviewProgress}
-          filterMode={ambiguityMarkerFilterMode}
-          deferredCount={deferredAmbiguityMarkers.length}
-          selectedIndex={selectedAmbiguityMarkerIndex}
-          reviewCompleted={ambiguityReviewCompleted}
-          hasDeferred={hasDeferredAmbiguityMarkers}
-          selectedMarkerLabel={selectedMarker?.label ?? null}
-          hasSelectedAmbiguityReview={hasSelectedAmbiguityReview}
-          selectedReviewTooltip={selectedAmbiguityReviewMessages.join(" • ")}
-          selectedMarkerIsDraft={selectedMarker?.status === "human_draft"}
-          onSetMode={setAmbiguityQueueMode}
-          onFocusAmbiguityMarker={focusAmbiguityMarker}
-        />
+            <MarkerRailFooter
+              sectionTitleClass={railSectionTitleClass}
+              displayedCount={displayedMarkers.length}
+              totalCount={session.markers.length}
+              showAmbiguityMarkersOnly={showAmbiguityMarkersOnly}
+              activeQueueLength={activeAmbiguityQueueMarkers.length}
+              activeQueueLabel={activeAmbiguityQueueLabel}
+              totalAmbiguityCount={ambiguityReviewMarkers.length}
+              showDeferredAmbiguityMarkersOnly={showDeferredAmbiguityMarkersOnly}
+              skippedCount={skippedAmbiguityMarkerIds.length}
+              currentPassCount={currentPassAmbiguityMarkers.length}
+              currentPosition={ambiguityReviewCurrentPosition}
+              progress={ambiguityReviewProgress}
+              filterMode={ambiguityMarkerFilterMode}
+              deferredCount={deferredAmbiguityMarkers.length}
+              selectedIndex={selectedAmbiguityMarkerIndex}
+              reviewCompleted={ambiguityReviewCompleted}
+              hasDeferred={hasDeferredAmbiguityMarkers}
+              selectedMarkerLabel={selectedMarker?.label ?? null}
+              hasSelectedAmbiguityReview={hasSelectedAmbiguityReview}
+              selectedReviewTooltip={selectedAmbiguityReviewMessages.join(" • ")}
+              selectedMarkerIsDraft={selectedMarker?.status === "human_draft"}
+              onSetMode={setAmbiguityQueueMode}
+              onFocusAmbiguityMarker={focusAmbiguityMarker}
+            />
 
-        <div className="scrollbar-hidden flex-1 overflow-y-auto px-2 py-2">
-          {displayedMarkers.length === 0 ? (
-            <div className="px-3 py-6 text-sm text-[#969ba5]">
-              {showDeferredAmbiguityMarkersOnly
-                ? "Отложенных ambiguity-точек сейчас нет."
-                : showAmbiguityMarkersOnly
-                  ? "Спорных AI review-точек сейчас нет."
-                  : isImportedJobPreviewSession
-                    ? "AI не поставил точки. Их можно добавить вручную на холсте."
-                    : "Пока точек нет."}
+            <div className="scrollbar-hidden flex-1 overflow-y-auto px-2 py-2">
+              {displayedMarkers.length === 0 ? (
+                <div className="px-3 py-6 text-sm text-[#969ba5]">
+                  {showDeferredAmbiguityMarkersOnly
+                    ? "Отложенных ambiguity-точек сейчас нет."
+                    : showAmbiguityMarkersOnly
+                      ? "Спорных AI review-точек сейчас нет."
+                      : isImportedJobPreviewSession
+                        ? "AI не поставил точки. Их можно добавить вручную на холсте."
+                        : "Пока точек нет."}
+                </div>
+              ) : (
+                <div className="space-y-1.5">
+                  {displayedMarkers.map((marker) => {
+                    const selected = marker.markerId === selectedMarkerId;
+                    const isConflict = markerConflictById.has(marker.markerId);
+                    const ambiguityConflicts = markerAmbiguityConflictsById.get(marker.markerId) ?? [];
+                    const hasAmbiguityReview = marker.status === "ai_review" && ambiguityConflicts.length > 0;
+                    const hasNearTieReview = ambiguityConflicts.some((conflict) => hasNearTieAmbiguity(conflict.message));
+                    const ambiguityTooltip = Array.from(
+                      new Set(ambiguityConflicts.map((conflict) => conflict.message.trim()).filter(Boolean))
+                    ).join(" • ");
+
+                    return (
+                      <MarkerListItem
+                        key={marker.markerId}
+                        marker={marker}
+                        selected={selected}
+                        tone={isConflict ? "conflict" : "normal"}
+                        hasAmbiguityReview={hasAmbiguityReview}
+                        hasNearTieReview={hasNearTieReview}
+                        ambiguityTooltip={ambiguityTooltip}
+                        onSelect={() => selectMarker(marker.markerId, { focus: true })}
+                      />
+                    );
+                  })}
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="space-y-1.5">
-              {displayedMarkers.map((marker) => {
-                const selected = marker.markerId === selectedMarkerId;
-                const isConflict = markerConflictById.has(marker.markerId);
-                const ambiguityConflicts = markerAmbiguityConflictsById.get(marker.markerId) ?? [];
-                const hasAmbiguityReview = marker.status === "ai_review" && ambiguityConflicts.length > 0;
-                const hasNearTieReview = ambiguityConflicts.some((conflict) => hasNearTieAmbiguity(conflict.message));
-                const ambiguityTooltip = Array.from(
-                  new Set(ambiguityConflicts.map((conflict) => conflict.message.trim()).filter(Boolean))
-                ).join(" • ");
+          </>
+        )}
 
-                return (
-                  <MarkerListItem
-                    key={marker.markerId}
-                    marker={marker}
-                    selected={selected}
-                    tone={isConflict ? "conflict" : "normal"}
-                    hasAmbiguityReview={hasAmbiguityReview}
-                    hasNearTieReview={hasNearTieReview}
-                    ambiguityTooltip={ambiguityTooltip}
-                    onSelect={() => selectMarker(marker.markerId, { focus: true })}
-                  />
-                );
-              })}
+        {isRailCondensed && (
+          <div className="px-4 pb-3">
+            <div className="rounded-[0.95rem] bg-[#15110e] px-3 py-2.5 text-sm text-[#c8ccd3]">
+              <p className="text-[11px] uppercase tracking-[0.16em] text-[#a99b8e]">Коротко</p>
+              <p className="mt-1">Кандидаты: {pendingCandidates.length}</p>
+              <p className="mt-0.5">Точки: {displayedMarkers.length} из {session.markers.length}</p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className="inline-flex min-h-8 items-center rounded-full bg-[#1f1814] px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f6efe7]"
+                  onClick={() => setIsCandidateOverlayOpen(true)}
+                >
+                  Кандидаты
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex min-h-8 items-center rounded-full bg-[#1f1814] px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f6efe7]"
+                  onClick={() => setIsMarkerOverlayOpen(true)}
+                >
+                  Точки
+                </button>
+              </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {!document && (
           <div className="px-5 py-4">
@@ -5148,6 +5186,213 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
         </div>
       )}
 
+      {isCandidateOverlayOpen && (
+        <div
+          className="absolute left-4 top-24 z-40"
+          style={{ width: isCompactWorkspace ? floatingOverlayWidth : Math.min(Math.max(leftRailWidth + 72, 260), 360) }}
+        >
+          <div className="rounded-[1.1rem] bg-[#17191f] p-4 text-white shadow-[0_24px_60px_rgba(8,10,14,0.38)]">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-xs uppercase tracking-[0.18em] text-[#a99b8e]">Кандидаты</p>
+                <p className="text-sm text-[#efe6dc]">В очереди: {pendingCandidates.length}</p>
+              </div>
+              <button
+                type="button"
+                aria-label="Закрыть кандидатов"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-[#d0d4db]"
+                onClick={() => setIsCandidateOverlayOpen(false)}
+              >
+                <CloseIcon />
+              </button>
+            </div>
+            <div className="scrollbar-hidden max-h-[65vh] overflow-y-auto pr-1">
+              {pendingCandidates.length === 0 ? (
+                <div className="rounded-[0.95rem] bg-[#111317] px-3 py-4 text-sm text-[#969ba5]">
+                  {isImportedJobPreviewSession ? "Новых мест для обязательной проверки сейчас нет." : "Новых кандидатов пока нет."}
+                </div>
+              ) : (
+                <div className="space-y-1.5">
+                  {pendingCandidates.map((candidate, index) => {
+                    const selected = candidate.candidateId === selectedCandidateId;
+                    const isConflict = (candidate.conflictCount ?? 0) > 1;
+                    const associationCount = candidateAssociationCountById.get(candidate.candidateId) ?? 0;
+
+                    return (
+                      <button
+                        key={candidate.candidateId}
+                        type="button"
+                        onClick={() => {
+                          selectCandidate(candidate.candidateId, { focus: true });
+                          setIsCandidateOverlayOpen(false);
+                        }}
+                        className={classNames(
+                          "block w-full rounded-[0.9rem] px-3 py-2 text-left transition",
+                          selected
+                            ? "bg-[#22262d] shadow-[0_10px_24px_rgba(10,12,16,0.28)]"
+                            : "bg-[#171310]",
+                          isConflict && "bg-[#231d15]/70"
+                        )}
+                      >
+                        <div className="flex items-start gap-3">
+                          <span
+                            className={classNames(
+                              "mt-1 h-2.5 w-2.5 rounded-full",
+                              candidate.kind === "box"
+                                ? "bg-[#16a34a]"
+                                : candidate.kind === "text"
+                                  ? "bg-[#60a5fa]"
+                                  : "bg-[#f59e0b]"
+                            )}
+                          />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="truncate text-[13px] font-semibold text-white">
+                                {candidate.suggestedLabel ? `№ ${candidate.suggestedLabel}` : `${candidateKindLabels[candidate.kind]} ${index + 1}`}
+                              </p>
+                              {isConflict && (
+                                <span className="inline-flex items-center rounded-full bg-[#2a2118] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8]">
+                                  конфликт
+                                </span>
+                              )}
+                            </div>
+                            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                              <span className="text-xs text-[#9ba1ab]">
+                                {Math.round(candidate.centerX)}, {Math.round(candidate.centerY)}
+                              </span>
+                              <span className="text-xs text-[#6f7681]">•</span>
+                              <span className="text-xs text-[#9ba1ab]">уверенность {Math.round(candidate.score)}</span>
+                              {candidate.suggestedConfidence != null && (
+                                <>
+                                  <span className="text-xs text-[#6f7681]">•</span>
+                                  <span className="text-xs text-[#d6dae1]">{formatCandidateConfidence(candidate.suggestedConfidence)}</span>
+                                </>
+                              )}
+                            </div>
+                            {(candidate.suggestedLabel || candidate.suggestedSource) && (
+                              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                                {candidate.suggestedLabel && (
+                                  <span className="inline-flex min-h-6 items-center rounded-full bg-[#1c2718] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#d7f5c9]">
+                                    найден номер {candidate.suggestedLabel}
+                                  </span>
+                                )}
+                                {candidate.suggestedSource && (
+                                  <span className="inline-flex min-h-6 items-center rounded-full bg-[#171310] px-2 py-0.5 text-[10px] font-medium text-[#aeb4be]">
+                                    источник: {candidate.suggestedSource}
+                                  </span>
+                                )}
+                                {associationCount > 0 && (
+                                  <span className="inline-flex min-h-6 items-center rounded-full bg-[#162433] px-2 py-0.5 text-[10px] font-medium text-[#bfe1ff]">
+                                    связей {associationCount}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isMarkerOverlayOpen && (
+        <div
+          className="absolute left-4 top-24 z-40"
+          style={{ width: isCompactWorkspace ? floatingOverlayWidth : Math.min(Math.max(leftRailWidth + 96, 280), 400) }}
+        >
+          <div className="rounded-[1.1rem] bg-[#17191f] p-4 text-white shadow-[0_24px_60px_rgba(8,10,14,0.38)]">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-xs uppercase tracking-[0.18em] text-[#a99b8e]">Точки</p>
+                <p className="text-sm text-[#efe6dc]">
+                  {displayedMarkers.length} из {session.markers.length}
+                </p>
+              </div>
+              <button
+                type="button"
+                aria-label="Закрыть точки"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-[#d0d4db]"
+                onClick={() => setIsMarkerOverlayOpen(false)}
+              >
+                <CloseIcon />
+              </button>
+            </div>
+            <MarkerRailFooter
+              sectionTitleClass={railSectionTitleClass}
+              displayedCount={displayedMarkers.length}
+              totalCount={session.markers.length}
+              showAmbiguityMarkersOnly={showAmbiguityMarkersOnly}
+              activeQueueLength={activeAmbiguityQueueMarkers.length}
+              activeQueueLabel={activeAmbiguityQueueLabel}
+              totalAmbiguityCount={ambiguityReviewMarkers.length}
+              showDeferredAmbiguityMarkersOnly={showDeferredAmbiguityMarkersOnly}
+              skippedCount={skippedAmbiguityMarkerIds.length}
+              currentPassCount={currentPassAmbiguityMarkers.length}
+              currentPosition={ambiguityReviewCurrentPosition}
+              progress={ambiguityReviewProgress}
+              filterMode={ambiguityMarkerFilterMode}
+              deferredCount={deferredAmbiguityMarkers.length}
+              selectedIndex={selectedAmbiguityMarkerIndex}
+              reviewCompleted={ambiguityReviewCompleted}
+              hasDeferred={hasDeferredAmbiguityMarkers}
+              selectedMarkerLabel={selectedMarker?.label ?? null}
+              hasSelectedAmbiguityReview={hasSelectedAmbiguityReview}
+              selectedReviewTooltip={selectedAmbiguityReviewMessages.join(" • ")}
+              selectedMarkerIsDraft={selectedMarker?.status === "human_draft"}
+              onSetMode={setAmbiguityQueueMode}
+              onFocusAmbiguityMarker={focusAmbiguityMarker}
+            />
+            <div className="scrollbar-hidden max-h-[60vh] overflow-y-auto pr-1">
+              {displayedMarkers.length === 0 ? (
+                <div className="rounded-[0.95rem] bg-[#111317] px-3 py-4 text-sm text-[#969ba5]">
+                  {showDeferredAmbiguityMarkersOnly
+                    ? "Отложенных ambiguity-точек сейчас нет."
+                    : showAmbiguityMarkersOnly
+                      ? "Спорных AI review-точек сейчас нет."
+                      : isImportedJobPreviewSession
+                        ? "AI не поставил точки. Их можно добавить вручную на холсте."
+                        : "Пока точек нет."}
+                </div>
+              ) : (
+                <div className="space-y-1.5">
+                  {displayedMarkers.map((marker) => {
+                    const selected = marker.markerId === selectedMarkerId;
+                    const isConflict = markerConflictById.has(marker.markerId);
+                    const ambiguityConflicts = markerAmbiguityConflictsById.get(marker.markerId) ?? [];
+                    const hasAmbiguityReview = marker.status === "ai_review" && ambiguityConflicts.length > 0;
+                    const hasNearTieReview = ambiguityConflicts.some((conflict) => hasNearTieAmbiguity(conflict.message));
+                    const ambiguityTooltip = Array.from(
+                      new Set(ambiguityConflicts.map((conflict) => conflict.message.trim()).filter(Boolean))
+                    ).join(" • ");
+
+                    return (
+                      <MarkerListItem
+                        key={marker.markerId}
+                        marker={marker}
+                        selected={selected}
+                        tone={isConflict ? "conflict" : "normal"}
+                        hasAmbiguityReview={hasAmbiguityReview}
+                        hasNearTieReview={hasNearTieReview}
+                        ambiguityTooltip={ambiguityTooltip}
+                        onSelect={() => {
+                          selectMarker(marker.markerId, { focus: true });
+                          setIsMarkerOverlayOpen(false);
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {isCompactWorkspace && (hasInspectorContentFocus || isInspectorOpen) && (
         <button
           type="button"
@@ -5174,7 +5419,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
         )}
         style={{ width: isCompactWorkspace ? floatingInspectorWidth : rightRailWidth }}
       >
-        <div className="scrollbar-hidden flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-hidden">
           <section className={railSectionClass}>
             {isCompactWorkspace && (
               <div className="mb-3 flex items-center justify-between gap-3">
@@ -5369,135 +5614,159 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                   />
                 )}
 
-                <div className="grid grid-cols-2 gap-2">
-                  <button type="button" className={toolbarButtonClass} disabled={isWorkspaceBusy} onClick={() => void nudgeMarker(-1, 0)}>
-                    X -1
+                <div className="space-y-2">
+                  <button
+                    type="button"
+                    className="inline-flex min-h-9 w-full items-center justify-between rounded-[0.9rem] bg-[#15110e] px-3 text-sm font-medium text-[#efe6dc]"
+                    onClick={() => setIsInspectorDetailsOpen((current) => !current)}
+                  >
+                    <span>Доводка координат</span>
+                    <span className="text-xs text-[#b7a28f]">{isInspectorDetailsOpen ? "Скрыть" : "Открыть"}</span>
                   </button>
-                  <button type="button" className={toolbarButtonClass} disabled={isWorkspaceBusy} onClick={() => void nudgeMarker(1, 0)}>
-                    X +1
-                  </button>
-                  <button type="button" className={toolbarButtonClass} disabled={isWorkspaceBusy} onClick={() => void nudgeMarker(0, -1)}>
-                    Y -1
-                  </button>
-                  <button type="button" className={toolbarButtonClass} disabled={isWorkspaceBusy} onClick={() => void nudgeMarker(0, 1)}>
-                    Y +1
-                  </button>
-                  <button type="button" className={toolbarButtonClass} disabled={isWorkspaceBusy} onClick={() => void nudgeMarker(-10, 0)}>
-                    X -10
-                  </button>
-                  <button type="button" className={toolbarButtonClass} disabled={isWorkspaceBusy} onClick={() => void nudgeMarker(10, 0)}>
-                    X +10
-                  </button>
-                  <button type="button" className={toolbarButtonClass} disabled={isWorkspaceBusy} onClick={() => void nudgeMarker(0, -10)}>
-                    Y -10
-                  </button>
-                  <button type="button" className={toolbarButtonClass} disabled={isWorkspaceBusy} onClick={() => void nudgeMarker(0, 10)}>
-                    Y +10
-                  </button>
+                  {(!isRailCondensed || isInspectorDetailsOpen) && (
+                    <div className="grid grid-cols-2 gap-2">
+                      <button type="button" className={toolbarButtonClass} disabled={isWorkspaceBusy} onClick={() => void nudgeMarker(-1, 0)}>
+                        X -1
+                      </button>
+                      <button type="button" className={toolbarButtonClass} disabled={isWorkspaceBusy} onClick={() => void nudgeMarker(1, 0)}>
+                        X +1
+                      </button>
+                      <button type="button" className={toolbarButtonClass} disabled={isWorkspaceBusy} onClick={() => void nudgeMarker(0, -1)}>
+                        Y -1
+                      </button>
+                      <button type="button" className={toolbarButtonClass} disabled={isWorkspaceBusy} onClick={() => void nudgeMarker(0, 1)}>
+                        Y +1
+                      </button>
+                      <button type="button" className={toolbarButtonClass} disabled={isWorkspaceBusy} onClick={() => void nudgeMarker(-10, 0)}>
+                        X -10
+                      </button>
+                      <button type="button" className={toolbarButtonClass} disabled={isWorkspaceBusy} onClick={() => void nudgeMarker(10, 0)}>
+                        X +10
+                      </button>
+                      <button type="button" className={toolbarButtonClass} disabled={isWorkspaceBusy} onClick={() => void nudgeMarker(0, -10)}>
+                        Y -10
+                      </button>
+                      <button type="button" className={toolbarButtonClass} disabled={isWorkspaceBusy} onClick={() => void nudgeMarker(0, 10)}>
+                        Y +10
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8f949d]">Лупа</span>
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/[0.03] text-sm font-semibold text-white transition"
-                        onClick={() => setPrecisionZoomLevel((current) => Number(clamp(current - 0.5, 2, 12).toFixed(1)))}
-                        aria-label="Уменьшить увеличение лупы"
-                      >
-                        −
-                      </button>
-                      <span className="min-w-[3rem] text-center text-[11px] font-semibold text-[#b5bac3]">
-                        {formatZoomValue(precisionZoom)}x
-                      </span>
-                      <button
-                        type="button"
-                        className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/[0.03] text-sm font-semibold text-white transition"
-                        onClick={() => setPrecisionZoomLevel((current) => Number(clamp(current + 0.5, 2, 12).toFixed(1)))}
-                        aria-label="Увеличить увеличение лупы"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                  <p className="text-[11px] text-[#9196a0]">клик по лупе двигает точку</p>
-                  <div
-                    className={classNames(
-                      "relative block overflow-hidden rounded-[1rem] bg-[#111317] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
-                      isWorkspaceBusy ? "opacity-50" : ""
-                    )}
-                    style={{
-                      width: precisionLensSize,
-                      height: precisionLensSize,
-                      maxWidth: "100%",
-                      backgroundImage: document ? `url(${resolveAssetUrl(document.storageUrl)})` : undefined,
-                      backgroundSize: precisionBackgroundSize,
-                      backgroundPosition: precisionBackgroundPosition,
-                      backgroundRepeat: "no-repeat"
-                    }}
+                  <button
+                    type="button"
+                    className="inline-flex min-h-9 w-full items-center justify-between rounded-[0.9rem] bg-[#15110e] px-3 text-sm font-medium text-[#efe6dc]"
+                    onClick={() => setIsInspectorLensOpen((current) => !current)}
                   >
-                    <button
-                      type="button"
-                      aria-label="Лупа для точной доводки"
-                      className="absolute inset-0 z-0 cursor-crosshair rounded-[inherit] disabled:cursor-not-allowed"
-                      disabled={isWorkspaceBusy}
-                      onClick={(event) => void handlePrecisionLensClick(event)}
-                    />
-                    <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[size:20px_20px]" />
-                    <span className="pointer-events-none absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-[#ffffff66]" />
-                    <span className="pointer-events-none absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-[#ffffff66]" />
-                    {precisionCandidates.map((candidate, index) => {
-                      const left = precisionLensSize / 2 + (candidate.x - selectedMarker.x) * precisionZoom;
-                      const top = precisionLensSize / 2 + (candidate.y - selectedMarker.y) * precisionZoom;
-                      if (left < -10 || left > precisionLensSize + 10 || top < -10 || top > precisionLensSize + 10) {
-                        return null;
-                      }
-
-                      return (
+                    <span>Лупа</span>
+                    <span className="text-xs text-[#b7a28f]">{isInspectorLensOpen ? "Скрыть" : "Открыть"}</span>
+                  </button>
+                  {(!isRailCondensed || isInspectorLensOpen) && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8f949d]">Точный зум</span>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/[0.03] text-sm font-semibold text-white transition"
+                            onClick={() => setPrecisionZoomLevel((current) => Number(clamp(current - 0.5, 2, 12).toFixed(1)))}
+                            aria-label="Уменьшить увеличение лупы"
+                          >
+                            −
+                          </button>
+                          <span className="min-w-[3rem] text-center text-[11px] font-semibold text-[#b5bac3]">
+                            {formatZoomValue(precisionZoom)}x
+                          </span>
+                          <button
+                            type="button"
+                            className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/[0.03] text-sm font-semibold text-white transition"
+                            onClick={() => setPrecisionZoomLevel((current) => Number(clamp(current + 0.5, 2, 12).toFixed(1)))}
+                            aria-label="Увеличить увеличение лупы"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+                      <p className="text-[11px] text-[#9196a0]">клик по лупе двигает точку</p>
+                      <div
+                        className={classNames(
+                          "relative block overflow-hidden rounded-[1rem] bg-[#111317] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
+                          isWorkspaceBusy ? "opacity-50" : ""
+                        )}
+                        style={{
+                          width: precisionLensSize,
+                          height: precisionLensSize,
+                          maxWidth: "100%",
+                          backgroundImage: document ? `url(${resolveAssetUrl(document.storageUrl)})` : undefined,
+                          backgroundSize: precisionBackgroundSize,
+                          backgroundPosition: precisionBackgroundPosition,
+                          backgroundRepeat: "no-repeat"
+                        }}
+                      >
                         <button
-                          key={`${candidate.source}-${index}`}
                           type="button"
-                          aria-label={`Вариант ${index + 1}`}
-                          className="absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#f59e0b] shadow-[0_4px_14px_rgba(245,158,11,0.45)] transition"
-                          style={{ left, top }}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            void moveMarkerToCoordinates(candidate.x, candidate.y);
-                          }}
-                        />
-                      );
-                    })}
-                    <span
-                      className={classNames(
-                        "pointer-events-none absolute left-1/2 top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 border-2 border-white shadow-[0_2px_10px_rgba(15,23,42,0.45)]",
-                        selectedMarker.pointType === "top_left" ? "rounded-[0.45rem] bg-[#16a34a]" : "rounded-full bg-[#d92d20]"
-                      )}
-                    />
-                  </div>
-                  {selectedMarker.status === "human_draft" && (
-                    <button
-                      type="button"
-                      className="inline-flex h-9 w-full items-center justify-center rounded-[0.8rem] bg-[#1c2718] px-3 text-[12px] font-semibold text-[#d7f5c9] transition disabled:cursor-not-allowed disabled:opacity-35"
-                      disabled={!draftLabel.trim() || isWorkspaceBusy}
-                      onClick={() => void confirmSelectedMarker()}
-                    >
-                      Подтвердить по лупе
-                    </button>
-                  )}
-                  {precisionCandidates.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5">
-                      {precisionCandidates.map((candidate, index) => (
-                        <button
-                          key={`candidate-chip-${candidate.source}-${index}`}
-                          type="button"
-                          className="inline-flex h-7 items-center rounded-full bg-white/[0.03] px-2.5 text-[11px] font-medium text-[#d2d6dd] transition"
+                          aria-label="Лупа для точной доводки"
+                          className="absolute inset-0 z-0 cursor-crosshair rounded-[inherit] disabled:cursor-not-allowed"
                           disabled={isWorkspaceBusy}
-                          onClick={() => void moveMarkerToCoordinates(candidate.x, candidate.y)}
+                          onClick={(event) => void handlePrecisionLensClick(event)}
+                        />
+                        <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[size:20px_20px]" />
+                        <span className="pointer-events-none absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-[#ffffff66]" />
+                        <span className="pointer-events-none absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-[#ffffff66]" />
+                        {precisionCandidates.map((candidate, index) => {
+                          const left = precisionLensSize / 2 + (candidate.x - selectedMarker.x) * precisionZoom;
+                          const top = precisionLensSize / 2 + (candidate.y - selectedMarker.y) * precisionZoom;
+                          if (left < -10 || left > precisionLensSize + 10 || top < -10 || top > precisionLensSize + 10) {
+                            return null;
+                          }
+
+                          return (
+                            <button
+                              key={`${candidate.source}-${index}`}
+                              type="button"
+                              aria-label={`Вариант ${index + 1}`}
+                              className="absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#f59e0b] shadow-[0_4px_14px_rgba(245,158,11,0.45)] transition"
+                              style={{ left, top }}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                void moveMarkerToCoordinates(candidate.x, candidate.y);
+                              }}
+                            />
+                          );
+                        })}
+                        <span
+                          className={classNames(
+                            "pointer-events-none absolute left-1/2 top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 border-2 border-white shadow-[0_2px_10px_rgba(15,23,42,0.45)]",
+                            selectedMarker.pointType === "top_left" ? "rounded-[0.45rem] bg-[#16a34a]" : "rounded-full bg-[#d92d20]"
+                          )}
+                        />
+                      </div>
+                      {selectedMarker.status === "human_draft" && (
+                        <button
+                          type="button"
+                          className="inline-flex h-9 w-full items-center justify-center rounded-[0.8rem] bg-[#1c2718] px-3 text-[12px] font-semibold text-[#d7f5c9] transition disabled:cursor-not-allowed disabled:opacity-35"
+                          disabled={!draftLabel.trim() || isWorkspaceBusy}
+                          onClick={() => void confirmSelectedMarker()}
                         >
-                          Вариант {index + 1}
+                          Подтвердить по лупе
                         </button>
-                      ))}
+                      )}
+                      {precisionCandidates.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5">
+                          {precisionCandidates.map((candidate, index) => (
+                            <button
+                              key={`candidate-chip-${candidate.source}-${index}`}
+                              type="button"
+                              className="inline-flex h-7 items-center rounded-full bg-white/[0.03] px-2.5 text-[11px] font-medium text-[#d2d6dd] transition"
+                              disabled={isWorkspaceBusy}
+                              onClick={() => void moveMarkerToCoordinates(candidate.x, candidate.y)}
+                            >
+                              Вариант {index + 1}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
