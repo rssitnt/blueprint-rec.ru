@@ -4704,16 +4704,16 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
             )}
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2 text-xs lg:grid-cols-3">
-            <div className="rounded-[0.85rem] border border-white/8 bg-white/[0.03] px-3 py-2">
-              <div className="text-[#b39d8a]">AI</div>
+            <div className="min-w-0 rounded-[0.85rem] border border-white/8 bg-white/[0.03] px-3 py-2">
+              <div className="text-[11px] leading-tight text-[#b39d8a]">AI</div>
               <div className="mt-1 font-semibold text-white">{session.summary.aiDetected + session.summary.aiReview}</div>
             </div>
-            <div className="rounded-[0.85rem] border border-white/8 bg-white/[0.03] px-3 py-2">
-              <div className="text-[#b39d8a]">Кандидаты</div>
+            <div className="min-w-0 rounded-[0.85rem] border border-white/8 bg-white/[0.03] px-3 py-2">
+              <div className="text-[11px] leading-tight text-[#b39d8a] break-words">Кандидаты</div>
               <div className="mt-1 font-semibold text-white">{pendingCandidates.length}</div>
             </div>
-            <div className={classNames("rounded-[0.85rem] border border-white/8 bg-white/[0.03] px-3 py-2", isCompactWorkspace && "col-span-2")}>
-              <div className="text-[#b39d8a]">Блокеры</div>
+            <div className={classNames("min-w-0 rounded-[0.85rem] border border-white/8 bg-white/[0.03] px-3 py-2", isCompactWorkspace && "col-span-2")}>
+              <div className="text-[11px] leading-tight text-[#b39d8a] break-words">Блокеры</div>
               <div className="mt-1 font-semibold text-white">{hardPipelineConflictCount}</div>
             </div>
           </div>
