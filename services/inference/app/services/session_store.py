@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import asyncio
+import csv
 import re
 import shutil
 import string
 import zipfile
 from dataclasses import dataclass
 from datetime import datetime
-from io import BytesIO
+from io import BytesIO, StringIO
 from math import hypot
 from pathlib import Path
 
@@ -16,6 +17,7 @@ from openpyxl.styles import Font
 from PIL import Image, ImageDraw, ImageFont, ImageOps, UnidentifiedImageError
 
 from ..core.config import settings
+from ..models.job_schemas import DrawingResultRow, DrawingResultRowStatus
 from ..models.schemas import (
     ActionLogEntry,
     ActionType,
@@ -32,6 +34,7 @@ from ..models.schemas import (
     MarkerPointType,
     MarkerStatus,
     PageVocabularyEntry,
+    PipelineConflict,
     PipelineConflictType,
     PipelineConflictSeverity,
     SessionCommandRequest,
@@ -131,6 +134,162 @@ class InMemorySessionStore:
             session_dir = self.storage_root / session_id
             if session_dir.is_dir():
                 shutil.rmtree(session_dir)
+
+    async def create_session_from_job_result(
+        self,
+        *,
+        title: str,
+        source_file_name: str,
+        raster_path: Path,
+        rows: list[DrawingResultRow],
+        held_back_rows: list[DrawingResultRow],
+        missing_labels: list[str],
+        document_confidence: float | None,
+        source_job_id: str,
+        near_tie_items: list[dict] | None = None,
+    ) -> CreateSessionResponse:
+        if not raster_path.is_file():
+            raise ValueError(f"Не найден подготовленный raster для preview: {raster_path}")
+
+        created = await self.create_session(CreateSessionRequest(title=title))
+        session_id = created.session.session_id
+        raster_file_name = f"{Path(source_file_name).stem or raster_path.stem}-preview.png"
+
+        try:
+            with raster_path.open("rb") as source_stream:
+                upload = self.prepare_upload(
+                    session_id=session_id,
+                    file_name=raster_file_name,
+                    content_type="image/png",
+                    source_stream=source_stream,
+                    size_bytes=raster_path.stat().st_size,
+                )
+            await self.upload_document(session_id, upload)
+
+            async with self._lock:
+                session = self._get_session(session_id)
+                merged_missing_labels = self._merge_job_missing_labels(missing_labels, rows)
+                session.markers = []
+                session.candidates = []
+                session.candidate_associations = []
+                session.page_vocabulary = self._build_page_vocabulary_from_job_rows(rows + held_back_rows)
+                session.missing_labels = merged_missing_labels
+                session.pipeline_conflicts = []
+                near_tie_index = self._build_near_tie_index(near_tie_items or [])
+
+                missing_conflict_labels = {normalize_label(label) for label in merged_missing_labels}
+
+                for row in rows:
+                    bbox_kwargs = self._job_row_bbox_kwargs(row)
+                    marker = self._build_marker_from_job_row(
+                        row,
+                        status=MarkerStatus.AI_REVIEW if row.status == DrawingResultRowStatus.UNCERTAIN else MarkerStatus.AI_DETECTED,
+                    )
+
+                    if marker is not None:
+                        session.markers.append(marker)
+
+                    if row.status == DrawingResultRowStatus.NOT_FOUND:
+                        session.pipeline_conflicts.append(
+                            PipelineConflict(
+                                type=PipelineConflictType.MISSING_VOCAB_LABEL,
+                                severity=PipelineConflictSeverity.ERROR,
+                                label=row.label,
+                                message=row.note or "Система не смогла уверенно найти номер на чертеже.",
+                                related_labels=[row.label],
+                                **bbox_kwargs,
+                            )
+                        )
+                        continue
+
+                    if row.status == DrawingResultRowStatus.UNCERTAIN:
+                        session.pipeline_conflicts.append(
+                            PipelineConflict(
+                                type=PipelineConflictType.CANDIDATE_AMBIGUITY,
+                                severity=PipelineConflictSeverity.WARNING,
+                                label=row.label,
+                                message=row.note or "Нужна ручная проверка результата job pipeline.",
+                                marker_ids=[marker.marker_id] if marker is not None else [],
+                                related_labels=[row.label],
+                                **bbox_kwargs,
+                            )
+                        )
+                        continue
+
+                    if marker is None:
+                        normalized_label = normalize_label(row.label)
+                        if normalized_label and normalized_label not in missing_conflict_labels:
+                            session.missing_labels.append(row.label)
+                            missing_conflict_labels.add(normalized_label)
+                        session.pipeline_conflicts.append(
+                            PipelineConflict(
+                                type=PipelineConflictType.MISSING_VOCAB_LABEL,
+                                severity=PipelineConflictSeverity.ERROR,
+                                label=row.label,
+                                message=row.note or "Для найденного номера не удалось собрать координаты preview.",
+                                related_labels=[row.label],
+                                **bbox_kwargs,
+                            )
+                        )
+
+                for row in held_back_rows:
+                    near_tie_item = near_tie_index.get((row.row, row.page_index, normalize_label(row.label)))
+                    if near_tie_item is not None and row.note and "OCR near-tie ambiguity" in row.note:
+                        markers = self._build_near_tie_markers_from_job_row(row, near_tie_item)
+                        session.markers.extend(markers)
+                        session.pipeline_conflicts.append(
+                            PipelineConflict(
+                                type=PipelineConflictType.CANDIDATE_AMBIGUITY,
+                                severity=PipelineConflictSeverity.WARNING,
+                                label=row.label,
+                                message=(
+                                    near_tie_item.get("note")
+                                    or row.note
+                                    or "Внутри одного bbox почти равный OCR-спор между двумя цифрами. Нужна ручная проверка."
+                                ),
+                                marker_ids=[marker.marker_id for marker in markers],
+                                related_labels=[marker.label for marker in markers if marker.label],
+                                **self._job_row_bbox_kwargs(row),
+                            )
+                        )
+                        continue
+                    bbox_kwargs = self._job_row_bbox_kwargs(row)
+                    marker = self._build_marker_from_job_row(row, status=MarkerStatus.AI_REVIEW)
+                    if marker is not None:
+                        session.markers.append(marker)
+                    session.pipeline_conflicts.append(
+                        PipelineConflict(
+                            type=PipelineConflictType.CANDIDATE_AMBIGUITY,
+                            severity=PipelineConflictSeverity.WARNING,
+                            label=row.label,
+                            message=row.note or "Кандидат удержан из итогового CSV и вынесен в ручную проверку.",
+                            marker_ids=[marker.marker_id] if marker is not None else [],
+                            related_labels=[row.label],
+                            **bbox_kwargs,
+                        )
+                    )
+
+                self._refresh_summary(session)
+                self._record_action(
+                    session,
+                    Actor.AI,
+                    ActionType.AUTO_ANNOTATION_COMPLETED,
+                    {
+                        "source_job_id": source_job_id,
+                        "imported_marker_count": len(session.markers),
+                        "held_back_marker_count": len(held_back_rows),
+                        "missing_label_count": len(session.missing_labels),
+                        "pipeline_conflict_count": len(session.pipeline_conflicts),
+                        "document_confidence": document_confidence,
+                    },
+                )
+                return CreateSessionResponse(session=session.model_copy(deep=True))
+        except Exception:
+            try:
+                await self.delete_session(session_id)
+            except KeyError:
+                pass
+            raise
 
     async def upload_document(self, session_id: str, upload: StoredUpload) -> UploadDocumentResponse:
         async with self._lock:
@@ -3241,6 +3400,7 @@ class InMemorySessionStore:
     def _build_export_archive(self, session: AnnotationSession, document_path: Path) -> bytes:
         archive_buffer = BytesIO()
         session_export_name = self._safe_export_name(session.title)
+        markers_csv = self._build_markers_csv(session)
         markers_xlsx = self._build_markers_xlsx(session)
 
         with Image.open(document_path) as source_image:
@@ -3249,6 +3409,7 @@ class InMemorySessionStore:
             annotated_image.save(annotated_buffer, format="PNG")
 
         with zipfile.ZipFile(archive_buffer, mode="w", compression=zipfile.ZIP_DEFLATED) as archive:
+            archive.writestr(f"{session_export_name}/markers.csv", markers_csv)
             archive.writestr(f"{session_export_name}/markers.xlsx", markers_xlsx)
             archive.writestr(f"{session_export_name}/annotated.png", annotated_buffer.getvalue())
 
@@ -3297,6 +3458,78 @@ class InMemorySessionStore:
         payload = BytesIO()
         workbook.save(payload)
         return payload.getvalue()
+
+    def _build_markers_csv(self, session: AnnotationSession) -> str:
+        rows = self._build_export_rows(session)
+        buffer = StringIO()
+        writer = csv.DictWriter(
+            buffer,
+            fieldnames=[
+                "label",
+                "center_x",
+                "center_y",
+                "top_left_x",
+                "top_left_y",
+                "statuses",
+                "confidence",
+            ],
+        )
+        writer.writeheader()
+        for row in rows:
+            writer.writerow(row)
+        return buffer.getvalue()
+
+    def _build_export_rows(self, session: AnnotationSession) -> list[dict[str, object]]:
+        grouped: dict[str, dict[str, object]] = {}
+        order: list[str] = []
+
+        for marker in session.markers:
+            export_key = (marker.label or "").strip() or f"unlabeled:{marker.marker_id}"
+            if export_key not in grouped:
+                grouped[export_key] = {
+                    "label": (marker.label or "").strip(),
+                    "center_x": None,
+                    "center_y": None,
+                    "top_left_x": None,
+                    "top_left_y": None,
+                    "statuses": [],
+                    "confidence": None,
+                }
+                order.append(export_key)
+
+            row = grouped[export_key]
+            statuses = row["statuses"]
+            if isinstance(statuses, list) and marker.status.value not in statuses:
+                statuses.append(marker.status.value)
+
+            if marker.confidence is not None:
+                current_confidence = row["confidence"]
+                if current_confidence is None or marker.confidence > current_confidence:
+                    row["confidence"] = marker.confidence
+
+            if marker.point_type == MarkerPointType.CENTER:
+                row["center_x"] = round(marker.x, 4)
+                row["center_y"] = round(marker.y, 4)
+            else:
+                row["top_left_x"] = round(marker.x, 4)
+                row["top_left_y"] = round(marker.y, 4)
+
+        export_rows: list[dict[str, object]] = []
+        for key in order:
+            row = grouped[key]
+            statuses = row["statuses"]
+            export_rows.append(
+                {
+                    "label": row["label"],
+                    "center_x": row["center_x"] if row["center_x"] is not None else "",
+                    "center_y": row["center_y"] if row["center_y"] is not None else "",
+                    "top_left_x": row["top_left_x"] if row["top_left_x"] is not None else "",
+                    "top_left_y": row["top_left_y"] if row["top_left_y"] is not None else "",
+                    "statuses": "|".join(statuses) if isinstance(statuses, list) else "",
+                    "confidence": row["confidence"] if row["confidence"] is not None else "",
+                }
+            )
+        return export_rows
 
     @staticmethod
     def _safe_export_name(title: str) -> str:
@@ -3507,6 +3740,162 @@ class InMemorySessionStore:
             return ActionType.CANDIDATE_REJECTED
 
         raise ValueError(f"Unsupported command type: {command.type}")
+
+    @staticmethod
+    def _job_row_bbox_kwargs(row: DrawingResultRow) -> dict[str, float]:
+        if row.bbox is None:
+            return {}
+        return {
+            "bbox_x": row.bbox.x,
+            "bbox_y": row.bbox.y,
+            "bbox_width": row.bbox.w,
+            "bbox_height": row.bbox.h,
+        }
+
+    @staticmethod
+    def _build_near_tie_index(items: list[dict]) -> dict[tuple[int, int, str], dict]:
+        index: dict[tuple[int, int, str], dict] = {}
+        for item in items:
+            try:
+                row = int(item.get("row"))
+                page_index = int(item.get("page_index", 0))
+            except (TypeError, ValueError):
+                continue
+            label = normalize_label(str(item.get("label") or ""))
+            if not label:
+                continue
+            index[(row, page_index, label)] = item
+        return index
+
+    @staticmethod
+    def _build_near_tie_markers_from_job_row(row: DrawingResultRow, near_tie_item: dict) -> list[Marker]:
+        if row.bbox is None:
+            marker = InMemorySessionStore._build_marker_from_job_row(row, status=MarkerStatus.AI_REVIEW)
+            return [marker] if marker is not None else []
+
+        primary_label = str(near_tie_item.get("ocr_best_label") or row.label or "").strip() or row.label
+        alternative_label = str(near_tie_item.get("alternative_label") or "").strip()
+        primary_score = near_tie_item.get("ocr_best_score")
+        alternative_score = near_tie_item.get("ocr_second_score")
+
+        center_x = row.bbox.x + (row.bbox.w / 2)
+        center_y = row.bbox.y + (row.bbox.h / 2)
+        vertical_split = row.bbox.h >= row.bbox.w * 1.4
+        offset = max(8.0, min(row.bbox.h if vertical_split else row.bbox.w, 26.0) * 0.22)
+
+        points: list[tuple[str, float | None, float, float]] = []
+        if vertical_split:
+            points.append((primary_label, primary_score, center_x, center_y - offset))
+            if alternative_label:
+                points.append((alternative_label, alternative_score, center_x, center_y + offset))
+        else:
+            points.append((primary_label, primary_score, center_x - offset, center_y))
+            if alternative_label:
+                points.append((alternative_label, alternative_score, center_x + offset, center_y))
+
+        markers: list[Marker] = []
+        seen_labels: set[str] = set()
+        for label, score, x, y in points:
+            normalized = normalize_label(label)
+            if not normalized or normalized in seen_labels:
+                continue
+            seen_labels.add(normalized)
+            markers.append(
+                Marker(
+                    label=label,
+                    x=x,
+                    y=y,
+                    point_type=MarkerPointType.CENTER,
+                    status=MarkerStatus.AI_REVIEW,
+                    confidence=float(score) if isinstance(score, (int, float)) else row.final_score,
+                    created_by=Actor.AI,
+                    updated_by=Actor.AI,
+                )
+            )
+        if not markers:
+            marker = InMemorySessionStore._build_marker_from_job_row(row, status=MarkerStatus.AI_REVIEW)
+            return [marker] if marker is not None else []
+        return markers
+
+    @staticmethod
+    def _build_marker_from_job_row(row: DrawingResultRow, *, status: MarkerStatus) -> Marker | None:
+        point = row.center
+        point_type = MarkerPointType.CENTER
+
+        if point is None and row.top_left is not None:
+            point = row.top_left
+            point_type = MarkerPointType.TOP_LEFT
+
+        if point is None:
+            return None
+
+        return Marker(
+            label=row.label,
+            x=point.x,
+            y=point.y,
+            point_type=point_type,
+            status=status,
+            confidence=row.final_score,
+            created_by=Actor.AI,
+            updated_by=Actor.AI,
+        )
+
+    def _build_page_vocabulary_from_job_rows(self, rows: list[DrawingResultRow]) -> list[PageVocabularyEntry]:
+        vocabulary_by_label: dict[str, PageVocabularyEntry] = {}
+
+        for row in rows:
+            if row.status == DrawingResultRowStatus.NOT_FOUND:
+                continue
+
+            normalized_label = normalize_label(row.label)
+            if not normalized_label:
+                continue
+
+            entry = vocabulary_by_label.get(normalized_label)
+            if entry is None:
+                entry = PageVocabularyEntry(
+                    label=row.label,
+                    normalized_label=normalized_label,
+                    occurrences=0,
+                    max_confidence=row.final_score,
+                    sources=[row.source_kind or "job-result"],
+                    **self._job_row_bbox_kwargs(row),
+                )
+                vocabulary_by_label[normalized_label] = entry
+
+            entry.occurrences += 1
+            if row.final_score is not None and (entry.max_confidence is None or row.final_score > entry.max_confidence):
+                entry.max_confidence = row.final_score
+            source_kind = row.source_kind or "job-result"
+            if source_kind not in entry.sources:
+                entry.sources.append(source_kind)
+            if row.bbox is not None and entry.bbox_width is None:
+                entry.bbox_x = row.bbox.x
+                entry.bbox_y = row.bbox.y
+                entry.bbox_width = row.bbox.w
+                entry.bbox_height = row.bbox.h
+
+        return list(vocabulary_by_label.values())
+
+    @staticmethod
+    def _merge_job_missing_labels(missing_labels: list[str], rows: list[DrawingResultRow]) -> list[str]:
+        ordered: list[str] = []
+        seen: set[str] = set()
+
+        def append_label(value: str | None) -> None:
+            normalized_value = normalize_label(value)
+            if not normalized_value or normalized_value in seen:
+                return
+            seen.add(normalized_value)
+            ordered.append((value or "").strip())
+
+        for label in missing_labels:
+            append_label(label)
+        for row in rows:
+            if row.status == DrawingResultRowStatus.NOT_FOUND:
+                append_label(row.label)
+
+        return ordered
 
     def _record_action(self, session: AnnotationSession, actor: Actor, action_type: ActionType, payload: dict) -> None:
         session.action_log.append(

@@ -1,0 +1,364 @@
+{
+  "generated_at": "2026-04-12T11:16:35.939865+00:00",
+  "source_image": "C:\\projects\\sites\\blueprint-rec-2\\blueprints-test\\image001.png",
+  "source_size": {
+    "width": 205,
+    "height": 174
+  },
+  "marker_count": 3,
+  "unique_label_count": 2,
+  "settings": {
+    "ocr_engine": "both",
+    "tile_size": 1280,
+    "tile_overlap": 192,
+    "detect_scales": [
+      1.0,
+      1.6
+    ],
+    "strict_labels": true,
+    "gemini_enabled": true,
+    "gemini_model": "google/gemini-3.1-flash-lite-preview",
+    "gemini_page_labels_enabled": true,
+    "gemini_page_max_side": 1800,
+    "gemini_tile_proposals_enabled": true,
+    "gemini_proposal_tile_size": 1024,
+    "gemini_proposal_tile_overlap": 160,
+    "gemini_proposal_min_ink_density": 0.02,
+    "gemini_proposal_min_dark_pixels": 12,
+    "gemini_proposal_min_score": 0.55,
+    "final_min_ink_density": 0.07,
+    "final_min_dark_pixels": 120,
+    "final_min_bbox_area": 550.0,
+    "final_max_sparse_bbox_area": 10000.0
+  },
+  "stats": {
+    "labels_with_duplicates": {
+      "26": 2
+    },
+    "status_counts": {
+      "ocr_gemini_agree": 3
+    },
+    "accepted_before_merge": 3,
+    "merged_out": 0,
+    "final_text_sanity_rejected": 0
+  },
+  "detect_debug": {
+    "tile_count": 1,
+    "detect_scales": [
+      1.0,
+      1.6
+    ],
+    "raw_counts_by_scale": {
+      "1.00": 2,
+      "1.60": 2
+    },
+    "raw_candidate_count": 4,
+    "deduped_candidate_count": 3
+  },
+  "run_debug": {
+    "gemini_enabled": true,
+    "gemini_page_labels_enabled": true,
+    "page_labels_source": "gemini_page",
+    "page_labels_result": {
+      "labels": [
+        "26",
+        "27"
+      ],
+      "confidence": 1.0,
+      "reason": "The image contains two clear callout labels, 26 and 27, pointing to components within the circular detail view.",
+      "image_size": {
+        "width": 205,
+        "height": 174
+      }
+    },
+    "allowed_labels": [
+      "26",
+      "27"
+    ],
+    "candidate_count": 3,
+    "accepted_before_merge": 3,
+    "multi_split_expansions": 0,
+    "tile_proposals": 0,
+    "final_text_sanity_rejected": 0,
+    "status_counts": {
+      "ocr_gemini_agree": 3
+    }
+  },
+  "markers": [
+    {
+      "quad": [
+        [
+          78.5,
+          35.5
+        ],
+        [
+          95.5,
+          35.5
+        ],
+        [
+          95.5,
+          50.5
+        ],
+        [
+          78.5,
+          50.5
+        ]
+      ],
+      "bbox": {
+        "x": 78.5,
+        "y": 35.5,
+        "w": 17.0,
+        "h": 15.0,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.0,
+      "center": {
+        "x": 87.0,
+        "y": 43.0
+      },
+      "top_left": {
+        "x": 78.5,
+        "y": 35.5
+      },
+      "tile_index": 0,
+      "label": "26",
+      "status": "gemini_single_localize",
+      "recognition": {
+        "crop_box": {
+          "x0": 70,
+          "y0": 28,
+          "x1": 104,
+          "y1": 58
+        },
+        "context_box": {
+          "x0": 0,
+          "y0": 0,
+          "x1": 205,
+          "y1": 174
+        },
+        "easyocr_scores": {
+          "26": 1.0
+        },
+        "rapidocr_scores": {
+          "26": 0.9999218583106995
+        },
+        "ocr_best_label": "26",
+        "ocr_best_score": 1.0,
+        "ocr_second_score": 0.0,
+        "gemini": {
+          "status": "ok",
+          "label": "26",
+          "confidence": 1.0,
+          "reason": "The highlighted text is a clear part-number callout with a leader line pointing to a component in the drawing.",
+          "raw_label": "26"
+        },
+        "gemini_single_localize": {
+          "items": [
+            {
+              "label": "26",
+              "x0": 250.0,
+              "y0": 250.0,
+              "x1": 750.0,
+              "y1": 750.0
+            }
+          ],
+          "reason": ""
+        },
+        "final_ink_density": 0.26590909090909093,
+        "final_dark_pixels": 117,
+        "final_bbox_area": 255.0,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 26,
+        "final_min_bbox_area_effective": 140.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 1.0,
+      "ocr_gap": 1.0
+    },
+    {
+      "quad": [
+        [
+          107.58,
+          72.736
+        ],
+        [
+          120.42,
+          72.736
+        ],
+        [
+          120.42,
+          83.26400000000001
+        ],
+        [
+          107.58,
+          83.26400000000001
+        ]
+      ],
+      "bbox": {
+        "x": 107.58,
+        "y": 72.736,
+        "w": 12.84,
+        "h": 10.528,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 114.0,
+        "y": 78.0
+      },
+      "top_left": {
+        "x": 107.58,
+        "y": 72.736
+      },
+      "tile_index": 0,
+      "label": "26",
+      "status": "gemini_single_localize",
+      "recognition": {
+        "crop_box": {
+          "x0": 99,
+          "y0": 64,
+          "x1": 129,
+          "y1": 92
+        },
+        "context_box": {
+          "x0": 0,
+          "y0": 0,
+          "x1": 205,
+          "y1": 174
+        },
+        "easyocr_scores": {
+          "26": 0.999997724070939
+        },
+        "rapidocr_scores": {
+          "26": 0.9999769330024719
+        },
+        "ocr_best_label": "26",
+        "ocr_best_score": 0.999997724070939,
+        "ocr_second_score": 0.0,
+        "gemini": {
+          "status": "ok",
+          "label": "26",
+          "confidence": 1.0,
+          "reason": "The highlighted text is a clear part callout label.",
+          "raw_label": "26"
+        },
+        "gemini_single_localize": {
+          "items": [
+            {
+              "label": "26",
+              "x0": 286.0,
+              "y0": 312.0,
+              "x1": 714.0,
+              "y1": 688.0
+            }
+          ],
+          "reason": ""
+        },
+        "final_ink_density": 0.7430555555555556,
+        "final_dark_pixels": 214,
+        "final_bbox_area": 135.17952,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 26,
+        "final_min_bbox_area_effective": 140.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.9999983613310761,
+      "ocr_gap": 0.999997724070939
+    },
+    {
+      "quad": [
+        [
+          38.942,
+          83.5
+        ],
+        [
+          55.058,
+          83.5
+        ],
+        [
+          55.058,
+          98.5
+        ],
+        [
+          38.942,
+          98.5
+        ]
+      ],
+      "bbox": {
+        "x": 38.942,
+        "y": 83.5,
+        "w": 16.116,
+        "h": 15.0,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 47.0,
+        "y": 91.0
+      },
+      "top_left": {
+        "x": 38.942,
+        "y": 83.5
+      },
+      "tile_index": 0,
+      "label": "27",
+      "status": "gemini_single_localize",
+      "recognition": {
+        "crop_box": {
+          "x0": 30,
+          "y0": 76,
+          "x1": 64,
+          "y1": 106
+        },
+        "context_box": {
+          "x0": 0,
+          "y0": 0,
+          "x1": 186,
+          "y1": 174
+        },
+        "easyocr_scores": {
+          "27": 0.999998651301114,
+          "3": 0.6599936383583758
+        },
+        "rapidocr_scores": {
+          "27": 0.9999155402183533
+        },
+        "ocr_best_label": "27",
+        "ocr_best_score": 0.999998651301114,
+        "ocr_second_score": 0.0,
+        "gemini": {
+          "status": "ok",
+          "label": "27",
+          "confidence": 1.0,
+          "reason": "The highlighted text is a clear part-number callout with a leader line pointing to a component in the drawing.",
+          "raw_label": "27"
+        },
+        "gemini_single_localize": {
+          "items": [
+            {
+              "label": "27",
+              "x0": 263.0,
+              "y0": 250.0,
+              "x1": 737.0,
+              "y1": 750.0
+            }
+          ],
+          "reason": ""
+        },
+        "final_ink_density": 0.21818181818181817,
+        "final_dark_pixels": 96,
+        "final_bbox_area": 241.74,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 26,
+        "final_min_bbox_area_effective": 140.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.999999028936802,
+      "ocr_gap": 0.999998651301114
+    }
+  ],
+  "final_text_sanity_rejected_markers": []
+}

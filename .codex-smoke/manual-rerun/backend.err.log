@@ -1,0 +1,5 @@
+INFO:     Loading environment from 'services/inference/.env.local'
+INFO:     Started server process [51972]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8010 (Press CTRL+C to quit)

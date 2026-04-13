@@ -1,0 +1,7 @@
+[v3] image=test1.jpg size=(900, 1060)
+[v3] allowed_labels=40 strict=True gemini=True
+[v3] gemini_page_labels=40 source=gemini_page reason=The labels were extracted by identifying all circled numbers acting as callouts for the exploded view components.
+[v3] detected candidates: raw=0 deduped=0
+[v3] final markers=0 unique=0
+[v3] json=C:\projects\sites\blueprint-rec-2\.codex-smoke\gemini-page-architecture\test1-direct-gemini\markers_v3.json
+[v3] overlay=C:\projects\sites\blueprint-rec-2\.codex-smoke\gemini-page-architecture\test1-direct-gemini\markers_v3.overlay.png

@@ -18,19 +18,15 @@ API_BASE_URL = "http://127.0.0.1:8010/api"
 TEST_DIR = Path(r"C:/projects/sites/blueprint-rec-2/blueprints-test")
 EXPORT_DIR = Path(r"C:/projects/sites/blueprint-rec-2/exports/test-batch-2026-03-29")
 IMAGE001_XLSX = Path(
-    r"C:/projects/sites/blueprint-rec/output/current/webui_jobs/20260324_125124_42e55359/downloads/image001_coordinates.xlsx"
+    r"C:/projects/sites/blueprint-rec-2/output/current/webui_jobs/20260324_125124_42e55359/downloads/image001_coordinates.xlsx"
 )
 TEST1_JSON = Path(
-    r"C:/projects/sites/blueprint-rec/output/current/runs/v2/test1_v14_filtered_plus_missing/markers_v2.json"
+    r"C:/projects/sites/blueprint-rec-2/output/current/runs/v2/test1_v14_filtered_plus_missing/markers_v2.json"
 )
 TEST1_MANUAL_EXTRAS = [
     ("1", 379, 47),
     ("29B", 368, 904),
 ]
-TEST2_XLSX = Path(
-    r"C:/projects/sites/blueprint-rec/output/archive/legacy_20260306_130226/spreadsheet/test_runs/test2_cycle_fix1_feedback4.xlsx"
-)
-
 POINT_TYPE = "center"
 NOTE_RADIUS_RE = re.compile(r"(?:^|;)r=([0-9.]+)")
 NOTE_CORE_INK_RE = re.compile(r"(?:^|;)core_ink=([0-9.]+)")
@@ -226,8 +222,6 @@ def load_markers_for(file_name: str) -> list[dict]:
             load_markers_v2_json(TEST1_JSON, point_type=POINT_TYPE),
             TEST1_MANUAL_EXTRAS,
         )
-    if file_name == "test2.jpg":
-        return load_legacy_markers(TEST2_XLSX, scale_divisor=1)
     raise ValueError(f"Unsupported file for marker source: {file_name}")
 
 
@@ -298,7 +292,7 @@ def api_export_session(session_id: str, zip_path: Path, unpack_dir: Path) -> Non
 
 def build_batch_exports(target_files: list[str] | None = None) -> None:
     if not target_files:
-        target_files = ["image001.png", "page4.png", "test1.jpg", "test2.jpg"]
+        target_files = ["image001.png", "page4.png", "test1.jpg"]
     EXPORT_DIR.mkdir(parents=True, exist_ok=True)
     created_outputs: list[Path] = []
 

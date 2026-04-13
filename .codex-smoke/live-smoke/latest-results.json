@@ -1,8 +1,8 @@
 [
   {
     "filePath": "C:\\projects\\sites\\blueprint-rec-2\\blueprints-test\\image001.png",
-    "sessionId": "437768f9-e337-4417-a55f-bd383ec62242",
-    "elapsedSeconds": 1.55,
+    "sessionId": "60e04205-d7b0-4161-911d-e53fd53a9d5c",
+    "elapsedSeconds": 1.73,
     "totalCandidates": 3,
     "totalMarkers": 3,
     "aiDetected": 3,
@@ -13,7 +13,7 @@
       "ok": true,
       "status": 200,
       "contentType": "application/zip",
-      "contentDisposition": "attachment; filename*=UTF-8''Codex-live-smoke-image001.png-2026-04-10T07-15-11.848Z-437768f9-export.zip",
+      "contentDisposition": "attachment; filename*=UTF-8''Codex-live-smoke-image001.png-2026-04-11T18-24-02.443Z-60e04205-export.zip",
       "body": null
     },
     "ui": {
@@ -23,25 +23,25 @@
       "hasConflictReviewSurface": false,
       "hasHistoryDialog": true,
       "historyHasAutoAnnotateEntry": true,
-      "screenshotPath": "C:\\projects\\sites\\blueprint-rec-2\\.codex-smoke\\live-smoke\\437768f9-e337-4417-a55f-bd383ec62242.png"
+      "screenshotPath": "C:\\projects\\sites\\blueprint-rec-2\\.codex-smoke\\live-smoke\\60e04205-d7b0-4161-911d-e53fd53a9d5c.png"
     }
   },
   {
     "filePath": "C:\\projects\\sites\\blueprint-rec-2\\blueprints-test\\test1.jpg",
-    "sessionId": "a301f258-727c-495b-b0e8-cdf17fd68530",
-    "elapsedSeconds": 75.42,
+    "sessionId": "80920250-5a3f-4e23-897a-6b2c2fa64365",
+    "elapsedSeconds": 92.27,
     "totalCandidates": 39,
     "totalMarkers": 32,
-    "aiDetected": 25,
-    "aiReview": 7,
-    "pipelineConflicts": 10,
+    "aiDetected": 24,
+    "aiReview": 8,
+    "pipelineConflicts": 11,
     "missingLabels": 2,
     "export": {
       "ok": false,
       "status": 400,
       "contentType": "application/json",
       "contentDisposition": null,
-      "body": "{\"detail\":\"Export blocked until pipeline conflicts are resolved: association_ambiguity; duplicate_label_nearby:17; duplicate_label_nearby:18; missing_vocab_label:21; +1 more\"}"
+      "body": "{\"detail\":\"Export blocked until pipeline conflicts are resolved: association_ambiguity; duplicate_label_nearby:17; duplicate_label_nearby:18; duplicate_label_nearby:18; +2 more\"}"
     },
     "ui": {
       "hasReviewSummary": true,
@@ -50,7 +50,7 @@
       "hasConflictReviewSurface": false,
       "hasHistoryDialog": true,
       "historyHasAutoAnnotateEntry": true,
-      "screenshotPath": "C:\\projects\\sites\\blueprint-rec-2\\.codex-smoke\\live-smoke\\a301f258-727c-495b-b0e8-cdf17fd68530.png"
+      "screenshotPath": "C:\\projects\\sites\\blueprint-rec-2\\.codex-smoke\\live-smoke\\80920250-5a3f-4e23-897a-6b2c2fa64365.png"
     }
   }
 ]

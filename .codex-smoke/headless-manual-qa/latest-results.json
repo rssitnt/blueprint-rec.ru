@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-04-10T07:18:53.759Z",
+  "generatedAt": "2026-04-11T18:04:56.400Z",
   "heavySession": {
     "filePath": "C:\\projects\\sites\\blueprint-rec-2\\blueprints-test\\test1.jpg",
-    "sessionId": "c63b907a-3866-47fd-be95-036ab20e6e6a",
-    "elapsedSeconds": 76.13,
+    "sessionId": "18733b45-1c26-4b84-94e6-a4aaf9623918",
+    "elapsedSeconds": 90.78,
     "summary": {
       "totalMarkers": 32,
-      "aiDetected": 25,
-      "aiReview": 7,
+      "aiDetected": 24,
+      "aiReview": 8,
       "humanConfirmed": 0,
       "humanCorrected": 0,
       "rejected": 0
@@ -15,8 +15,8 @@
   },
   "lightSession": {
     "filePath": "C:\\projects\\sites\\blueprint-rec-2\\blueprints-test\\image001.png",
-    "sessionId": "575e60fa-92fc-4b76-ac4e-3d6177db5b20",
-    "elapsedSeconds": 1.49,
+    "sessionId": "1053e784-726f-42d6-a205-f0c6b48f6b04",
+    "elapsedSeconds": 1.81,
     "summary": {
       "totalMarkers": 3,
       "aiDetected": 3,
@@ -27,7 +27,7 @@
     }
   },
   "heavyUi": {
-    "initialReviewCount": "14",
+    "initialReviewCount": "15",
     "hasConflictSurface": true,
     "historyHasStickyControls": true,
     "candidatePanelAvailable": true,
@@ -35,20 +35,20 @@
     "labelEditorVisible": true,
     "labelUpdated": true,
     "candidateCreatedAndConfirmed": true,
-    "screenshotPath": "C:\\projects\\sites\\blueprint-rec-2\\.codex-smoke\\headless-manual-qa\\c63b907a-3866-47fd-be95-036ab20e6e6a-heavy.png"
+    "screenshotPath": "C:\\projects\\sites\\blueprint-rec-2\\.codex-smoke\\headless-manual-qa\\18733b45-1c26-4b84-94e6-a4aaf9623918-heavy.png"
   },
   "heavyExport": {
     "ok": false,
     "status": 400,
     "contentType": "application/json",
     "contentDisposition": null,
-    "body": "{\"detail\":\"Export blocked until pipeline conflicts are resolved: association_ambiguity; duplicate_label_nearby:17; duplicate_label_nearby:18; missing_vocab_label:21; +1 more\"}"
+    "body": "{\"detail\":\"Export blocked until pipeline conflicts are resolved: association_ambiguity; duplicate_label_nearby:17; duplicate_label_nearby:18; duplicate_label_nearby:18; +2 more\"}"
   },
   "lightExport": {
     "ok": true,
     "status": 200,
     "contentType": "application/zip",
-    "contentDisposition": "attachment; filename*=UTF-8''Headless-manual-QA-image001.png-2026-04-10T07-17-15.674Z-575e60fa-export.zip",
+    "contentDisposition": "attachment; filename*=UTF-8''Headless-manual-QA-image001.png-2026-04-11T18-03-04.031Z-1053e784-export.zip",
     "body": null
   }
 }

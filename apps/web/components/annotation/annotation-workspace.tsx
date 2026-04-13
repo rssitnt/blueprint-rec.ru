@@ -45,6 +45,12 @@ const markerStatusLabels: Record<MarkerStatus, string> = {
   rejected: "Ложный"
 };
 
+const NEAR_TIE_AMBIGUITY_TOKEN = "OCR near-tie ambiguity";
+
+function hasNearTieAmbiguity(message: string | null | undefined) {
+  return (message ?? "").includes(NEAR_TIE_AMBIGUITY_TOKEN);
+}
+
 const actionActorLabels = {
   human: "человек",
   ai: "ai",
@@ -95,7 +101,6 @@ type HistoryEntryCardViewModel = {
   historyJumpContext: HistoryJumpContext;
   nextStepHint: string | null;
   ambiguityMetaLabel: string | null;
-  ambiguityMetaClass: string | null;
 };
 
 type AmbiguityReviewState = {
@@ -363,7 +368,7 @@ function HistoryNextStepPanel({
             {primaryQueueContext && <HistoryQueueChip queueContext={primaryQueueContext} />}
             <button
               type="button"
-              className="inline-flex min-h-7 items-center rounded-[0.7rem] px-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#d7f5c9] transition hover:bg-[#23301d]"
+              className="inline-flex min-h-7 items-center rounded-[0.7rem] px-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#d7f5c9] transition"
               onClick={onContinue}
             >
               {historyActionLabels.nextCase}
@@ -372,7 +377,7 @@ function HistoryNextStepPanel({
           {currentPassCount > 0 && primaryQueueContext !== "review" && (
             <button
               type="button"
-              className="inline-flex min-h-7 items-center rounded-[0.7rem] border border-[#7a5a23] bg-[#2e2418] px-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8] transition hover:bg-[#3a2b1d]"
+              className="inline-flex min-h-7 items-center rounded-[0.7rem] border border-[#7a5a23] bg-[#2e2418] px-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8] transition"
               onClick={() => onOpenQueue("current")}
             >
               {historyActionLabels.toReview} {currentPassCount}
@@ -381,7 +386,7 @@ function HistoryNextStepPanel({
           {deferredCount > 0 && primaryQueueContext !== "deferred" && (
             <button
               type="button"
-              className="inline-flex min-h-7 items-center rounded-[0.7rem] border border-[#2b4b67] bg-[#162433] px-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#bfe1ff] transition hover:bg-[#1b2d41]"
+              className="inline-flex min-h-7 items-center rounded-[0.7rem] border border-[#2b4b67] bg-[#162433] px-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#bfe1ff] transition"
               onClick={() => onOpenQueue("deferred")}
             >
               {historyActionLabels.toDeferred} {deferredCount}
@@ -434,7 +439,7 @@ function HistoryStickyToolbar({
             {primaryQueueContext && <HistoryQueueChip queueContext={primaryQueueContext} count={nextUnresolvedCount} />}
             <button
               type="button"
-              className="inline-flex min-h-8 items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#d7f5c9] transition hover:bg-[#23301d]"
+              className="inline-flex min-h-8 items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#d7f5c9] transition"
               onClick={onContinue}
             >
               {historyActionLabels.nextCase}
@@ -444,7 +449,7 @@ function HistoryStickyToolbar({
         {historyAlternateQueueAction && (
           <button
             type="button"
-            className="inline-flex min-h-8 items-center rounded-full border border-[#2b4b67] bg-[#162433] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#bfe1ff] transition hover:bg-[#1b2d41]"
+            className="inline-flex min-h-8 items-center rounded-full border border-[#2b4b67] bg-[#162433] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#bfe1ff] transition"
             onClick={() => onOpenQueue(historyAlternateQueueAction.mode)}
           >
             {historyAlternateQueueAction.label}
@@ -457,7 +462,7 @@ function HistoryStickyToolbar({
               "inline-flex min-h-8 items-center rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] transition",
               showOnlyAmbiguityHistory
                 ? "border-[#7a5a23] bg-[#2e2418] text-[#f5d0a8]"
-                : "border-white/10 bg-white/5 text-[#c8ccd3] hover:bg-white/10"
+                : "border-white/10 bg-white/5 text-[#c8ccd3]"
             )}
             onClick={onToggleScope}
           >
@@ -473,7 +478,7 @@ function HistoryStickyToolbar({
             "inline-flex min-h-8 items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] transition",
             isCompactPinned
               ? "border-[#2b4b67] bg-[#162433] text-[#bfe1ff]"
-              : "border-white/10 bg-white/5 text-[#c8ccd3] hover:bg-white/10"
+              : "border-white/10 bg-white/5 text-[#c8ccd3]"
           )}
           onClick={onToggleCompactPinned}
         >
@@ -485,7 +490,7 @@ function HistoryStickyToolbar({
           <span>{historyStatusLabels.journal}</span>
           <span className="text-[#626874]">→</span>
           {canToggleAmbiguityScope ? (
-            <button type="button" className="transition hover:text-white" onClick={onToggleScope}>
+            <button type="button" className="transition" onClick={onToggleScope}>
               {historyModeScopeLabel}
             </button>
           ) : (
@@ -495,7 +500,7 @@ function HistoryStickyToolbar({
           {primaryQueueContext ? (
             <button
               type="button"
-              className="transition hover:text-white"
+              className="transition"
               onClick={() => onOpenQueue(historyQueueContextToMode[primaryQueueContext])}
             >
               {historyModeQueueLabel}
@@ -511,8 +516,8 @@ function HistoryStickyToolbar({
               className={classNames(
                 "inline-flex min-h-6 items-center rounded-full border px-2 py-0.5 transition",
                 showOnlyAmbiguityHistory
-                  ? "border-[#7a5a23] bg-[#2e2418] text-[#f5d0a8] hover:bg-[#3a2b1d]"
-                  : "border-white/10 bg-white/5 text-[#aeb4be] hover:bg-white/10 hover:text-white"
+                  ? "border-[#7a5a23] bg-[#2e2418] text-[#f5d0a8]"
+                  : "border-white/10 bg-white/5 text-[#aeb4be]"
               )}
               onClick={onToggleScope}
             >
@@ -535,8 +540,8 @@ function HistoryStickyToolbar({
               className={classNames(
                 "inline-flex min-h-6 items-center rounded-full border px-2 py-0.5 transition",
                 primaryQueueContext === "review"
-                  ? "border-[#7a5a23] bg-[#2e2418] text-[#f5d0a8] hover:bg-[#3a2b1d]"
-                  : "border-[#2b4b67] bg-[#162433] text-[#bfe1ff] hover:bg-[#1b2d41]"
+                  ? "border-[#7a5a23] bg-[#2e2418] text-[#f5d0a8]"
+                  : "border-[#2b4b67] bg-[#162433] text-[#bfe1ff]"
               )}
               onClick={() => onOpenQueue(historyQueueContextToMode[primaryQueueContext])}
             >
@@ -554,14 +559,12 @@ function HistoryCardHeader({
   canJumpToMarker,
   historyJumpContext,
   ambiguityMetaLabel,
-  ambiguityMetaClass,
   onJumpToMarker
 }: {
   entry: RenderedHistoryEntry;
   canJumpToMarker: boolean;
   historyJumpContext: HistoryJumpContext;
   ambiguityMetaLabel: string | null;
-  ambiguityMetaClass: string | null;
   onJumpToMarker: (markerId: string | null) => void;
 }) {
   return (
@@ -573,7 +576,7 @@ function HistoryCardHeader({
         {canJumpToMarker && entry.markerId && (
           <button
             type="button"
-            className="inline-flex min-h-6 items-center gap-1 rounded-full border border-white/10 bg-white/5 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white transition hover:bg-white/10"
+            className="inline-flex min-h-6 items-center gap-1 rounded-full border border-white/10 bg-white/5 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white transition"
             onClick={() => onJumpToMarker(entry.markerId)}
           >
             <span
@@ -591,18 +594,9 @@ function HistoryCardHeader({
             <span className="pr-0.5">{historyActionLabels.jumpToPoint}</span>
           </button>
         )}
-        {ambiguityMetaLabel && ambiguityMetaClass ? (
-          <span
-            className={classNames(
-              "inline-flex min-h-5 items-center rounded-full border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em]",
-              ambiguityMetaClass
-            )}
-          >
-            {ambiguityMetaLabel} · {actionActorLabels[entry.actor]}
-          </span>
-        ) : (
-          <span className="text-[10px] uppercase tracking-[0.16em] text-[#9499a3]">{actionActorLabels[entry.actor]}</span>
-        )}
+        <span className="text-[10px] uppercase tracking-[0.16em] text-[#9499a3]">
+          {ambiguityMetaLabel ? `${ambiguityMetaLabel} · ${actionActorLabels[entry.actor]}` : actionActorLabels[entry.actor]}
+        </span>
       </div>
     </div>
   );
@@ -646,7 +640,7 @@ function HistoryRouteRow({
                   "inline-flex min-h-5 items-center rounded-full border px-1.5 py-0.5 transition",
                   isCurrentRouteStep
                     ? "border-[#f5d0a8] bg-[#2e2418] font-semibold text-[#f5d0a8]"
-                    : "border-white/8 bg-black/10 text-[#d6dae1] hover:bg-white/10"
+                    : "border-white/8 bg-black/10 text-[#d6dae1]"
                 )}
                 onClick={() => onJumpToMarker(markerId)}
                 title={isCurrentRouteStep ? "Текущий шаг маршрута. Открыть эту точку на холсте" : "Открыть эту точку на холсте"}
@@ -682,7 +676,6 @@ function HistoryEntryCard({
   historyJumpContext,
   nextStepHint,
   ambiguityMetaLabel,
-  ambiguityMetaClass,
   onJumpToMarker
 }: {
   entry: RenderedHistoryEntry;
@@ -691,7 +684,6 @@ function HistoryEntryCard({
   historyJumpContext: HistoryJumpContext;
   nextStepHint: string | null;
   ambiguityMetaLabel: string | null;
-  ambiguityMetaClass: string | null;
   onJumpToMarker: (markerId: string | null) => void;
 }) {
   return (
@@ -714,7 +706,6 @@ function HistoryEntryCard({
         canJumpToMarker={canJumpToMarker}
         historyJumpContext={historyJumpContext}
         ambiguityMetaLabel={ambiguityMetaLabel}
-        ambiguityMetaClass={ambiguityMetaClass}
         onJumpToMarker={onJumpToMarker}
       />
       <HistoryRouteRow
@@ -766,24 +757,12 @@ function buildHistoryEntryCardViewModel({
       ? ambiguityNextStepHints[entry.ambiguityDecision]
       : null;
   const ambiguityMetaLabel = entry.ambiguityDecision !== null ? ambiguityRouteLabels[entry.ambiguityDecision] : null;
-  const ambiguityMetaClass =
-    entry.ambiguityDecision === "confirmed"
-      ? "border-[#3e5f2b] bg-[#1c2718] text-[#d7f5c9]"
-      : entry.ambiguityDecision === "deleted"
-        ? "border-[#7b2d2d] bg-[#331d1e] text-[#ffcccc]"
-        : entry.ambiguityDecision === "skipped"
-          ? "border-[#5a5f69] bg-[#1d2026] text-[#d7dbe2]"
-          : entry.ambiguityDecision === "restored"
-            ? "border-[#2b4b67] bg-[#162433] text-[#bfe1ff]"
-            : null;
-
   return {
     route,
     canJumpToMarker,
     historyJumpContext,
     nextStepHint,
-    ambiguityMetaLabel,
-    ambiguityMetaClass
+    ambiguityMetaLabel
   };
 }
 
@@ -792,6 +771,7 @@ function MarkerListItem({
   selected,
   tone,
   hasAmbiguityReview,
+  hasNearTieReview,
   ambiguityTooltip,
   onSelect
 }: {
@@ -799,6 +779,7 @@ function MarkerListItem({
   selected: boolean;
   tone: MarkerItemTone;
   hasAmbiguityReview: boolean;
+  hasNearTieReview: boolean;
   ambiguityTooltip: string;
   onSelect: () => void;
 }) {
@@ -813,8 +794,9 @@ function MarkerListItem({
         "block w-full rounded-[0.9rem] border px-3 py-2 text-left transition",
         selected
           ? "border-[#474c55] bg-[#22262d] shadow-[0_10px_24px_rgba(10,12,16,0.28)]"
-          : "border-transparent bg-transparent hover:border-white/8 hover:bg-white/[0.03]",
-        (isConflict || hasAmbiguityReview) && "border-[#6d4a1a] bg-[#231d15]/70"
+          : "border-transparent bg-transparent",
+        (isConflict || hasAmbiguityReview) && "border-[#6d4a1a] bg-[#231d15]/70",
+        hasNearTieReview && "border-[#7b3aed] bg-[#221933]/75"
       )}
     >
       <div className="flex items-start gap-3">
@@ -840,6 +822,14 @@ function MarkerListItem({
                 className="inline-flex items-center rounded-full border border-[#7a5a23] bg-[#2e2418] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8]"
               >
                 AI review
+              </span>
+            )}
+            {hasNearTieReview && (
+              <span
+                title="Один bbox содержит почти равный OCR-спор между двумя цифрами"
+                className="inline-flex items-center rounded-full border border-[#7c3aed] bg-[#271a3f] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#dcc8ff]"
+              >
+                OCR split
               </span>
             )}
             {isConflict && (
@@ -892,14 +882,14 @@ function AmbiguityReviewCandidateCard({
         <div className="flex shrink-0 flex-col gap-1.5">
           <button
             type="button"
-            className="inline-flex min-h-7 items-center justify-center rounded-[0.7rem] border border-white/10 bg-white/[0.05] px-2.5 text-[11px] font-medium text-white transition hover:bg-white/[0.08]"
+            className="inline-flex min-h-7 items-center justify-center rounded-[0.7rem] border border-white/10 bg-white/[0.05] px-2.5 text-[11px] font-medium text-white transition"
             onClick={() => onSelectCandidate(candidate.candidateId)}
           >
             К кандидату
           </button>
           <button
             type="button"
-            className="inline-flex min-h-7 items-center justify-center rounded-[0.7rem] border border-[#3e5f2b] bg-[#1c2718] px-2.5 text-[11px] font-medium text-[#d7f5c9] transition hover:border-[#557e3c] hover:bg-[#23301d]"
+            className="inline-flex min-h-7 items-center justify-center rounded-[0.7rem] border border-[#3e5f2b] bg-[#1c2718] px-2.5 text-[11px] font-medium text-[#d7f5c9] transition"
             onClick={() => onMoveMarker(candidate.centerX, candidate.centerY)}
           >
             Поставить сюда
@@ -915,6 +905,7 @@ function AmbiguityReviewPanel({
   reviewConflictCount,
   reviewTypeLabels,
   reviewMessages,
+  hasNearTieAmbiguity,
   reviewQueueTitle,
   reviewQueueHint,
   showDeferredPass,
@@ -933,6 +924,7 @@ function AmbiguityReviewPanel({
   reviewConflictCount: number;
   reviewTypeLabels: string[];
   reviewMessages: string[];
+  hasNearTieAmbiguity: boolean;
   reviewQueueTitle: string;
   reviewQueueHint: string;
   showDeferredPass: boolean;
@@ -973,6 +965,15 @@ function AmbiguityReviewPanel({
         <p className="text-[12px] text-[#d9bf9b]">{reviewQueueHint}</p>
       </div>
 
+      {hasNearTieAmbiguity && (
+        <div className="rounded-[0.9rem] border border-[#7c3aed] bg-[#221933] px-3 py-2.5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#dcc8ff]">OCR split</p>
+          <p className="mt-1 text-[12px] leading-5 text-[#efe5ff]">
+            Один bbox содержит почти равный OCR-спор между двумя цифрами. Это не две реальные детали на листе, а два варианта чтения одного и того же места.
+          </p>
+        </div>
+      )}
+
       {reviewTypeLabels.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {reviewTypeLabels.map((label) => (
@@ -986,7 +987,7 @@ function AmbiguityReviewPanel({
           {hasConflictFocus && (
             <button
               type="button"
-              className="inline-flex min-h-7 items-center rounded-full border border-white/10 bg-white/[0.05] px-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white transition hover:bg-white/[0.08]"
+              className="inline-flex min-h-7 items-center rounded-full border border-white/10 bg-white/[0.05] px-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-white transition"
               onClick={onFocusConflict}
             >
               показать зону спора
@@ -1036,7 +1037,7 @@ function AmbiguityReviewPanel({
       <div className="grid grid-cols-3 gap-2">
         <button
           type="button"
-          className="inline-flex h-9 w-full items-center justify-center rounded-[0.8rem] border border-white/10 bg-white/[0.05] px-3 text-[12px] font-semibold text-[#d7dbe2] transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-35"
+          className="inline-flex h-9 w-full items-center justify-center rounded-[0.8rem] border border-white/10 bg-white/[0.05] px-3 text-[12px] font-semibold text-[#d7dbe2] transition disabled:cursor-not-allowed disabled:opacity-35"
           disabled={!canSkip || busy}
           onClick={onSkip}
         >
@@ -1044,7 +1045,7 @@ function AmbiguityReviewPanel({
         </button>
         <button
           type="button"
-          className="inline-flex h-9 w-full items-center justify-center rounded-[0.8rem] border border-[#7b2d2d] bg-[#331d1e] px-3 text-[12px] font-semibold text-[#ffcccc] transition hover:border-[#9c3d3d] hover:bg-[#402021] disabled:cursor-not-allowed disabled:opacity-35"
+          className="inline-flex h-9 w-full items-center justify-center rounded-[0.8rem] border border-[#7b2d2d] bg-[#331d1e] px-3 text-[12px] font-semibold text-[#ffcccc] transition disabled:cursor-not-allowed disabled:opacity-35"
           disabled={busy}
           onClick={onDelete}
         >
@@ -1052,7 +1053,7 @@ function AmbiguityReviewPanel({
         </button>
         <button
           type="button"
-          className="inline-flex h-9 w-full items-center justify-center rounded-[0.8rem] border border-[#3e5f2b] bg-[#1c2718] px-3 text-[12px] font-semibold text-[#d7f5c9] transition hover:border-[#557e3c] hover:bg-[#23301d] disabled:cursor-not-allowed disabled:opacity-35"
+          className="inline-flex h-9 w-full items-center justify-center rounded-[0.8rem] border border-[#3e5f2b] bg-[#1c2718] px-3 text-[12px] font-semibold text-[#d7f5c9] transition disabled:cursor-not-allowed disabled:opacity-35"
           disabled={!canConfirm || busy}
           onClick={onConfirm}
         >
@@ -1128,7 +1129,7 @@ function CandidateReviewNotice({
           {currentPassCount > 0 && (
             <button
               type="button"
-              className="inline-flex min-h-8 items-center rounded-full border border-[#7a5a23] bg-[#2e2418] px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8] transition hover:bg-[#3a2b1d]"
+              className="inline-flex min-h-8 items-center rounded-full border border-[#7a5a23] bg-[#2e2418] px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f5d0a8] transition"
               onClick={onOpenReview}
             >
               к AI review {currentPassCount}
@@ -1137,7 +1138,7 @@ function CandidateReviewNotice({
           {deferredCount > 0 && (
             <button
               type="button"
-              className="inline-flex min-h-8 items-center rounded-full border border-[#2b4b67] bg-[#10202e] px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#bfe1ff] transition hover:bg-[#173044]"
+              className="inline-flex min-h-8 items-center rounded-full border border-[#2b4b67] bg-[#10202e] px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#bfe1ff] transition"
               onClick={onOpenDeferred}
             >
               к отложенным ai {deferredCount}
@@ -1250,7 +1251,7 @@ function MarkerRailFooter({
                 type="button"
                 className={classNames(
                   "inline-flex min-h-7 items-center rounded-full px-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition",
-                  filterMode === "all" ? "bg-white/12 text-white" : "text-[#b8bec8] hover:bg-white/10 hover:text-white"
+                  filterMode === "all" ? "bg-white/12 text-white" : "text-[#b8bec8]"
                 )}
                 onClick={() => onSetMode("all")}
               >
@@ -1260,7 +1261,7 @@ function MarkerRailFooter({
                 type="button"
                 className={classNames(
                   "inline-flex min-h-7 items-center rounded-full px-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition disabled:cursor-not-allowed disabled:opacity-35",
-                  filterMode === "current" ? "bg-[#2e2418] text-[#f5d0a8]" : "text-[#d0d4db] hover:bg-white/10 hover:text-white"
+                  filterMode === "current" ? "bg-[#2e2418] text-[#f5d0a8]" : "text-[#d0d4db]"
                 )}
                 disabled={currentPassCount === 0}
                 onClick={() => onSetMode("current")}
@@ -1271,7 +1272,7 @@ function MarkerRailFooter({
                 type="button"
                 className={classNames(
                   "inline-flex min-h-7 items-center rounded-full px-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] transition disabled:cursor-not-allowed disabled:opacity-35",
-                  filterMode === "deferred" ? "bg-[#1d2026] text-[#d7dbe2]" : "text-[#d0d4db] hover:bg-white/10 hover:text-white"
+                  filterMode === "deferred" ? "bg-[#1d2026] text-[#d7dbe2]" : "text-[#d0d4db]"
                 )}
                 disabled={deferredCount === 0}
                 onClick={() => onSetMode("deferred")}
@@ -1284,7 +1285,7 @@ function MarkerRailFooter({
                 <button
                   type="button"
                   aria-label="Предыдущая спорная точка"
-                  className="inline-flex h-6 w-6 items-center justify-center rounded-full text-sm text-white transition hover:bg-white/10 disabled:opacity-35"
+                  className="inline-flex h-6 w-6 items-center justify-center rounded-full text-sm text-white transition disabled:opacity-35"
                   disabled={activeQueueLength < 2}
                   onClick={() => onFocusAmbiguityMarker(-1)}
                 >
@@ -1296,7 +1297,7 @@ function MarkerRailFooter({
                 <button
                   type="button"
                   aria-label="Следующая спорная точка"
-                  className="inline-flex h-6 w-6 items-center justify-center rounded-full text-sm text-white transition hover:bg-white/10 disabled:opacity-35"
+                  className="inline-flex h-6 w-6 items-center justify-center rounded-full text-sm text-white transition disabled:opacity-35"
                   disabled={activeQueueLength < 2}
                   onClick={() => onFocusAmbiguityMarker(1)}
                 >
@@ -1330,7 +1331,7 @@ function MarkerRailFooter({
               <div className="mt-2 flex justify-end">
                 <button
                   type="button"
-                  className="inline-flex min-h-8 items-center rounded-full border border-[#5a5f69] bg-white/5 px-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#d7dbe2] transition hover:bg-white/10"
+                  className="inline-flex min-h-8 items-center rounded-full border border-[#5a5f69] bg-white/5 px-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#d7dbe2] transition"
                   onClick={() => onSetMode("deferred")}
                 >
                   открыть отложенные {deferredCount}
@@ -1434,7 +1435,7 @@ function AmbiguityWorkspaceBanner({
               <HistoryQueueChip queueContext={primaryQueueContext} />
               <button
                 type="button"
-                className="inline-flex min-h-8 items-center rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#d7f5c9] transition hover:bg-[#23301d]"
+                className="inline-flex min-h-8 items-center rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#d7f5c9] transition"
                 onClick={onContinue}
               >
                 {historyActionLabels.nextCase}
@@ -1444,7 +1445,7 @@ function AmbiguityWorkspaceBanner({
           {currentPassCount > 0 && deferredCount > 0 && (
             <button
               type="button"
-              className="inline-flex min-h-7 items-center rounded-full border border-[#2b4b67] bg-[#162433] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#bfe1ff] transition hover:bg-[#1b2d41]"
+              className="inline-flex min-h-7 items-center rounded-full border border-[#2b4b67] bg-[#162433] px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#bfe1ff] transition"
               onClick={onOpenDeferred}
             >
               {historyActionLabels.toDeferred} {deferredCount}
@@ -1714,6 +1715,7 @@ function formatHistoryAction(entry: ActionLogEntry) {
       };
     }
     case "auto_annotation_completed": {
+      const importedFromJobId = getPayloadString(payload, "source_job_id", "sourceJobId");
       const candidateCount = getPayloadNumber(payload, "candidateCount");
       const autoAccepted = getPayloadNumber(payload, "autoAccepted");
       const autoReview = getPayloadNumber(payload, "autoReview");
@@ -1725,7 +1727,7 @@ function formatHistoryAction(entry: ActionLogEntry) {
         pendingCandidates !== null ? `в ожидании ${pendingCandidates}` : null
       ].filter(Boolean);
       return {
-        title: "Авторазметка завершена",
+        title: importedFromJobId ? "Результат распознавания импортирован" : "Авторазметка завершена",
         details: parts.length > 0 ? [parts.join(" • ")] : []
       };
     }
@@ -1915,7 +1917,7 @@ function CompactPointTypeSwitch({
             onClick={() => onChange(option.value)}
             className={classNames(
               "relative z-10 inline-flex min-h-10 items-center justify-center gap-2 rounded-full px-3.5 text-[13px] font-semibold tracking-[-0.01em] transition",
-              active ? "text-[#15171b]" : "text-[#c4c7ce] hover:text-white"
+              active ? "text-[#15171b]" : "text-[#c4c7ce]"
             )}
             aria-pressed={active}
           >
@@ -1993,6 +1995,17 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
   } | null>(null);
 
   const document = session?.document ?? null;
+  const importedJobEntry =
+    session?.actionLog.find(
+      (entry) =>
+        entry.type === "auto_annotation_completed" &&
+        getPayloadString((entry.payload ?? {}) as Record<string, unknown>, "source_job_id", "sourceJobId") != null
+    ) ?? null;
+  const importedJobSourceId =
+    importedJobEntry == null
+      ? null
+      : getPayloadString((importedJobEntry.payload ?? {}) as Record<string, unknown>, "source_job_id", "sourceJobId");
+  const isImportedJobPreviewSession = importedJobSourceId != null;
   const selectedMarker = session?.markers.find((item) => item.markerId === selectedMarkerId) ?? null;
   const pendingCandidates = (session?.candidates ?? []).filter((item) => item.reviewStatus === "pending");
   const selectedCandidate =
@@ -2093,6 +2106,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
     selectedMarkerId,
     draftLabel
   });
+  const selectedMarkerHasNearTieAmbiguity = selectedMarkerAmbiguityConflicts.some((conflict) => hasNearTieAmbiguity(conflict.message));
   const historyAlternateQueueAction = buildHistoryAlternateQueueAction({
     showDeferredAmbiguityMarkersOnly,
     currentPassCount: currentPassAmbiguityMarkers.length,
@@ -2203,14 +2217,14 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
   const isCompactWorkspace = measuredWidth > 0 && desktopCanvasStageWidth < 500;
   const isUltraCompactWorkspace = measuredWidth > 0 && desktopCanvasStageWidth < 360;
   const preferredLeftRailWidth = isUltraCompactWorkspace
-    ? 156
+    ? 188
     : isCompactWorkspace
-      ? 168
+      ? 212
       : desktopPreferredLeftRailWidth;
   const preferredRightRailWidth = isCompactWorkspace ? 0 : desktopPreferredRightRailWidth;
   const railGap = desktopRailGap;
   const minCanvasWidth = isUltraCompactWorkspace ? 260 : isCompactWorkspace ? 320 : desktopMinCanvasWidth;
-  const minLeftRailWidth = isUltraCompactWorkspace ? 132 : isCompactWorkspace ? 148 : desktopMinLeftRailWidth;
+  const minLeftRailWidth = isUltraCompactWorkspace ? 164 : isCompactWorkspace ? 184 : desktopMinLeftRailWidth;
   const minRightRailWidth = isCompactWorkspace ? 0 : desktopMinRightRailWidth;
   const maxRailBudget = Math.max(
     measuredWidth - minCanvasWidth - railGap * 2,
@@ -2261,8 +2275,8 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
       : null;
   const precisionLensSize = Math.min(Math.max((isCompactWorkspace ? 236 : rightRailWidth) - 28, 184), 228);
   const floatingMarkerRailWidth = Math.min(
-    Math.max(measuredWidth - (isUltraCompactWorkspace ? 48 : 72), isUltraCompactWorkspace ? 220 : 248),
-    isUltraCompactWorkspace ? 280 : 296
+    Math.max(measuredWidth - (isUltraCompactWorkspace ? 20 : 28), isUltraCompactWorkspace ? 252 : 308),
+    isUltraCompactWorkspace ? 332 : 372
   );
   const floatingInspectorWidth = Math.min(
     Math.max(measuredWidth - (isUltraCompactWorkspace ? 20 : 28), isUltraCompactWorkspace ? 228 : 268),
@@ -4178,7 +4192,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
           {error && (
             <button
               type="button"
-              className="inline-flex min-h-9 items-center rounded-full border border-[#1f2937]/12 bg-white px-3 text-sm font-medium text-[#1f2937] transition hover:bg-[#f5f7fa] disabled:opacity-50"
+              className="inline-flex min-h-9 items-center rounded-full border border-[#1f2937]/12 bg-white px-3 text-sm font-medium text-[#1f2937] transition disabled:opacity-50"
               disabled={isSessionLoading || isReloadingSession}
               onClick={() => void reloadCurrentSession({ preferFit: true })}
             >
@@ -4281,13 +4295,13 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
   const sessionMarkerIds = new Set(session.markers.map((marker) => marker.markerId));
   const displayedHistoryEntries = showOnlyAmbiguityHistory ? ambiguityHistoryEntries : mergedRecentHistoryEntries;
   const railShellClass =
-    "absolute inset-y-0 z-30 flex min-h-0 flex-col overflow-hidden border-[#2b2e35] bg-[#17191f] text-white shadow-[0_30px_90px_rgba(8,10,14,0.42)]";
-  const railSectionClass = "border-b border-[#2b2e35] px-3.5 py-3";
-  const railSectionTitleClass = "text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8f949d]";
+    "absolute inset-y-0 z-30 flex min-h-0 flex-col overflow-hidden border-[#2f241d] bg-[#16120f] text-[#fff7ef] shadow-[0_26px_72px_rgba(8,6,5,0.34)]";
+  const railSectionClass = "border-b border-[#2f241d] px-3.5 py-3";
+  const railSectionTitleClass = "text-[10px] font-semibold uppercase tracking-[0.18em] text-[#b7a28f]";
   const inspectorInputClass =
-    "h-9 w-full rounded-[0.8rem] border border-[#30343c] bg-[#111317] px-3 text-sm font-medium text-white outline-none transition placeholder:text-[#737983] focus:border-[#616872] focus:ring-2 focus:ring-[#616872]/25";
+    "h-9 w-full rounded-[0.8rem] border border-[#3a2d24] bg-[#120f0d] px-3 text-sm font-medium text-[#fff7ef] outline-none transition-none placeholder:text-[#7f7065] focus:border-[#7d6350] focus:ring-2 focus:ring-[#7d6350]/20";
   const toolbarButtonClass =
-    "inline-flex h-9 items-center justify-center rounded-[0.8rem] border border-[#30343c] bg-[#1a1d24] px-3 text-[12px] font-medium text-[#f1f3f5] transition hover:border-[#444952] hover:bg-[#20242b] disabled:cursor-not-allowed disabled:opacity-35";
+    "inline-flex h-9 items-center justify-center rounded-[0.8rem] border border-[#3a2d24] bg-[#1d1713] px-3 text-[12px] font-medium text-[#f5ede4] transition-none disabled:cursor-not-allowed disabled:opacity-35";
   const toolbarIconButtonClass = classNames(toolbarButtonClass, "w-9 px-0 text-[1.05rem] font-semibold");
   const toolbarSegmentClass =
     "inline-flex min-h-9 items-center justify-center rounded-[0.8rem] px-3 text-[12px] font-medium text-[#b6bcc6] transition";
@@ -4321,21 +4335,21 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                     transformOrigin: "top left"
                   }}
                 >
-                  <img
-                    src={resolveAssetUrl(document.storageUrl)}
-                    alt={document.fileName}
-                    crossOrigin="anonymous"
+                  <div
+                    aria-label={document.fileName}
+                    role="img"
                     className="absolute left-0 top-0 block select-none shadow-[0_28px_72px_rgba(15,18,32,0.14)]"
-                    draggable={false}
-                    width={document.width}
-                    height={document.height}
                     style={{
                       left: 0,
                       top: 0,
                       width: document.width,
                       height: document.height,
                       maxWidth: "none",
-                      pointerEvents: "none"
+                      pointerEvents: "none",
+                      backgroundImage: `url(${resolveAssetUrl(document.storageUrl)})`,
+                      backgroundPosition: "center",
+                      backgroundRepeat: "no-repeat",
+                      backgroundSize: "100% 100%"
                     }}
                   />
 
@@ -4445,14 +4459,14 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                     />
                     <button
                       type="submit"
-                      className="inline-flex h-10 w-10 items-center justify-center rounded-[0.85rem] border border-transparent bg-ink text-sm font-semibold text-white shadow-[0_10px_24px_rgba(15,18,32,0.18)] transition hover:-translate-y-px hover:bg-graphite"
+                      className="inline-flex h-10 w-10 items-center justify-center rounded-[0.85rem] border border-transparent bg-ink text-sm font-semibold text-white shadow-[0_10px_24px_rgba(15,18,32,0.18)] transition"
                     >
                       &gt;
                     </button>
                     <button
                       type="button"
                       aria-label="Удалить точку"
-                      className="inline-flex h-10 w-10 items-center justify-center rounded-[0.85rem] border border-[#f2c2be] bg-[#fff4f3] text-[#c9362a] shadow-[0_10px_24px_rgba(201,54,42,0.08)] transition hover:-translate-y-px hover:border-[#e59a93] hover:bg-[#ffe8e5]"
+                      className="inline-flex h-10 w-10 items-center justify-center rounded-[0.85rem] border border-[#f2c2be] bg-[#fff4f3] text-[#c9362a] shadow-[0_10px_24px_rgba(201,54,42,0.08)] transition"
                       onClick={() => void deleteSelectedMarker()}
                     >
                       <TrashIcon />
@@ -4484,7 +4498,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
             {currentPassAmbiguityMarkers.length > 0 ? (
               <button
                 type="button"
-                className="inline-flex h-8 items-center justify-center rounded-full border border-[#7a5a23] bg-[#2e2418] px-3 text-[11px] font-semibold text-[#f5d0a8] transition hover:bg-[#3a2b1d]"
+                className="inline-flex h-8 items-center justify-center rounded-full border border-[#7a5a23] bg-[#2e2418] px-3 text-[11px] font-semibold text-[#f5d0a8] transition"
                 onClick={() => setAmbiguityQueueMode("current", { focusFirst: true })}
               >
                 К AI review {currentPassAmbiguityMarkers.length}
@@ -4497,7 +4511,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
             {deferredAmbiguityMarkers.length > 0 && (
               <button
                 type="button"
-                className="inline-flex h-8 items-center justify-center rounded-full border border-[#2b4b67] bg-[#162433] px-3 text-[11px] font-semibold text-[#bfe1ff] transition hover:bg-[#1b2d41]"
+                className="inline-flex h-8 items-center justify-center rounded-full border border-[#2b4b67] bg-[#162433] px-3 text-[11px] font-semibold text-[#bfe1ff] transition"
                 onClick={() => setAmbiguityQueueMode("deferred", { focusFirst: true })}
               >
                 К отложенным {deferredAmbiguityMarkers.length}
@@ -4505,7 +4519,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
             )}
             <button
               type="button"
-              className="inline-flex h-8 items-center justify-center rounded-full border border-[#7c4734] bg-[#2b1d18] px-3 text-xs font-semibold text-white transition hover:bg-[#35241d]"
+              className="inline-flex h-8 items-center justify-center rounded-full border border-[#7c4734] bg-[#2b1d18] px-3 text-xs font-semibold text-white transition"
               onClick={() => {
                 if (selectedCandidate) {
                   selectCandidate(selectedCandidate.candidateId, { focus: true });
@@ -4525,7 +4539,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
       {isCompactWorkspace && (
         <button
           type="button"
-          className="absolute left-3 top-3 z-40 inline-flex min-h-10 items-center rounded-full border border-[#30343c] bg-[#17191f]/94 px-3 text-[12px] font-semibold text-white shadow-[0_16px_36px_rgba(8,10,14,0.28)] backdrop-blur transition hover:border-[#444952] hover:bg-[#1d2128]"
+          className="absolute left-3 top-3 z-40 inline-flex min-h-10 items-center rounded-full border border-[#30343c] bg-[#17191f]/94 px-3 text-[12px] font-semibold text-white shadow-[0_16px_36px_rgba(8,10,14,0.28)] backdrop-blur transition"
           onClick={() => {
             setIsMarkerRailOpen((current) => {
               const nextState = !current;
@@ -4555,7 +4569,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
               <button
                 type="button"
                 aria-label="Скрыть список точек"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[#d0d4db] transition hover:bg-white/10"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[#d0d4db] transition"
                 onClick={() => setIsMarkerRailOpen(false)}
               >
                 <CloseIcon />
@@ -4563,12 +4577,17 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
             </div>
           )}
           <div className="min-w-0">
-            <Link href="/" className="text-sm font-medium text-[#d6d9df] hover:text-white hover:underline">
+            <Link href="/" className="text-sm font-medium text-[#e9d7c5]">
               К сессиям
             </Link>
-            <p className="mt-3 break-words text-[12px] leading-5 text-[#9ca2ac]">
-              {document ? `${document.fileName} • ${document.width}×${document.height}` : "Чертёж ещё не загружен."}
-            </p>
+            {document ? (
+              <div className="mt-3 space-y-1.5">
+                <p className="break-words text-[12px] leading-5 text-[#d5c4b4]">{document.fileName}</p>
+                <p className="text-[12px] leading-5 text-[#a9927d]">{document.width}×{document.height}</p>
+              </div>
+            ) : (
+              <p className="mt-3 break-words text-[12px] leading-5 text-[#9f8d7d]">Чертёж ещё не загружен.</p>
+            )}
           </div>
 
           {error && (
@@ -4578,7 +4597,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
               <div className="mt-2 flex flex-wrap gap-2">
                 <button
                   type="button"
-                  className="inline-flex min-h-8 items-center rounded-full border border-white/10 bg-white/5 px-2.5 text-[11px] font-medium text-white transition hover:bg-white/10 disabled:opacity-40"
+                  className="inline-flex min-h-8 items-center rounded-full border border-white/10 bg-white/5 px-2.5 text-[11px] font-medium text-white transition disabled:opacity-40"
                   disabled={isReloadingSession}
                   onClick={() =>
                     void reloadCurrentSession({
@@ -4591,7 +4610,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                 </button>
                 <button
                   type="button"
-                  className="inline-flex min-h-8 items-center rounded-full border border-white/10 bg-transparent px-2.5 text-[11px] font-medium text-[#f6d3d3] transition hover:bg-white/5"
+                  className="inline-flex min-h-8 items-center rounded-full border border-white/10 bg-transparent px-2.5 text-[11px] font-medium text-[#f6d3d3] transition"
                   onClick={() => setError(null)}
                 >
                   Скрыть
@@ -4608,7 +4627,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
             onOpenDeferred={() => setAmbiguityQueueMode("deferred", { focusFirst: true })}
           />
 
-          <div className="mt-4 grid grid-cols-2 gap-2">
+          <div className={classNames("mt-4 grid gap-2", isUltraCompactWorkspace ? "grid-cols-1" : "grid-cols-2")}>
             <div className="min-w-0">
               <button
                 type="button"
@@ -4647,38 +4666,51 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                     : `Нужно закрыть ${missingLabels.length} пропущенных меток.`}
               </p>
               <p className="mt-1 text-xs leading-5 text-[#d5b78b]">
-                Подсказки ниже в блоках «Авторазметка» и «Словарь страницы».
+                {isImportedJobPreviewSession
+                  ? "Подсказки ниже в блоках «Результат AI» и «Словарь страницы»."
+                  : "Подсказки ниже в блоках «Авторазметка» и «Словарь страницы»."}
               </p>
             </div>
           )}
         </div>
 
         <div className="border-t border-white/8 px-4 py-3">
-          <div className="flex items-start justify-between gap-3">
+          <div className={classNames("flex gap-3", isCompactWorkspace ? "flex-col items-start" : "items-start justify-between")}>
             <div>
-              <p className={railSectionTitleClass}>Авторазметка</p>
-              <p className="mt-1 text-sm text-[#c8ccd3]">{autoMarkerCount} точек уже выставлено</p>
+              <p className={railSectionTitleClass}>{isImportedJobPreviewSession ? "Результат AI" : "Авторазметка"}</p>
+              <p className="mt-1 text-sm text-[#eadccd]">
+                {isImportedJobPreviewSession ? `${autoMarkerCount} точек перенесено из распознавания` : `${autoMarkerCount} точек уже выставлено`}
+              </p>
             </div>
-            <button
-              type="button"
-              className="inline-flex min-h-8 items-center rounded-full border border-white/10 bg-white/5 px-2.5 text-[11px] font-medium text-white transition hover:bg-white/10 disabled:opacity-40"
-              disabled={!document || isWorkspaceBusy}
-              onClick={() => void runAutoAnnotate()}
-            >
-              {isAutoAnnotating ? "Идёт…" : "Прогнать"}
-            </button>
+            {isImportedJobPreviewSession ? (
+              <span className={classNames(
+                "inline-flex min-h-8 items-center rounded-full border border-[#5a4435] bg-[#241c17] px-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#f0d4b7]",
+                isCompactWorkspace && "w-full justify-center"
+              )}>
+                импортировано
+              </span>
+            ) : (
+              <button
+                type="button"
+                className="inline-flex min-h-8 items-center rounded-full border border-white/10 bg-white/5 px-2.5 text-[11px] font-medium text-white transition disabled:opacity-40"
+                disabled={!document || isWorkspaceBusy}
+                onClick={() => void runAutoAnnotate()}
+              >
+                {isAutoAnnotating ? "Идёт…" : "Прогнать"}
+              </button>
+            )}
           </div>
-          <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
+          <div className={classNames("mt-3 gap-2 text-xs", isCompactWorkspace ? "grid grid-cols-2" : "grid grid-cols-3")}>
             <div className="rounded-[0.85rem] border border-white/8 bg-white/[0.03] px-3 py-2">
-              <div className="text-[#8f949d]">AI</div>
+              <div className="text-[#b39d8a]">AI</div>
               <div className="mt-1 font-semibold text-white">{session.summary.aiDetected + session.summary.aiReview}</div>
             </div>
             <div className="rounded-[0.85rem] border border-white/8 bg-white/[0.03] px-3 py-2">
-              <div className="text-[#8f949d]">Кандидаты</div>
+              <div className="text-[#b39d8a]">Кандидаты</div>
               <div className="mt-1 font-semibold text-white">{pendingCandidates.length}</div>
             </div>
-            <div className="rounded-[0.85rem] border border-white/8 bg-white/[0.03] px-3 py-2">
-              <div className="text-[#8f949d]">Блокеры</div>
+            <div className={classNames("rounded-[0.85rem] border border-white/8 bg-white/[0.03] px-3 py-2", isCompactWorkspace && "col-span-2")}>
+              <div className="text-[#b39d8a]">Блокеры</div>
               <div className="mt-1 font-semibold text-white">{hardPipelineConflictCount}</div>
             </div>
           </div>
@@ -4688,8 +4720,8 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className={railSectionTitleClass}>Словарь страницы</p>
-              <p className="mt-1 text-sm text-[#c8ccd3]">{pageVocabulary.length} меток найдено по странице</p>
-              <p className="mt-1 text-xs text-[#8f949d]">
+              <p className="mt-1 text-sm text-[#eadccd]">{pageVocabulary.length} меток найдено по странице</p>
+              <p className="mt-1 text-xs text-[#ae9886]">
                 {candidateAssociations.length} связей между номером и фигурой{associationConflictCount > 0 ? ` • ${associationConflictCount} спорных` : ""}
               </p>
             </div>
@@ -4731,7 +4763,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                     type="button"
                     onClick={() => focusPipelineConflict(conflict)}
                     className={classNames(
-                      "block w-full rounded-[0.9rem] border px-3 py-2 text-left transition hover:bg-white/[0.03]",
+                      "block w-full rounded-[0.9rem] border px-3 py-2 text-left transition",
                       conflict.severity === "error"
                         ? "border-[#6d2a2a] bg-[#241617]"
                         : "border-[#5a4a1a] bg-[#231d15]"
@@ -4762,17 +4794,23 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
 
         <div className="flex items-center justify-between px-4 py-3">
           <div>
-            <p className={railSectionTitleClass}>Кандидаты на проверку</p>
-            <p className="mt-1 text-sm text-[#c8ccd3]">{pendingCandidates.length} кандидатов ждут решения</p>
+            <p className={railSectionTitleClass}>{isImportedJobPreviewSession ? "Очередь проверки" : "Кандидаты на проверку"}</p>
+            <p className="mt-1 text-sm text-[#c8ccd3]">
+              {isImportedJobPreviewSession ? `${pendingCandidates.length} точек и кандидатов ждут решения` : `${pendingCandidates.length} кандидатов ждут решения`}
+            </p>
             <p className="mt-1 text-xs leading-5 text-[#8f949d]">
-              Здесь сначала разбираются найденные варианты по номеру и фигуре. Спорные AI-точки идут отдельной очередью в списке точек ниже.
+              {isImportedJobPreviewSession
+                ? "Здесь лежат кандидаты и спорные места, которые стоит проверить перед финальным экспортом."
+                : "Здесь сначала разбираются найденные варианты по номеру и фигуре. Спорные AI-точки идут отдельной очередью в списке точек ниже."}
             </p>
           </div>
         </div>
 
         <div className="scrollbar-hidden max-h-[28vh] overflow-y-auto px-2 py-2">
           {pendingCandidates.length === 0 ? (
-            <div className="px-3 py-4 text-sm text-[#969ba5]">Новых кандидатов пока нет.</div>
+            <div className="px-3 py-4 text-sm text-[#969ba5]">
+              {isImportedJobPreviewSession ? "Новых мест для обязательной проверки сейчас нет." : "Новых кандидатов пока нет."}
+            </div>
           ) : (
             <div className="space-y-1.5">
               {pendingCandidates.map((candidate, index) => {
@@ -4789,7 +4827,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                       "block w-full rounded-[0.9rem] border px-3 py-2 text-left transition",
                       selected
                         ? "border-[#474c55] bg-[#22262d] shadow-[0_10px_24px_rgba(10,12,16,0.28)]"
-                        : "border-transparent bg-transparent hover:border-white/8 hover:bg-white/[0.03]",
+                        : "border-transparent bg-transparent",
                       isConflict && "border-[#6d4a1a] bg-[#231d15]/70"
                     )}
                   >
@@ -4889,7 +4927,9 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                 ? "Отложенных ambiguity-точек сейчас нет."
                 : showAmbiguityMarkersOnly
                   ? "Спорных AI review-точек сейчас нет."
-                  : "Пока точек нет."}
+                  : isImportedJobPreviewSession
+                    ? "AI не поставил точки. Их можно добавить вручную на холсте."
+                    : "Пока точек нет."}
             </div>
           ) : (
             <div className="space-y-1.5">
@@ -4898,6 +4938,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                 const isConflict = markerConflictById.has(marker.markerId);
                 const ambiguityConflicts = markerAmbiguityConflictsById.get(marker.markerId) ?? [];
                 const hasAmbiguityReview = marker.status === "ai_review" && ambiguityConflicts.length > 0;
+                const hasNearTieReview = ambiguityConflicts.some((conflict) => hasNearTieAmbiguity(conflict.message));
                 const ambiguityTooltip = Array.from(
                   new Set(ambiguityConflicts.map((conflict) => conflict.message.trim()).filter(Boolean))
                 ).join(" • ");
@@ -4909,6 +4950,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                     selected={selected}
                     tone={isConflict ? "conflict" : "normal"}
                     hasAmbiguityReview={hasAmbiguityReview}
+                    hasNearTieReview={hasNearTieReview}
                     ambiguityTooltip={ambiguityTooltip}
                     onSelect={() => selectMarker(marker.markerId, { focus: true })}
                   />
@@ -4956,7 +4998,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
               <button
                 type="button"
                 aria-label="Закрыть сводку"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[#d0d4db] transition hover:bg-white/10"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[#d0d4db] transition"
                 onClick={() => setIsSummaryOpen(false)}
               >
                 <CloseIcon />
@@ -4995,7 +5037,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
               <button
                 type="button"
                 aria-label="Закрыть историю"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[#d0d4db] transition hover:bg-white/10"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[#d0d4db] transition"
                 onClick={() => setIsHistoryOpen(false)}
               >
                 <CloseIcon />
@@ -5078,7 +5120,6 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                         historyJumpContext={viewModel.historyJumpContext}
                         nextStepHint={viewModel.nextStepHint}
                         ambiguityMetaLabel={viewModel.ambiguityMetaLabel}
-                        ambiguityMetaClass={viewModel.ambiguityMetaClass}
                         onJumpToMarker={jumpToHistoryMarker}
                       />
                     );
@@ -5092,7 +5133,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
       {isCompactWorkspace && (hasInspectorContentFocus || isInspectorOpen) && (
         <button
           type="button"
-          className="absolute right-3 top-3 z-40 inline-flex min-h-10 items-center rounded-full border border-[#30343c] bg-[#17191f]/94 px-3 text-[12px] font-semibold text-white shadow-[0_16px_36px_rgba(8,10,14,0.28)] backdrop-blur transition hover:border-[#444952] hover:bg-[#1d2128]"
+          className="absolute right-3 top-3 z-40 inline-flex min-h-10 items-center rounded-full border border-[#30343c] bg-[#17191f]/94 px-3 text-[12px] font-semibold text-white shadow-[0_16px_36px_rgba(8,10,14,0.28)] backdrop-blur transition"
           onClick={() => {
             setIsInspectorOpen((current) => {
               const nextState = !current;
@@ -5123,7 +5164,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                 <button
                   type="button"
                   aria-label="Скрыть панель проверки"
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[#d0d4db] transition hover:bg-white/10"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[#d0d4db] transition"
                   onClick={() => setIsInspectorOpen(false)}
                 >
                   <CloseIcon />
@@ -5234,7 +5275,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                           <button
                             key={association.associationId}
                             type="button"
-                            className="block w-full rounded-[0.9rem] border border-white/8 bg-white/[0.03] px-3 py-2 text-left transition hover:bg-white/[0.05]"
+                            className="block w-full rounded-[0.9rem] border border-white/8 bg-white/[0.03] px-3 py-2 text-left transition"
                             onClick={() => selectCandidate(linkedCandidateId, { focus: true })}
                           >
                             <div className="flex items-start justify-between gap-3">
@@ -5289,6 +5330,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                     reviewConflictCount={selectedMarkerAmbiguityConflicts.length}
                     reviewTypeLabels={selectedAmbiguityReviewTypeLabels}
                     reviewMessages={selectedAmbiguityReviewMessages}
+                    hasNearTieAmbiguity={selectedMarkerHasNearTieAmbiguity}
                     reviewQueueTitle={selectedAmbiguityQueueTitle}
                     reviewQueueHint={selectedAmbiguityQueueHint}
                     showDeferredPass={showDeferredAmbiguityMarkersOnly}
@@ -5342,7 +5384,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                     <div className="flex items-center gap-1.5">
                       <button
                         type="button"
-                        className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-sm font-semibold text-white transition hover:bg-white/[0.08]"
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-sm font-semibold text-white transition"
                         onClick={() => setPrecisionZoomLevel((current) => Number(clamp(current - 0.5, 2, 12).toFixed(1)))}
                         aria-label="Уменьшить увеличение лупы"
                       >
@@ -5353,7 +5395,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                       </span>
                       <button
                         type="button"
-                        className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-sm font-semibold text-white transition hover:bg-white/[0.08]"
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-sm font-semibold text-white transition"
                         onClick={() => setPrecisionZoomLevel((current) => Number(clamp(current + 0.5, 2, 12).toFixed(1)))}
                         aria-label="Увеличить увеличение лупы"
                       >
@@ -5362,11 +5404,11 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                     </div>
                   </div>
                   <p className="text-[11px] text-[#9196a0]">клик по лупе двигает точку</p>
-                  <button
-                    type="button"
-                    aria-label="Лупа для точной доводки"
-                    className="relative block overflow-hidden rounded-[1rem] border border-[#30343c] bg-[#111317] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] disabled:cursor-not-allowed disabled:opacity-50"
-                    disabled={isWorkspaceBusy}
+                  <div
+                    className={classNames(
+                      "relative block overflow-hidden rounded-[1rem] border border-[#30343c] bg-[#111317] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]",
+                      isWorkspaceBusy ? "opacity-50" : ""
+                    )}
                     style={{
                       width: precisionLensSize,
                       height: precisionLensSize,
@@ -5376,8 +5418,14 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                       backgroundPosition: precisionBackgroundPosition,
                       backgroundRepeat: "no-repeat"
                     }}
-                    onClick={(event) => void handlePrecisionLensClick(event)}
                   >
+                    <button
+                      type="button"
+                      aria-label="Лупа для точной доводки"
+                      className="absolute inset-0 z-0 cursor-crosshair rounded-[inherit] disabled:cursor-not-allowed"
+                      disabled={isWorkspaceBusy}
+                      onClick={(event) => void handlePrecisionLensClick(event)}
+                    />
                     <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.06)_1px,transparent_1px)] bg-[size:20px_20px]" />
                     <span className="pointer-events-none absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-[#ffffff66]" />
                     <span className="pointer-events-none absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-[#ffffff66]" />
@@ -5393,7 +5441,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                           key={`${candidate.source}-${index}`}
                           type="button"
                           aria-label={`Вариант ${index + 1}`}
-                          className="absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white bg-[#f59e0b] shadow-[0_4px_14px_rgba(245,158,11,0.45)] transition hover:scale-110"
+                          className="absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white bg-[#f59e0b] shadow-[0_4px_14px_rgba(245,158,11,0.45)] transition"
                           style={{ left, top }}
                           onClick={(event) => {
                             event.stopPropagation();
@@ -5408,11 +5456,11 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                         selectedMarker.pointType === "top_left" ? "rounded-[0.45rem] bg-[#16a34a]" : "rounded-full bg-[#d92d20]"
                       )}
                     />
-                  </button>
+                  </div>
                   {selectedMarker.status === "human_draft" && (
                     <button
                       type="button"
-                      className="inline-flex h-9 w-full items-center justify-center rounded-[0.8rem] border border-[#3e5f2b] bg-[#1c2718] px-3 text-[12px] font-semibold text-[#d7f5c9] transition hover:border-[#557e3c] hover:bg-[#23301d] disabled:cursor-not-allowed disabled:opacity-35"
+                      className="inline-flex h-9 w-full items-center justify-center rounded-[0.8rem] border border-[#3e5f2b] bg-[#1c2718] px-3 text-[12px] font-semibold text-[#d7f5c9] transition disabled:cursor-not-allowed disabled:opacity-35"
                       disabled={!draftLabel.trim() || isWorkspaceBusy}
                       onClick={() => void confirmSelectedMarker()}
                     >
@@ -5425,7 +5473,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                         <button
                           key={`candidate-chip-${candidate.source}-${index}`}
                           type="button"
-                          className="inline-flex h-7 items-center rounded-full border border-white/10 bg-white/[0.03] px-2.5 text-[11px] font-medium text-[#d2d6dd] transition hover:bg-white/[0.08]"
+                          className="inline-flex h-7 items-center rounded-full border border-white/10 bg-white/[0.03] px-2.5 text-[11px] font-medium text-[#d2d6dd] transition"
                           disabled={isWorkspaceBusy}
                           onClick={() => void moveMarkerToCoordinates(candidate.x, candidate.y)}
                         >
@@ -5438,7 +5486,9 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
               </div>
             ) : (
               <p className="text-sm leading-6 text-[#9aa1ab]">
-                Запусти авторазметку, потом выбери кандидата слева для review или готовую точку для правки.
+                {isImportedJobPreviewSession
+                  ? "Выбери точку или спорное место слева. Если AI ничего не нашёл, поставь точку вручную на холсте."
+                  : "Запусти авторазметку, потом выбери кандидата слева для review или готовую точку для правки."}
               </p>
             )}
           </section>

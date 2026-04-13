@@ -127,7 +127,7 @@ export function SessionHome() {
               </div>
               <div className="space-y-2">
                 <label className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8f949d]">Файл чертежа</label>
-                <label className="flex min-h-[4.5rem] cursor-pointer items-center justify-between rounded-[1.3rem] border border-dashed border-[#353941] bg-[#111317] px-5 py-4 text-[15px] text-[#d3d7de] shadow-[0_12px_28px_rgba(8,10,14,0.18)] transition hover:border-[#4a4f59] hover:bg-[#14171d]">
+                <label className="flex min-h-[4.5rem] cursor-pointer items-center justify-between rounded-[1.3rem] border border-dashed border-[#353941] bg-[#111317] px-5 py-4 text-[15px] text-[#d3d7de] shadow-[0_12px_28px_rgba(8,10,14,0.18)] transition">
                   <span>{isBusy ? "Открываю рабочее поле..." : file ? file.name : "PNG, JPG или WEBP"}</span>
                   <span className="inline-flex min-h-11 items-center rounded-[1rem] border border-[#3a3e47] bg-[#1f232b] px-4 text-[13px] font-semibold uppercase tracking-[0.18em] text-white shadow-[0_10px_24px_rgba(8,10,14,0.2)]">
                     {isBusy ? "Жди" : "Выбрать"}
@@ -149,7 +149,7 @@ export function SessionHome() {
         <Card className="!border-[#2b2e35] !bg-[#17191f] shadow-[0_24px_70px_rgba(8,10,14,0.28)]">
           <button
             type="button"
-            className="flex min-h-12 w-full items-center justify-between gap-4 rounded-[1rem] text-left transition hover:bg-white/[0.02]"
+            className="flex min-h-12 w-full items-center justify-between gap-4 rounded-[1rem] text-left transition"
             onClick={() => setShowSessions((current) => !current)}
           >
             <div>
@@ -170,7 +170,7 @@ export function SessionHome() {
                 return (
                   <div
                     key={session.sessionId}
-                    className="rounded-2xl border border-[#2f333b] bg-[#1d2027] px-4 py-4 transition hover:border-[#444952] hover:bg-[#21252d]"
+                    className="rounded-2xl border border-[#2f333b] bg-[#1d2027] px-4 py-4 transition"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <Link
@@ -192,7 +192,7 @@ export function SessionHome() {
                           type="button"
                           variant="outline"
                           disabled={isDeleting}
-                          className="min-h-9 rounded-full !border-[#5c3534] !bg-[#211718] px-3.5 py-2 text-sm font-semibold !text-[#ffb3ac] shadow-none hover:!border-[#7a4441] hover:!bg-[#2a1c1d]"
+                          className="min-h-9 rounded-full !border-[#5c3534] !bg-[#211718] px-3.5 py-2 text-sm font-semibold !text-[#ffb3ac] shadow-none"
                           onClick={() => void handleDeleteSession(session)}
                         >
                           <span className="mr-1.5 inline-flex items-center justify-center">

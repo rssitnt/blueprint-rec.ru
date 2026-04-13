@@ -1,0 +1,17 @@
+
+> @blueprint-rec/web@0.1.0 start
+> next start --port 3010
+
+   ▲ Next.js 15.5.14
+   - Local:        http://localhost:3010
+   - Network:      http://172.16.0.1:3010
+
+ ✓ Starting...
+ ✓ Ready in 505ms
+npm error Lifecycle script `start` failed with error:
+npm error code 4294967295
+npm error path C:\projects\sites\blueprint-rec-2\apps\web
+npm error workspace @blueprint-rec/web@0.1.0
+npm error location C:\projects\sites\blueprint-rec-2\apps\web
+npm error command failed
+npm error command C:\WINDOWS\system32\cmd.exe /d /s /c next start --port 3010

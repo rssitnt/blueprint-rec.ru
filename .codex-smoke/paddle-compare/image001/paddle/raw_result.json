@@ -1,0 +1,55 @@
+[
+  {
+    "input_path": "C:\\projects\\sites\\blueprint-rec-2\\blueprints-test\\image001.png",
+    "page_index": null,
+    "doc_preprocessor_res": {
+      "output_img": "[[[244 ... 244]\n  ...\n  [244 ... 244]]\n\n ...\n\n [[252 ... 252]\n  ...\n  [244 ... 244]]]"
+    },
+    "dt_polys": [
+      "[[76 32]\n ...\n [76 51]]",
+      "[[105  70]\n ...\n [105  84]]",
+      "[[35 80]\n ...\n [35 99]]"
+    ],
+    "model_settings": {
+      "use_doc_preprocessor": false,
+      "use_textline_orientation": false
+    },
+    "text_det_params": {
+      "limit_side_len": 64,
+      "limit_type": "min",
+      "thresh": 0.3,
+      "max_side_limit": 4000,
+      "box_thresh": 0.6,
+      "unclip_ratio": 1.5
+    },
+    "text_type": "general",
+    "text_rec_score_thresh": 0.0,
+    "return_word_box": false,
+    "rec_texts": [
+      "26",
+      "26",
+      "27"
+    ],
+    "rec_scores": [
+      0.9999831318855286,
+      0.9999769926071167,
+      0.9998540878295898
+    ],
+    "rec_polys": [
+      "[[76 32]\n ...\n [76 51]]",
+      "[[105  70]\n ...\n [105  84]]",
+      "[[35 80]\n ...\n [35 99]]"
+    ],
+    "vis_fonts": [
+      "<paddlex.utils.fonts.Font object at 0x00000291FFE3C3D0>",
+      "<paddlex.utils.fonts.Font object at 0x00000291FFE3C3D0>",
+      "<paddlex.utils.fonts.Font object at 0x00000291FFE3C3D0>"
+    ],
+    "textline_orientation_angles": [
+      -1,
+      -1,
+      -1
+    ],
+    "rec_boxes": "[[76 ... 51]\n ...\n [35 ... 99]]"
+  }
+]

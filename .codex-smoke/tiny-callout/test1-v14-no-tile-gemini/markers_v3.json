@@ -1,0 +1,498 @@
+{
+  "generated_at": "2026-04-12T14:23:49.855004+00:00",
+  "source_image": "C:\\projects\\sites\\blueprint-rec-2\\blueprints-test\\test1.jpg",
+  "source_size": {
+    "width": 900,
+    "height": 1060
+  },
+  "marker_count": 4,
+  "unique_label_count": 3,
+  "settings": {
+    "ocr_engine": "both",
+    "tile_size": 1280,
+    "tile_overlap": 192,
+    "detect_scales": [
+      1.0,
+      1.6
+    ],
+    "strict_labels": true,
+    "gemini_enabled": true,
+    "paddle_enabled": true,
+    "gemini_model": "google/gemini-3.1-flash-lite-preview",
+    "gemini_page_labels_enabled": true,
+    "gemini_page_max_side": 1800,
+    "gemini_tile_proposals_enabled": false,
+    "gemini_proposal_tile_size": 1024,
+    "gemini_proposal_tile_overlap": 160,
+    "gemini_proposal_min_ink_density": 0.02,
+    "gemini_proposal_min_dark_pixels": 12,
+    "gemini_proposal_min_score": 0.55,
+    "final_min_ink_density": 0.07,
+    "final_min_dark_pixels": 120,
+    "final_min_bbox_area": 550.0,
+    "final_max_sparse_bbox_area": 10000.0
+  },
+  "stats": {
+    "labels_with_duplicates": {
+      "3": 2
+    },
+    "status_counts": {
+      "ocr_gemini_agree": 4
+    },
+    "accepted_before_merge": 4,
+    "merged_out": 0,
+    "final_text_sanity_rejected": 0
+  },
+  "detect_debug": {
+    "tile_count": 1,
+    "detect_scales": [
+      1.0,
+      1.6
+    ],
+    "raw_counts_by_scale": {
+      "1.00": 0,
+      "1.60": 0
+    },
+    "raw_candidate_count": 0,
+    "deduped_candidate_count": 32
+  },
+  "run_debug": {
+    "gemini_enabled": true,
+    "paddle_enabled": true,
+    "gemini_page_labels_enabled": true,
+    "page_labels_source": "gemini_page",
+    "page_labels_result": {
+      "labels": [
+        "1",
+        "38",
+        "2",
+        "4",
+        "5",
+        "6",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "3",
+        "18",
+        "40",
+        "39",
+        "37",
+        "19",
+        "20",
+        "21",
+        "23",
+        "24",
+        "25",
+        "26",
+        "28",
+        "7",
+        "22",
+        "41",
+        "33",
+        "42",
+        "32",
+        "31",
+        "34",
+        "27",
+        "35",
+        "36"
+      ],
+      "confidence": 1.0,
+      "reason": "The labels were extracted by identifying all circled numbers acting as callouts for the exploded view components.",
+      "image_size": {
+        "width": 900,
+        "height": 1060
+      }
+    },
+    "allowed_labels": [
+      "1",
+      "38",
+      "2",
+      "4",
+      "5",
+      "6",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14",
+      "15",
+      "16",
+      "17",
+      "3",
+      "18",
+      "40",
+      "39",
+      "37",
+      "19",
+      "20",
+      "21",
+      "23",
+      "24",
+      "25",
+      "26",
+      "28",
+      "7",
+      "22",
+      "41",
+      "33",
+      "42",
+      "32",
+      "31",
+      "34",
+      "27",
+      "35",
+      "36"
+    ],
+    "candidate_count": 32,
+    "tiny_callout_candidates": 32,
+    "paddle_page_fallback_count": 0,
+    "paddle_crop_result_count": 32,
+    "paddle_crop_errors": 0,
+    "accepted_before_merge": 4,
+    "multi_split_expansions": 0,
+    "paddle_missing_candidates": 0,
+    "tile_proposals": 0,
+    "targeted_missing_proposals": 0,
+    "final_text_sanity_rejected": 0,
+    "status_counts": {
+      "ocr_gemini_agree": 4
+    }
+  },
+  "markers": [
+    {
+      "quad": [
+        [
+          697.91,
+          86.55
+        ],
+        [
+          710.0899999999999,
+          86.55
+        ],
+        [
+          710.0899999999999,
+          105.44999999999999
+        ],
+        [
+          697.91,
+          105.44999999999999
+        ]
+      ],
+      "bbox": {
+        "x": 697.91,
+        "y": 86.55,
+        "w": 12.18,
+        "h": 18.9,
+        "angle": 0.0
+      },
+      "source_kind": "tiny_callout",
+      "detect_scale": 0.0,
+      "center": {
+        "x": 704.0,
+        "y": 96.0
+      },
+      "top_left": {
+        "x": 697.91,
+        "y": 86.55
+      },
+      "recognition": {
+        "crop_box": {
+          "x0": 683,
+          "y0": 75,
+          "x1": 725,
+          "y1": 117
+        },
+        "context_box": {
+          "x0": 562,
+          "y0": 0,
+          "x1": 846,
+          "y1": 238
+        },
+        "paddle_scores": {
+          "5": 0.9996086955070496
+        },
+        "ocr_best_label": "5",
+        "ocr_best_score": 0.9996086955070496,
+        "ocr_second_score": 0.0,
+        "gemini": {
+          "status": "ok",
+          "label": "5",
+          "confidence": 1.0,
+          "reason": "The highlighted text is a standard part callout in a circle.",
+          "raw_label": "5"
+        },
+        "gemini_single_localize": {
+          "items": [
+            {
+              "label": "5",
+              "x0": 355.0,
+              "y0": 275.0,
+              "x1": 645.0,
+              "y1": 725.0
+            }
+          ],
+          "reason": ""
+        },
+        "final_ink_density": 0.35185185185185186,
+        "final_dark_pixels": 152,
+        "final_bbox_area": 230.20199999999997,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 117,
+        "final_min_bbox_area_effective": 537.2010796712902,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "label": "5",
+      "status": "gemini_single_localize",
+      "final_score": 0.9997182607650756,
+      "ocr_gap": 0.9996086955070496
+    },
+    {
+      "quad": [
+        [
+          697.351,
+          119.751
+        ],
+        [
+          709.649,
+          119.751
+        ],
+        [
+          709.649,
+          149.249
+        ],
+        [
+          697.351,
+          149.249
+        ]
+      ],
+      "bbox": {
+        "x": 697.351,
+        "y": 119.751,
+        "w": 12.298,
+        "h": 29.498,
+        "angle": 0.0
+      },
+      "source_kind": "tiny_callout",
+      "detect_scale": 0.0,
+      "center": {
+        "x": 703.5,
+        "y": 134.5
+      },
+      "top_left": {
+        "x": 697.351,
+        "y": 119.751
+      },
+      "recognition": {
+        "crop_box": {
+          "x0": 682,
+          "y0": 113,
+          "x1": 725,
+          "y1": 156
+        },
+        "context_box": {
+          "x0": 561,
+          "y0": 0,
+          "x1": 846,
+          "y1": 277
+        },
+        "paddle_scores": {
+          "6": 0.9999743700027466
+        },
+        "ocr_best_label": "6",
+        "ocr_best_score": 0.9999743700027466,
+        "ocr_second_score": 0.0,
+        "gemini": {
+          "status": "ok",
+          "label": "6",
+          "confidence": 1.0,
+          "reason": "The highlighted text is a standard part callout in a circle.",
+          "raw_label": "6"
+        },
+        "gemini_single_localize": {
+          "items": [
+            {
+              "label": "6",
+              "x0": 357.0,
+              "y0": 157.0,
+              "x1": 643.0,
+              "y1": 843.0
+            }
+          ],
+          "reason": ""
+        },
+        "final_ink_density": 0.40672268907563025,
+        "final_dark_pixels": 242,
+        "final_bbox_area": 362.766404,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 117,
+        "final_min_bbox_area_effective": 537.2010796712902,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "label": "6",
+      "status": "gemini_single_localize",
+      "final_score": 0.9999815464019776,
+      "ocr_gap": 0.9999743700027466
+    },
+    {
+      "quad": [
+        [
+          412.0,
+          369.0
+        ],
+        [
+          441.0,
+          369.0
+        ],
+        [
+          441.0,
+          398.0
+        ],
+        [
+          412.0,
+          398.0
+        ]
+      ],
+      "bbox": {
+        "x": 412.0,
+        "y": 369.0,
+        "w": 29.0,
+        "h": 29.0,
+        "angle": 0.0
+      },
+      "source_kind": "tiny_callout",
+      "detect_scale": 0.0,
+      "center": {
+        "x": 426.5,
+        "y": 383.5
+      },
+      "top_left": {
+        "x": 412.0,
+        "y": 369.0
+      },
+      "recognition": {
+        "crop_box": {
+          "x0": 405,
+          "y0": 362,
+          "x1": 448,
+          "y1": 405
+        },
+        "context_box": {
+          "x0": 284,
+          "y0": 241,
+          "x1": 569,
+          "y1": 526
+        },
+        "paddle_scores": {
+          "3": 0.9999524354934692
+        },
+        "ocr_best_label": "3",
+        "ocr_best_score": 0.9999524354934692,
+        "ocr_second_score": 0.0,
+        "gemini": {
+          "status": "ok",
+          "label": "3",
+          "confidence": 1.0,
+          "reason": "The highlighted text is a standard part callout in a circle with a leader line.",
+          "raw_label": "3"
+        },
+        "final_ink_density": 0.34618916437098257,
+        "final_dark_pixels": 377,
+        "final_bbox_area": 841.0,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 117,
+        "final_min_bbox_area_effective": 537.2010796712902,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "label": "3",
+      "status": "ocr_gemini_agree",
+      "final_score": 0.9999657535552979,
+      "ocr_gap": 0.9999524354934692
+    },
+    {
+      "quad": [
+        [
+          538.0,
+          655.0
+        ],
+        [
+          566.0,
+          655.0
+        ],
+        [
+          566.0,
+          684.0
+        ],
+        [
+          538.0,
+          684.0
+        ]
+      ],
+      "bbox": {
+        "x": 538.0,
+        "y": 655.0,
+        "w": 28.0,
+        "h": 29.0,
+        "angle": 0.0
+      },
+      "source_kind": "tiny_callout",
+      "detect_scale": 0.0,
+      "center": {
+        "x": 552.0,
+        "y": 669.5
+      },
+      "top_left": {
+        "x": 538.0,
+        "y": 655.0
+      },
+      "recognition": {
+        "crop_box": {
+          "x0": 531,
+          "y0": 648,
+          "x1": 573,
+          "y1": 691
+        },
+        "context_box": {
+          "x0": 410,
+          "y0": 527,
+          "x1": 694,
+          "y1": 812
+        },
+        "paddle_scores": {
+          "3": 0.9999387264251709
+        },
+        "ocr_best_label": "3",
+        "ocr_best_score": 0.9999387264251709,
+        "ocr_second_score": 0.0,
+        "gemini": {
+          "status": "ok",
+          "label": "3",
+          "confidence": 1.0,
+          "reason": "The highlighted text is a standard part callout enclosed in a circle, pointing to a component in the assembly drawing.",
+          "raw_label": "3"
+        },
+        "final_ink_density": 0.3731060606060606,
+        "final_dark_pixels": 394,
+        "final_bbox_area": 812.0,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 117,
+        "final_min_bbox_area_effective": 537.2010796712902,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "label": "3",
+      "status": "ocr_gemini_agree",
+      "final_score": 0.9999558830261231,
+      "ocr_gap": 0.9999387264251709
+    }
+  ],
+  "final_text_sanity_rejected_markers": []
+}

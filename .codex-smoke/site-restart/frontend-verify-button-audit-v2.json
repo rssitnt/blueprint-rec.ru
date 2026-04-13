@@ -1,0 +1,26 @@
+{
+  "action": {
+    "backgroundColor": "rgb(43, 34, 29)",
+    "color": "rgb(255, 244, 234)",
+    "transitionProperty": "none",
+    "transitionDuration": "0s",
+    "transform": "none",
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px"
+  },
+  "reset": {
+    "backgroundColor": "rgb(29, 23, 19)",
+    "color": "rgb(220, 207, 194)",
+    "transitionProperty": "none",
+    "transitionDuration": "0s",
+    "transform": "none",
+    "boxShadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px"
+  },
+  "drawingToggle": {
+    "backgroundColor": "rgb(43, 34, 29)",
+    "color": "rgb(255, 245, 235)",
+    "transitionProperty": "none",
+    "transitionDuration": "0s",
+    "transform": "none",
+    "boxShadow": "none"
+  }
+}

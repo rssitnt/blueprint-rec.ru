@@ -1,0 +1,154 @@
+
+> @blueprint-rec/web@0.1.0 dev
+> next dev --port 3010
+
+   тЦ▓ Next.js 15.5.14
+   - Local:        http://localhost:3010
+   - Network:      http://172.16.0.1:3010
+   - Environments: .env.local
+
+ тЬУ Starting...
+ тЬУ Ready in 1777ms
+ тЧЛ Compiling / ...
+ тЬУ Compiled / in 3.2s (584 modules)
+ GET / 200 in 3490ms
+ GET / 200 in 47ms
+ тЬУ Compiled in 298ms (566 modules)
+ GET / 200 in 70ms
+[Error: ENOENT: no such file or directory, stat 'C:\projects\sites\blueprint-rec-2\apps\web\.next\cache\webpack\server-development\0.pack.gz'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\cache\\webpack\\server-development\\0.pack.gz'
+}
+ тип unhandledRejection: [Error: ENOENT: no such file or directory, stat 'C:\projects\sites\blueprint-rec-2\apps\web\.next\cache\webpack\server-development\0.pack.gz'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\cache\\webpack\\server-development\\0.pack.gz'
+}
+ тип unhandledRejection:  [Error: ENOENT: no such file or directory, stat 'C:\projects\sites\blueprint-rec-2\apps\web\.next\cache\webpack\server-development\0.pack.gz'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\cache\\webpack\\server-development\\0.pack.gz'
+}
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, stat 'C:\projects\sites\blueprint-rec-2\apps\web\.next\cache\webpack\server-development\0.pack.gz'
+[Error: ENOENT: no such file or directory, stat 'C:\projects\sites\blueprint-rec-2\apps\web\.next\cache\webpack\client-development\1.pack.gz'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\cache\\webpack\\client-development\\1.pack.gz'
+}
+ тип unhandledRejection: [Error: ENOENT: no such file or directory, stat 'C:\projects\sites\blueprint-rec-2\apps\web\.next\cache\webpack\client-development\1.pack.gz'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\cache\\webpack\\client-development\\1.pack.gz'
+}
+ тип unhandledRejection:  [Error: ENOENT: no such file or directory, stat 'C:\projects\sites\blueprint-rec-2\apps\web\.next\cache\webpack\client-development\1.pack.gz'] {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'stat',
+  path: 'C:\\projects\\sites\\blueprint-rec-2\\apps\\web\\.next\\cache\\webpack\\client-development\\1.pack.gz'
+}
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, stat 'C:\projects\sites\blueprint-rec-2\apps\web\.next\cache\webpack\client-development\1.pack.gz'
+ тип Error: Could not find the module "C:\projects\sites\blueprint-rec-2\node_modules\next\dist\next-devtools\userspace\app\segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>) {
+  digest: '1212665400'
+}
+ тип Error: Could not find the module "C:\projects\sites\blueprint-rec-2\node_modules\next\dist\next-devtools\userspace\app\segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '4156446105'
+}
+ тип Error: Could not find the module "C:\projects\sites\blueprint-rec-2\node_modules\next\dist\next-devtools\userspace\app\segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '4156446105'
+}
+ тип Error: Could not find the module "C:\projects\sites\blueprint-rec-2\node_modules\next\dist\next-devtools\userspace\app\segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>)
+    at stringify (<anonymous>) {
+  digest: '4156446105'
+}
+ тип Error: Could not find the module "C:\projects\sites\blueprint-rec-2\node_modules\next\dist\next-devtools\userspace\app\segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>) {
+  digest: '1212665400'
+}
+ тип Error: Could not find the module "C:\projects\sites\blueprint-rec-2\node_modules\next\dist\next-devtools\userspace\app\segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>) {
+  digest: '1212665400'
+}
+ тип [TypeError: __webpack_modules__[moduleId] is not a function] {
+  digest: '645960990'
+}
+ тип Error: Could not find the module "C:\projects\sites\blueprint-rec-2\node_modules\next\dist\next-devtools\userspace\app\segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+    at stringify (<anonymous>) {
+  digest: '1212665400'
+}
+[TypeError: __webpack_modules__[moduleId] is not a function]
+ тип [TypeError: __webpack_modules__[moduleId] is not a function]
+ тип [TypeError: __webpack_modules__[moduleId] is not a function] {
+  page: '/'
+}
+ тЧЛ Compiling /_error ...
+ тЬУ Compiled /_error in 1251ms (912 modules)
+ тип Error: Cannot find module './92.js'
+Require stack:
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\webpack-runtime.js
+- C:\projects\sites\blueprint-rec-2\apps\web\.next\server\pages\_document.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\require.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\load-components.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\utils.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\options.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\swc\index.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\build\next-config-ts\transpile-config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\config.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\next.js
+- C:\projects\sites\blueprint-rec-2\node_modules\next\dist\server\lib\start-server.js
+    at <unknown> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:2:47172)
+    at Object.<anonymous> (C:\projects\sites\blueprint-rec-2\apps\web\.next\server\app\page.js:2:47216) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array],
+  page: '/'
+}
+ GET / 500 in 3274ms
+ GET / 500 in 874ms
+
+> @blueprint-rec/web@0.1.0 dev
+> next dev --port 3010
+
+ тип Failed to start server
+Error: listen EADDRINUSE: address already in use :::3010
+    at <unknown> (Error: listen EADDRINUSE: address already in use :::3010)
+    at new Promise (<anonymous>) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '::',
+  port: 3010
+}
+[?25h
+
+> @blueprint-rec/web@0.1.0 dev
+> next dev --port 3010
+
+   тЦ▓ Next.js 15.5.14
+   - Local:        http://localhost:3010
+   - Network:      http://172.16.0.1:3010
+   - Environments: .env.local
+   - Experiments (use with caution):
+     тип devtoolSegmentExplorer
+
+ тЬУ Starting...
+ тЬУ Ready in 1561ms
+ тЪа Fast Refresh had to perform a full reload due to a runtime error.
+ тЧЛ Compiling / ...
+ тЬУ Compiled / in 2.7s (584 modules)
+ тЪа Fast Refresh had to perform a full reload due to a runtime error.
+ GET / 200 in 2874ms
+ GET / 200 in 29ms
+ GET / 200 in 25ms
+ GET / 200 in 36ms
+[?25h

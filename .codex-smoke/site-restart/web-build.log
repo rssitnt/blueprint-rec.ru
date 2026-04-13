@@ -1,0 +1,43 @@
+
+> blueprint-rec-2@0.1.0 build:web
+> npm run build --workspace @blueprint-rec/web
+
+
+> @blueprint-rec/web@0.1.0 build
+> node ./scripts/clean-next-build.mjs && next build
+
+   ▲ Next.js 15.5.14
+   - Environments: .env.local
+   - Experiments (use with caution):
+     ⨯ devtoolSegmentExplorer
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 13.2s
+   Linting and checking validity of types ...
+
+./components/annotation/job-home.tsx
+1086:25  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+   Collecting page data ...
+   Generating static pages (0/4) ...
+   Generating static pages (1/4) 
+   Generating static pages (2/4) 
+   Generating static pages (3/4) 
+ ✓ Generating static pages (4/4)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size  First Load JS
+┌ ○ /                                    11.9 kB         114 kB
+├ ○ /_not-found                            987 B         103 kB
+└ ƒ /sessions/[sessionId]                41.2 kB         143 kB
++ First Load JS shared by all             102 kB
+  ├ chunks/18-90b700ea37b686a2.js          46 kB
+  ├ chunks/87c73c54-24122e7b92478d00.js  54.2 kB
+  └ other shared chunks (total)          1.99 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

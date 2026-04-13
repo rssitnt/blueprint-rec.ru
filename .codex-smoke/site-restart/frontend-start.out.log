@@ -1,0 +1,10 @@
+
+> @blueprint-rec/web@0.1.0 start
+> next start --port 3010
+
+   ▲ Next.js 15.5.14
+   - Local:        http://localhost:3010
+   - Network:      http://172.16.0.1:3010
+
+ ✓ Starting...
+ ✓ Ready in 768ms

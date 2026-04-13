@@ -1,0 +1,13 @@
+INFO:     127.0.0.1:55858 - "GET /api/sessions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62136 - "POST /api/sessions HTTP/1.1" 201 Created
+INFO:     127.0.0.1:62137 - "POST /api/sessions/3ba8d723-d43e-44f3-a0f4-4e4e87191b32/document HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62136 - "POST /api/sessions/3ba8d723-d43e-44f3-a0f4-4e4e87191b32/auto-annotate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62232 - "OPTIONS /api/sessions/3ba8d723-d43e-44f3-a0f4-4e4e87191b32 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62232 - "GET /api/sessions/3ba8d723-d43e-44f3-a0f4-4e4e87191b32 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62235 - "GET /storage/3ba8d723-d43e-44f3-a0f4-4e4e87191b32/20260411182840309675-page4.png HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62241 - "GET /api/sessions/3ba8d723-d43e-44f3-a0f4-4e4e87191b32/export HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62242 - "POST /api/sessions HTTP/1.1" 201 Created
+INFO:     127.0.0.1:62243 - "POST /api/sessions/c80c0674-6159-47e4-96d1-228b7e987e0c/document HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62242 - "POST /api/sessions/c80c0674-6159-47e4-96d1-228b7e987e0c/auto-annotate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49641 - "POST /api/sessions HTTP/1.1" 201 Created
+INFO:     127.0.0.1:51072 - "POST /api/sessions/a1f9bb27-1f7a-432b-8b55-772e2cd3287d/document HTTP/1.1" 200 OK

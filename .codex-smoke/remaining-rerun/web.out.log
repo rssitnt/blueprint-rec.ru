@@ -1,0 +1,18 @@
+
+> @blueprint-rec/web@0.1.0 dev
+> next dev --hostname 127.0.0.1 --port 3030
+
+   ▲ Next.js 15.5.14
+   - Local:        http://127.0.0.1:3030
+   - Network:      http://127.0.0.1:3030
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 1775ms
+ ○ Compiling / ...
+ ✓ Compiled / in 520ms (552 modules)
+ GET / 200 in 744ms
+ ✓ Compiled /sessions/[sessionId] in 249ms (645 modules)
+ GET /sessions/3ba8d723-d43e-44f3-a0f4-4e4e87191b32 200 in 756ms
+ GET /sessions/c80c0674-6159-47e4-96d1-228b7e987e0c 200 in 444ms
+[?25h

@@ -14,6 +14,8 @@ load_dotenv(ENV_LOCAL_PATH, override=True)
 
 class Settings:
     def __init__(self) -> None:
+        repo_root = Path(__file__).resolve().parents[4]
+        default_legacy_repo = repo_root.parent / "blueprint-rec"
         self.debug = os.getenv("INFERENCE_DEBUG", "").lower() in {"1", "true", "yes"}
         self.storage_dir = str((Path(__file__).resolve().parents[2] / os.getenv("INFERENCE_STORAGE_DIR", "var")).resolve())
         self.storage_mount_path = os.getenv("INFERENCE_STORAGE_MOUNT_PATH", "/storage")
@@ -40,6 +42,39 @@ class Settings:
         self.gemini_api_key = os.getenv("GEMINI_API_KEY")
         self.enable_gemini_vision = os.getenv("INFERENCE_ENABLE_GEMINI", "true").lower() in {"1", "true", "yes"}
         self.gemini_vision_model = os.getenv("INFERENCE_GEMINI_VISION_MODEL", "gemini-2.5-flash")
+        self.legacy_pipeline_repo = str(Path(os.getenv("INFERENCE_LEGACY_PIPELINE_REPO", str(default_legacy_repo))).resolve())
+        self.legacy_pipeline_script = str(
+            Path(
+                os.getenv(
+                    "INFERENCE_LEGACY_PIPELINE_SCRIPT",
+                    str(Path(self.legacy_pipeline_repo) / "scripts" / "run_v3_number_pipeline.py"),
+                )
+            ).resolve()
+        )
+        self.legacy_pipeline_timeout_seconds = max(30, int(os.getenv("INFERENCE_LEGACY_PIPELINE_TIMEOUT_SECONDS", "3600")))
+        self.legacy_fallback_pipeline_timeout_seconds = max(
+            30,
+            int(os.getenv("INFERENCE_LEGACY_FALLBACK_PIPELINE_TIMEOUT_SECONDS", "180")),
+        )
+        self.legacy_fallback_detect_scales = os.getenv("INFERENCE_LEGACY_FALLBACK_DETECT_SCALES", "1.0")
+        self.legacy_fallback_tile_size = max(256, int(os.getenv("INFERENCE_LEGACY_FALLBACK_TILE_SIZE", "1536")))
+        self.legacy_fallback_tile_overlap = max(0, int(os.getenv("INFERENCE_LEGACY_FALLBACK_TILE_OVERLAP", "96")))
+        self.legacy_fallback_disable_gemini = os.getenv(
+            "INFERENCE_LEGACY_FALLBACK_DISABLE_GEMINI",
+            "false",
+        ).lower() in {"1", "true", "yes"}
+        self.legacy_fallback_disable_gemini_tile_proposals = os.getenv(
+            "INFERENCE_LEGACY_FALLBACK_DISABLE_GEMINI_TILE_PROPOSALS",
+            "true",
+        ).lower() in {"1", "true", "yes"}
+        self.legacy_emergency_fallback_enabled = os.getenv(
+            "INFERENCE_LEGACY_EMERGENCY_FALLBACK_ENABLED",
+            "true",
+        ).lower() in {"1", "true", "yes"}
+        self.legacy_emergency_fallback_pipeline_timeout_seconds = max(
+            30,
+            int(os.getenv("INFERENCE_LEGACY_EMERGENCY_FALLBACK_PIPELINE_TIMEOUT_SECONDS", "120")),
+        )
 
 
 settings = Settings()

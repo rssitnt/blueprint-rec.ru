@@ -1,0 +1,11 @@
+[v3] image=test1.jpg size=(900, 1060)
+[v3] allowed_labels=40 strict=True gemini=True
+[v3] gemini_page_labels=40 source=gemini_page reason=The labels represent part index numbers used in an exploded view assembly drawing.
+[v3] detected candidates: raw=0 deduped=11
+[v3] paddle page fallback added=11 total=11
+[v3] paddle crop readout=11/11
+[v3] recognized 10/11
+[v3] recognized 11/11
+[v3] final markers=9 unique=7
+[v3] json=C:\projects\sites\blueprint-rec-2\.codex-smoke\paddle-integrated\test1-v2\markers_v3.json
+[v3] overlay=C:\projects\sites\blueprint-rec-2\.codex-smoke\paddle-integrated\test1-v2\markers_v3.overlay.png

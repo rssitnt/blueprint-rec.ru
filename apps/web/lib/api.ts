@@ -1,18 +1,30 @@
 import type {
   AnnotationSession,
+  BatchListResponse,
+  BatchResponse,
+  CreateBatchJobsResponse,
+  CreateJobResponse,
+  PreviewSessionResponse,
   CreateSessionRequest,
   CreateSessionResponse,
+  JobListResponse,
   SessionCommandRequest,
   SessionCommandResponse,
   SessionListResponse,
   UploadDocumentResponse
 } from "@blueprint-rec/shared-types";
 
-const API_BASE_URL = (
-  process.env.NEXT_PUBLIC_ANNOTATION_API_BASE_URL ||
-  process.env.NEXT_PUBLIC_INFERENCE_BASE_URL ||
-  "http://127.0.0.1:8000"
-).replace(/\/$/, "");
+const configuredApiBaseUrl =
+  process.env.NEXT_PUBLIC_ANNOTATION_API_BASE_URL ??
+  process.env.NEXT_PUBLIC_INFERENCE_BASE_URL ??
+  "";
+
+const API_BASE_URL = configuredApiBaseUrl.trim().replace(/\/$/, "");
+
+function formatNetworkErrorMessage() {
+  const target = API_BASE_URL || "same-origin /api";
+  return `Не удалось подключиться к сервису разметки (${target}). Проверь, что backend запущен, и попробуй ещё раз.`;
+}
 
 async function readErrorMessage(response: Response) {
   const contentType = response.headers.get("content-type") ?? "";
@@ -32,14 +44,23 @@ async function readErrorMessage(response: Response) {
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const isFormData = init?.body instanceof FormData;
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...init,
-    cache: "no-store",
-    headers: {
-      ...(isFormData ? {} : { "Content-Type": "application/json" }),
-      ...(init?.headers ?? {})
+  let response: Response;
+
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      ...init,
+      cache: "no-store",
+      headers: {
+        ...(isFormData ? {} : { "Content-Type": "application/json" }),
+        ...(init?.headers ?? {})
+      }
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(formatNetworkErrorMessage());
     }
-  });
+    throw error;
+  }
 
   if (!response.ok) {
     throw new Error(await readErrorMessage(response));
@@ -49,13 +70,22 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 async function requestWithoutBody(path: string, init?: RequestInit): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...init,
-    cache: "no-store",
-    headers: {
-      ...(init?.headers ?? {})
+  let response: Response;
+
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      ...init,
+      cache: "no-store",
+      headers: {
+        ...(init?.headers ?? {})
+      }
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(formatNetworkErrorMessage());
     }
-  });
+    throw error;
+  }
 
   if (!response.ok) {
     throw new Error(await readErrorMessage(response));
@@ -74,8 +104,24 @@ export function resolveAssetUrl(path: string) {
   return `${API_BASE_URL}${path}`;
 }
 
+export function resolveBatchExportUrl(batchId: string, mode: "production" | "review") {
+  return `${API_BASE_URL}/api/batches/${encodeURIComponent(batchId)}/export?mode=${encodeURIComponent(mode)}`;
+}
+
 export async function listSessions() {
   return request<SessionListResponse>("/api/sessions");
+}
+
+export async function listJobs() {
+  return request<JobListResponse>("/api/jobs");
+}
+
+export async function listBatches() {
+  return request<BatchListResponse>("/api/batches");
+}
+
+export async function getBatch(batchId: string) {
+  return request<BatchResponse>(`/api/batches/${batchId}`);
 }
 
 export async function createSession(payload: CreateSessionRequest) {
@@ -85,14 +131,58 @@ export async function createSession(payload: CreateSessionRequest) {
   });
 }
 
+export async function createJob(payload: { title?: string; drawing: File; labels?: File | null }) {
+  const formData = new FormData();
+  formData.append("drawing", payload.drawing);
+  if (payload.title?.trim()) {
+    formData.append("title", payload.title.trim());
+  }
+  if (payload.labels) {
+    formData.append("labels", payload.labels);
+  }
+  return request<CreateJobResponse>("/api/jobs", {
+    method: "POST",
+    body: formData
+  });
+}
+
+export async function createBatchJobs(payload: { archive: File; titlePrefix?: string }) {
+  const formData = new FormData();
+  formData.append("archive", payload.archive);
+  if (payload.titlePrefix?.trim()) {
+    formData.append("title_prefix", payload.titlePrefix.trim());
+  }
+  return request<CreateBatchJobsResponse>("/api/jobs/batch", {
+    method: "POST",
+    body: formData
+  });
+}
+
 export async function deleteSession(sessionId: string) {
   return requestWithoutBody(`/api/sessions/${sessionId}`, {
     method: "DELETE"
   });
 }
 
+export async function deleteJob(jobId: string) {
+  return requestWithoutBody(`/api/jobs/${jobId}`, {
+    method: "DELETE"
+  });
+}
+
 export async function getSession(sessionId: string) {
   return request<CreateSessionResponse>(`/api/sessions/${sessionId}`);
+}
+
+export async function getJob(jobId: string) {
+  return request<CreateJobResponse>(`/api/jobs/${jobId}`);
+}
+
+export async function createJobPreviewSession(jobId: string, pageIndex?: number) {
+  const query = pageIndex != null ? `?page_index=${encodeURIComponent(String(pageIndex))}` : "";
+  return request<PreviewSessionResponse>(`/api/jobs/${jobId}/preview-session${query}`, {
+    method: "POST"
+  });
 }
 
 export async function uploadDocument(sessionId: string, file: File) {

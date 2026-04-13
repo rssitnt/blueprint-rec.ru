@@ -1,0 +1,11 @@
+[v3] image=page4.png size=(1191, 1684)
+[v3] allowed_labels=17 strict=True gemini=True
+[v3] gemini_page_labels=17 source=gemini_page reason=The labels are clearly identified as part callouts with leader lines pointing to specific components in the exploded view.
+[v3] detected candidates: raw=54 deduped=22
+[v3] recognized 10/22
+[v3] recognized 20/22
+[v3] recognized 22/22
+[v3] tile proposals=2
+[v3] final markers=15 unique=15
+[v3] json=C:\projects\sites\blueprint-rec-2\.codex-smoke\gemini-page-architecture\page4-direct-gemini\markers_v3.json
+[v3] overlay=C:\projects\sites\blueprint-rec-2\.codex-smoke\gemini-page-architecture\page4-direct-gemini\markers_v3.overlay.png

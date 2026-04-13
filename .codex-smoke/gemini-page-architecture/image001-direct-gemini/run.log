@@ -1,0 +1,8 @@
+[v3] image=image001.png size=(205, 174)
+[v3] allowed_labels=2 strict=True gemini=True
+[v3] gemini_page_labels=2 source=gemini_page reason=The image contains two clear callout labels, 26 and 27, pointing to components within the circular detail view.
+[v3] detected candidates: raw=4 deduped=3
+[v3] recognized 3/3
+[v3] final markers=3 unique=2
+[v3] json=C:\projects\sites\blueprint-rec-2\.codex-smoke\gemini-page-architecture\image001-direct-gemini\markers_v3.json
+[v3] overlay=C:\projects\sites\blueprint-rec-2\.codex-smoke\gemini-page-architecture\image001-direct-gemini\markers_v3.overlay.png

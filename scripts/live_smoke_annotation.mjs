@@ -8,10 +8,6 @@ import { chromium } from "@playwright/test";
 const repoRoot = "C:/projects/sites/blueprint-rec-2";
 const smokeDir = path.join(repoRoot, ".codex-smoke", "live-smoke");
 const logsDir = path.join(smokeDir, "logs");
-let backendPort = 8012;
-let webPort = 3003;
-let backendBaseUrl = `http://127.0.0.1:${backendPort}`;
-let webBaseUrl = `http://127.0.0.1:${webPort}`;
 const blueprintFiles = [
   {
     filePath: path.join(repoRoot, "blueprints-test", "image001.png"),
@@ -175,7 +171,7 @@ async function readBodyText(page) {
   }
 }
 
-async function createLiveSession(filePath) {
+async function createLiveSession(backendBaseUrl, filePath) {
   let createResponse;
   let lastError = null;
   for (let attempt = 1; attempt <= 5; attempt += 1) {
@@ -283,7 +279,7 @@ function assertScenario(result, expect) {
   }
 }
 
-async function probeExport(sessionId) {
+async function probeExport(backendBaseUrl, sessionId) {
   const response = await fetch(`${backendBaseUrl}/api/sessions/${sessionId}/export`);
   return {
     ok: response.ok,
@@ -358,7 +354,7 @@ function hasTransientWorkspaceBody(bodyText) {
   );
 }
 
-async function inspectUi(sessionId, expectedReview) {
+async function inspectUi(webBaseUrl, sessionId, expectedReview) {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
   try {
@@ -467,10 +463,10 @@ async function inspectUi(sessionId, expectedReview) {
 }
 
 async function main() {
-  backendPort = await getAvailablePort();
-  webPort = await getAvailablePortInRange(3000, 3010);
-  backendBaseUrl = `http://127.0.0.1:${backendPort}`;
-  webBaseUrl = `http://127.0.0.1:${webPort}`;
+  const backendPort = await getAvailablePort();
+  const webPort = await getAvailablePort();
+  const backendBaseUrl = `http://127.0.0.1:${backendPort}`;
+  const webBaseUrl = `http://127.0.0.1:${webPort}`;
 
   const backend = startProcess(
     "py",
@@ -516,9 +512,9 @@ async function main() {
     for (const scenario of blueprintFiles) {
       ensureProcessAlive(backend, "Live smoke backend");
       ensureProcessAlive(web, "Live smoke web");
-      const live = await createLiveSession(scenario.filePath);
-      const exportProbe = await probeExport(live.sessionId);
-      const ui = await inspectUi(live.sessionId, live.session.summary.aiReview ?? 0);
+      const live = await createLiveSession(backendBaseUrl, scenario.filePath);
+      const exportProbe = await probeExport(backendBaseUrl, live.sessionId);
+      const ui = await inspectUi(webBaseUrl, live.sessionId, live.session.summary.aiReview ?? 0);
       const result = {
         filePath: scenario.filePath,
         sessionId: live.sessionId,

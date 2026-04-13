@@ -16,7 +16,8 @@
     "test:live-smoke": "node ./scripts/live_smoke_annotation.mjs",
     "test:headless-manual-qa": "node ./scripts/headless_manual_qa.mjs",
     "dev:inference": "py -3.11 -m uvicorn app.main:app --reload --app-dir services/inference --env-file services/inference/.env.local --port 8010",
-    "test:inference": "set INFERENCE_ENABLE_GEMINI=false&& set INFERENCE_ENABLE_OPENAI_VISION=false&& py -3.11 -m pytest services/inference/tests"
+    "test:inference": "set INFERENCE_ENABLE_GEMINI=false&& set INFERENCE_ENABLE_OPENAI_VISION=false&& py -3.11 -m pytest services/inference/tests",
+    "test:inference:jobs": "set INFERENCE_ENABLE_GEMINI=false&& set INFERENCE_ENABLE_OPENAI_VISION=false&& py -3.11 -m pytest services/inference/tests/test_jobs_api.py"
   },
   "devDependencies": {
     "@playwright/test": "^1.51.1",

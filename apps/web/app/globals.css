@@ -5,6 +5,9 @@
 @layer base {
   :root {
     color-scheme: light;
+    --scrollbar-track: #120f0d;
+    --scrollbar-thumb: #3a2e25;
+    --scrollbar-thumb-hover: #4a3a2f;
   }
 
   * {
@@ -21,6 +24,8 @@
   body {
     font-family: var(--font-body), sans-serif;
     color: #0f1220;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+    scrollbar-width: thin;
   }
 
   button,
@@ -28,6 +33,39 @@
   select {
     font: inherit;
   }
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track,
+*::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb,
+*::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 999px;
+  border: 3px solid var(--scrollbar-track);
+}
+
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover,
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+html::-webkit-scrollbar-corner,
+body::-webkit-scrollbar-corner,
+*::-webkit-scrollbar-corner {
+  background: var(--scrollbar-track);
 }
 
 a {

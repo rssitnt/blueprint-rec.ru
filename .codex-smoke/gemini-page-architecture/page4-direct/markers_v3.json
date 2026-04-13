@@ -1,0 +1,1253 @@
+{
+  "generated_at": "2026-04-12T11:07:22.353907+00:00",
+  "source_image": "C:\\projects\\sites\\blueprint-rec-2\\blueprints-test\\page4.png",
+  "source_size": {
+    "width": 1191,
+    "height": 1684
+  },
+  "marker_count": 13,
+  "unique_label_count": 11,
+  "settings": {
+    "ocr_engine": "both",
+    "tile_size": 1280,
+    "tile_overlap": 192,
+    "detect_scales": [
+      1.0,
+      1.6
+    ],
+    "strict_labels": false,
+    "gemini_enabled": false,
+    "gemini_model": null,
+    "gemini_page_labels_enabled": false,
+    "gemini_page_max_side": 1800,
+    "gemini_tile_proposals_enabled": true,
+    "gemini_proposal_tile_size": 1024,
+    "gemini_proposal_tile_overlap": 160,
+    "gemini_proposal_min_ink_density": 0.02,
+    "gemini_proposal_min_dark_pixels": 12,
+    "gemini_proposal_min_score": 0.55,
+    "final_min_ink_density": 0.07,
+    "final_min_dark_pixels": 120,
+    "final_min_bbox_area": 550.0,
+    "final_max_sparse_bbox_area": 10000.0
+  },
+  "stats": {
+    "labels_with_duplicates": {
+      "1": 2,
+      "11": 2
+    },
+    "status_counts": {
+      "ocr_only": 21,
+      "page_furniture_reject": 1
+    },
+    "accepted_before_merge": 21,
+    "merged_out": 8,
+    "final_text_sanity_rejected": 3
+  },
+  "detect_debug": {
+    "tile_count": 2,
+    "detect_scales": [
+      1.0,
+      1.6
+    ],
+    "raw_counts_by_scale": {
+      "1.00": 20,
+      "1.60": 34
+    },
+    "raw_candidate_count": 54,
+    "deduped_candidate_count": 22
+  },
+  "run_debug": {
+    "gemini_enabled": false,
+    "gemini_page_labels_enabled": false,
+    "page_labels_source": "none",
+    "page_labels_result": null,
+    "allowed_labels": [],
+    "candidate_count": 22,
+    "accepted_before_merge": 21,
+    "multi_split_expansions": 0,
+    "tile_proposals": 0,
+    "final_text_sanity_rejected": 3,
+    "status_counts": {
+      "ocr_only": 21,
+      "page_furniture_reject": 1
+    }
+  },
+  "markers": [
+    {
+      "quad": [
+        [
+          136.0,
+          94.0
+        ],
+        [
+          296.0,
+          94.0
+        ],
+        [
+          296.0,
+          146.0
+        ],
+        [
+          136.0,
+          146.0
+        ]
+      ],
+      "bbox": {
+        "x": 136.0,
+        "y": 94.0,
+        "w": 160.0,
+        "h": 52.0,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.0,
+      "center": {
+        "x": 216.0,
+        "y": 120.0
+      },
+      "top_left": {
+        "x": 136.0,
+        "y": 94.0
+      },
+      "tile_index": 0,
+      "label": "1",
+      "status": "ocr_only",
+      "recognition": {
+        "crop_box": {
+          "x0": 96,
+          "y0": 54,
+          "x1": 336,
+          "y1": 186
+        },
+        "context_box": {
+          "x0": 0,
+          "y0": 0,
+          "x1": 776,
+          "y1": 626
+        },
+        "easyocr_scores": {
+          "5": 0.7098679699366564,
+          "1": 0.958695731739315
+        },
+        "rapidocr_scores": {},
+        "ocr_best_label": "1",
+        "ocr_best_score": 0.958695731739315,
+        "ocr_second_score": 0.7098679699366564,
+        "gemini": null,
+        "final_ink_density": 0.25109011627906974,
+        "final_dark_pixels": 2764,
+        "final_bbox_area": 8320.0,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.6192741298586412,
+      "ocr_gap": 0.24882776180265864
+    },
+    {
+      "quad": [
+        [
+          84.0,
+          365.0
+        ],
+        [
+          136.0,
+          365.0
+        ],
+        [
+          136.0,
+          396.0
+        ],
+        [
+          84.0,
+          396.0
+        ]
+      ],
+      "bbox": {
+        "x": 84.0,
+        "y": 365.0,
+        "w": 52.0,
+        "h": 31.0,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 110.0,
+        "y": 380.5
+      },
+      "top_left": {
+        "x": 84.0,
+        "y": 365.0
+      },
+      "tile_index": 0,
+      "label": "11",
+      "status": "ocr_only",
+      "recognition": {
+        "crop_box": {
+          "x0": 71,
+          "y0": 352,
+          "x1": 149,
+          "y1": 409
+        },
+        "context_box": {
+          "x0": 0,
+          "y0": 209,
+          "x1": 292,
+          "y1": 552
+        },
+        "easyocr_scores": {
+          "112": 0.963218092543013,
+          "11": 0.9992624255520057
+        },
+        "rapidocr_scores": {},
+        "ocr_best_label": "11",
+        "ocr_best_score": 0.9992624255520057,
+        "ocr_second_score": 0.963218092543013,
+        "gemini": null,
+        "final_ink_density": 0.1510204081632653,
+        "final_dark_pixels": 296,
+        "final_bbox_area": 1612.0,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.6231471371431427,
+      "ocr_gap": 0.03604433300899268
+    },
+    {
+      "quad": [
+        [
+          921.0,
+          429.0
+        ],
+        [
+          951.0,
+          429.0
+        ],
+        [
+          951.0,
+          463.0
+        ],
+        [
+          921.0,
+          463.0
+        ]
+      ],
+      "bbox": {
+        "x": 921.0,
+        "y": 429.0,
+        "w": 30.0,
+        "h": 34.0,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.0,
+      "center": {
+        "x": 936.0,
+        "y": 446.0
+      },
+      "top_left": {
+        "x": 921.0,
+        "y": 429.0
+      },
+      "tile_index": 0,
+      "label": "13",
+      "status": "ocr_only",
+      "recognition": {
+        "crop_box": {
+          "x0": 913,
+          "y0": 421,
+          "x1": 959,
+          "y1": 471
+        },
+        "context_box": {
+          "x0": 793,
+          "y0": 301,
+          "x1": 1079,
+          "y1": 591
+        },
+        "easyocr_scores": {
+          "13": 0.9998664813948034
+        },
+        "rapidocr_scores": {
+          "13": 0.9990271627902985
+        },
+        "ocr_best_label": "13",
+        "ocr_best_score": 0.9998664813948034,
+        "ocr_second_score": 0.0,
+        "gemini": null,
+        "final_ink_density": 0.15092879256965944,
+        "final_dark_pixels": 195,
+        "final_bbox_area": 1020.0,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.7199038666042584,
+      "ocr_gap": 0.9998664813948034
+    },
+    {
+      "quad": [
+        [
+          277.0,
+          757.0
+        ],
+        [
+          306.0,
+          757.0
+        ],
+        [
+          306.0,
+          792.0
+        ],
+        [
+          277.0,
+          792.0
+        ]
+      ],
+      "bbox": {
+        "x": 277.0,
+        "y": 757.0,
+        "w": 29.0,
+        "h": 35.0,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 291.5,
+        "y": 774.5
+      },
+      "top_left": {
+        "x": 277.0,
+        "y": 757.0
+      },
+      "tile_index": 0,
+      "label": "11",
+      "status": "ocr_only",
+      "recognition": {
+        "crop_box": {
+          "x0": 268,
+          "y0": 748,
+          "x1": 315,
+          "y1": 801
+        },
+        "context_box": {
+          "x0": 149,
+          "y0": 629,
+          "x1": 434,
+          "y1": 920
+        },
+        "easyocr_scores": {
+          "11": 0.9947822543327747
+        },
+        "rapidocr_scores": {
+          "71": 0.9400184750556946,
+          "11": 0.998359352350235
+        },
+        "ocr_best_label": "11",
+        "ocr_best_score": 0.998359352350235,
+        "ocr_second_score": 0.9400184750556946,
+        "gemini": null,
+        "final_ink_density": 0.13131313131313133,
+        "final_dark_pixels": 169,
+        "final_bbox_area": 1015.0,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.6248168861865997,
+      "ocr_gap": 0.058340877294540405
+    },
+    {
+      "quad": [
+        [
+          274.0,
+          799.0
+        ],
+        [
+          307.0,
+          799.0
+        ],
+        [
+          307.0,
+          834.0
+        ],
+        [
+          274.0,
+          834.0
+        ]
+      ],
+      "bbox": {
+        "x": 274.0,
+        "y": 799.0,
+        "w": 33.0,
+        "h": 35.0,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 290.5,
+        "y": 816.5
+      },
+      "top_left": {
+        "x": 274.0,
+        "y": 799.0
+      },
+      "tile_index": 0,
+      "label": "10",
+      "status": "ocr_only",
+      "recognition": {
+        "crop_box": {
+          "x0": 265,
+          "y0": 790,
+          "x1": 316,
+          "y1": 843
+        },
+        "context_box": {
+          "x0": 146,
+          "y0": 671,
+          "x1": 435,
+          "y1": 962
+        },
+        "easyocr_scores": {
+          "10": 0.9992554306941491
+        },
+        "rapidocr_scores": {
+          "10": 0.999459981918335
+        },
+        "ocr_best_label": "10",
+        "ocr_best_score": 0.999459981918335,
+        "ocr_second_score": 0.0,
+        "gemini": null,
+        "final_ink_density": 0.16285516285516285,
+        "final_dark_pixels": 235,
+        "final_bbox_area": 1155.0,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.7196111869812012,
+      "ocr_gap": 0.999459981918335
+    },
+    {
+      "quad": [
+        [
+          921.0,
+          805.0
+        ],
+        [
+          944.0,
+          805.0
+        ],
+        [
+          944.0,
+          836.0
+        ],
+        [
+          921.0,
+          836.0
+        ]
+      ],
+      "bbox": {
+        "x": 921.0,
+        "y": 805.0,
+        "w": 23.0,
+        "h": 31.0,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 932.5,
+        "y": 820.5
+      },
+      "top_left": {
+        "x": 921.0,
+        "y": 805.0
+      },
+      "tile_index": 0,
+      "label": "9",
+      "status": "ocr_only",
+      "recognition": {
+        "crop_box": {
+          "x0": 913,
+          "y0": 797,
+          "x1": 952,
+          "y1": 844
+        },
+        "context_box": {
+          "x0": 793,
+          "y0": 677,
+          "x1": 1072,
+          "y1": 964
+        },
+        "easyocr_scores": {
+          "9": 0.9999967813517721
+        },
+        "rapidocr_scores": {
+          "6": 0.9980348944664001
+        },
+        "ocr_best_label": "9",
+        "ocr_best_score": 0.9999967813517721,
+        "ocr_second_score": 0.9980348944664001,
+        "gemini": null,
+        "final_ink_density": 0.1544973544973545,
+        "final_dark_pixels": 146,
+        "final_bbox_area": 713.0,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.6201941931266359,
+      "ocr_gap": 0.0019618868853719107
+    },
+    {
+      "quad": [
+        [
+          277.0,
+          901.0
+        ],
+        [
+          301.0,
+          901.0
+        ],
+        [
+          301.0,
+          932.0
+        ],
+        [
+          277.0,
+          932.0
+        ]
+      ],
+      "bbox": {
+        "x": 277.0,
+        "y": 901.0,
+        "w": 24.0,
+        "h": 31.0,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 289.0,
+        "y": 916.5
+      },
+      "top_left": {
+        "x": 277.0,
+        "y": 901.0
+      },
+      "tile_index": 0,
+      "label": "3",
+      "status": "ocr_only",
+      "recognition": {
+        "crop_box": {
+          "x0": 269,
+          "y0": 893,
+          "x1": 309,
+          "y1": 940
+        },
+        "context_box": {
+          "x0": 149,
+          "y0": 773,
+          "x1": 429,
+          "y1": 1060
+        },
+        "easyocr_scores": {
+          "3": 0.999853616349867,
+          "7": 0.908766324225599
+        },
+        "rapidocr_scores": {
+          "3": 0.998764157295227,
+          "71": 0.5308973975479603
+        },
+        "ocr_best_label": "3",
+        "ocr_best_score": 0.999853616349867,
+        "ocr_second_score": 0.908766324225599,
+        "gemini": null,
+        "final_ink_density": 0.11020408163265306,
+        "final_dark_pixels": 108,
+        "final_bbox_area": 744.0,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.6290179713493443,
+      "ocr_gap": 0.09108729212426803
+    },
+    {
+      "quad": [
+        [
+          922.0,
+          1000.0
+        ],
+        [
+          946.0,
+          1000.0
+        ],
+        [
+          946.0,
+          1032.0
+        ],
+        [
+          922.0,
+          1032.0
+        ]
+      ],
+      "bbox": {
+        "x": 922.0,
+        "y": 1000.0,
+        "w": 24.0,
+        "h": 32.0,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 934.0,
+        "y": 1016.0
+      },
+      "top_left": {
+        "x": 922.0,
+        "y": 1000.0
+      },
+      "tile_index": 1,
+      "label": "5",
+      "status": "ocr_only",
+      "recognition": {
+        "crop_box": {
+          "x0": 914,
+          "y0": 992,
+          "x1": 954,
+          "y1": 1040
+        },
+        "context_box": {
+          "x0": 794,
+          "y0": 872,
+          "x1": 1074,
+          "y1": 1160
+        },
+        "easyocr_scores": {
+          "5": 0.9999500519313962
+        },
+        "rapidocr_scores": {
+          "5": 0.9925740957260132
+        },
+        "ocr_best_label": "5",
+        "ocr_best_score": 0.9999500519313962,
+        "ocr_second_score": 0.0,
+        "gemini": null,
+        "final_ink_density": 0.12103174603174603,
+        "final_dark_pixels": 122,
+        "final_bbox_area": 768.0,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.7199640373906053,
+      "ocr_gap": 0.9999500519313962
+    },
+    {
+      "quad": [
+        [
+          279.0,
+          1022.0
+        ],
+        [
+          301.0,
+          1022.0
+        ],
+        [
+          301.0,
+          1053.0
+        ],
+        [
+          279.0,
+          1053.0
+        ]
+      ],
+      "bbox": {
+        "x": 279.0,
+        "y": 1022.0,
+        "w": 22.0,
+        "h": 31.0,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 290.0,
+        "y": 1037.5
+      },
+      "top_left": {
+        "x": 279.0,
+        "y": 1022.0
+      },
+      "tile_index": 0,
+      "label": "2",
+      "status": "ocr_only",
+      "recognition": {
+        "crop_box": {
+          "x0": 271,
+          "y0": 1014,
+          "x1": 309,
+          "y1": 1061
+        },
+        "context_box": {
+          "x0": 151,
+          "y0": 894,
+          "x1": 429,
+          "y1": 1181
+        },
+        "easyocr_scores": {
+          "2": 0.9999992847443906
+        },
+        "rapidocr_scores": {
+          "2": 0.9980406165122986
+        },
+        "ocr_best_label": "2",
+        "ocr_best_score": 0.9999992847443906,
+        "ocr_second_score": 0.0,
+        "gemini": null,
+        "final_ink_density": 0.13186813186813187,
+        "final_dark_pixels": 120,
+        "final_bbox_area": 682.0,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.7199994850159612,
+      "ocr_gap": 0.9999992847443906
+    },
+    {
+      "quad": [
+        [
+          480.0,
+          1078.0
+        ],
+        [
+          546.0,
+          1078.0
+        ],
+        [
+          546.0,
+          1116.0
+        ],
+        [
+          480.0,
+          1116.0
+        ]
+      ],
+      "bbox": {
+        "x": 480.0,
+        "y": 1078.0,
+        "w": 66.0,
+        "h": 38.0,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 513.0,
+        "y": 1097.0
+      },
+      "top_left": {
+        "x": 480.0,
+        "y": 1078.0
+      },
+      "tile_index": 1,
+      "label": "1",
+      "status": "ocr_only",
+      "recognition": {
+        "crop_box": {
+          "x0": 464,
+          "y0": 1062,
+          "x1": 562,
+          "y1": 1132
+        },
+        "context_box": {
+          "x0": 282,
+          "y0": 880,
+          "x1": 744,
+          "y1": 1314
+        },
+        "easyocr_scores": {
+          "1": 0.9996538461839464,
+          "14-2": 0.9311764151100679
+        },
+        "rapidocr_scores": {
+          "1": 0.9869832992553711,
+          "14-2": 0.9994061440229416
+        },
+        "ocr_best_label": "1",
+        "ocr_best_score": 0.9996538461839464,
+        "ocr_second_score": 0.9994061440229416,
+        "gemini": null,
+        "final_ink_density": 0.10984848484848485,
+        "final_dark_pixels": 348,
+        "final_bbox_area": 2508.0,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.6198101548501472,
+      "ocr_gap": 0.0002477021610047814
+    },
+    {
+      "quad": [
+        [
+          545.0,
+          1101.0
+        ],
+        [
+          607.0,
+          1101.0
+        ],
+        [
+          607.0,
+          1137.0
+        ],
+        [
+          545.0,
+          1137.0
+        ]
+      ],
+      "bbox": {
+        "x": 545.0,
+        "y": 1101.0,
+        "w": 62.0,
+        "h": 36.0,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 576.0,
+        "y": 1119.0
+      },
+      "top_left": {
+        "x": 545.0,
+        "y": 1101.0
+      },
+      "tile_index": 0,
+      "label": "14-3",
+      "status": "ocr_only",
+      "recognition": {
+        "crop_box": {
+          "x0": 529,
+          "y0": 1085,
+          "x1": 623,
+          "y1": 1153
+        },
+        "context_box": {
+          "x0": 359,
+          "y0": 915,
+          "x1": 793,
+          "y1": 1323
+        },
+        "easyocr_scores": {
+          "14-3": 0.9991636872291565,
+          "2": 0.9499246910238701
+        },
+        "rapidocr_scores": {
+          "14-3": 0.998493954539299
+        },
+        "ocr_best_label": "14-3",
+        "ocr_best_score": 0.9991636872291565,
+        "ocr_second_score": 0.9499246910238701,
+        "gemini": null,
+        "final_ink_density": 0.12727272727272726,
+        "final_dark_pixels": 336,
+        "final_bbox_area": 2232.0,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.6244053857026056,
+      "ocr_gap": 0.04923899620528638
+    },
+    {
+      "quad": [
+        [
+          661.0,
+          1145.0
+        ],
+        [
+          749.0,
+          1145.0
+        ],
+        [
+          749.0,
+          1182.0
+        ],
+        [
+          661.0,
+          1182.0
+        ]
+      ],
+      "bbox": {
+        "x": 661.0,
+        "y": 1145.0,
+        "w": 88.0,
+        "h": 37.0,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 705.0,
+        "y": 1163.5
+      },
+      "top_left": {
+        "x": 661.0,
+        "y": 1145.0
+      },
+      "tile_index": 0,
+      "label": "14-4(1)",
+      "status": "ocr_only",
+      "recognition": {
+        "crop_box": {
+          "x0": 639,
+          "y0": 1123,
+          "x1": 771,
+          "y1": 1204
+        },
+        "context_box": {
+          "x0": 397,
+          "y0": 881,
+          "x1": 1013,
+          "y1": 1446
+        },
+        "easyocr_scores": {},
+        "rapidocr_scores": {
+          "14-4(1)": 0.9768579431942531
+        },
+        "ocr_best_label": "14-4(1)",
+        "ocr_best_score": 0.9768579431942531,
+        "ocr_second_score": 0.0,
+        "gemini": null,
+        "final_ink_density": 0.1310185185185185,
+        "final_dark_pixels": 566,
+        "final_bbox_area": 3256.0,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.7033377190998622,
+      "ocr_gap": 0.9768579431942531
+    },
+    {
+      "quad": [
+        [
+          658.0,
+          1357.0
+        ],
+        [
+          752.0,
+          1357.0
+        ],
+        [
+          752.0,
+          1394.0
+        ],
+        [
+          658.0,
+          1394.0
+        ]
+      ],
+      "bbox": {
+        "x": 658.0,
+        "y": 1357.0,
+        "w": 94.0,
+        "h": 37.0,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 705.0,
+        "y": 1375.5
+      },
+      "top_left": {
+        "x": 658.0,
+        "y": 1357.0
+      },
+      "tile_index": 1,
+      "label": "14-4(2)",
+      "status": "ocr_only",
+      "recognition": {
+        "crop_box": {
+          "x0": 634,
+          "y0": 1333,
+          "x1": 776,
+          "y1": 1418
+        },
+        "context_box": {
+          "x0": 376,
+          "y0": 1075,
+          "x1": 1034,
+          "y1": 1676
+        },
+        "easyocr_scores": {},
+        "rapidocr_scores": {
+          "14-4(2)": 0.9974367618560791
+        },
+        "ocr_best_label": "14-4(2)",
+        "ocr_best_score": 0.9974367618560791,
+        "ocr_second_score": 0.0,
+        "gemini": null,
+        "final_ink_density": 0.13071895424836602,
+        "final_dark_pixels": 600,
+        "final_bbox_area": 3478.0,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.718154468536377,
+      "ocr_gap": 0.9974367618560791
+    }
+  ],
+  "final_text_sanity_rejected_markers": [
+    {
+      "quad": [
+        [
+          281.0,
+          579.0
+        ],
+        [
+          300.0,
+          579.0
+        ],
+        [
+          300.0,
+          605.0
+        ],
+        [
+          281.0,
+          605.0
+        ]
+      ],
+      "bbox": {
+        "x": 281.0,
+        "y": 579.0,
+        "w": 19.0,
+        "h": 26.0,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 290.5,
+        "y": 592.0
+      },
+      "top_left": {
+        "x": 281.0,
+        "y": 579.0
+      },
+      "tile_index": 1,
+      "label": "9",
+      "status": "final_text_sanity_reject",
+      "recognition": {
+        "crop_box": {
+          "x0": 275,
+          "y0": 573,
+          "x1": 306,
+          "y1": 611
+        },
+        "context_box": {
+          "x0": 153,
+          "y0": 451,
+          "x1": 428,
+          "y1": 733
+        },
+        "easyocr_scores": {
+          "9": 0.9999991655351472,
+          "6": 0.9497752143807963
+        },
+        "rapidocr_scores": {
+          "9": 0.9995044469833374
+        },
+        "ocr_best_label": "9",
+        "ocr_best_score": 0.9999991655351472,
+        "ocr_second_score": 0.9497752143807963,
+        "gemini": null,
+        "final_ink_density": 0.18695652173913044,
+        "final_dark_pixels": 129,
+        "final_bbox_area": 494.0,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0,
+        "final_text_sanity_reason": "too_small"
+      },
+      "final_score": 0.6250218777472264,
+      "ocr_gap": 0.050223951154350965
+    },
+    {
+      "quad": [
+        [
+          925.0,
+          765.0
+        ],
+        [
+          943.0,
+          765.0
+        ],
+        [
+          943.0,
+          793.0
+        ],
+        [
+          925.0,
+          793.0
+        ]
+      ],
+      "bbox": {
+        "x": 925.0,
+        "y": 765.0,
+        "w": 18.0,
+        "h": 28.0,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 934.0,
+        "y": 779.0
+      },
+      "top_left": {
+        "x": 925.0,
+        "y": 765.0
+      },
+      "tile_index": 0,
+      "label": "8",
+      "status": "final_text_sanity_reject",
+      "recognition": {
+        "crop_box": {
+          "x0": 918,
+          "y0": 758,
+          "x1": 950,
+          "y1": 800
+        },
+        "context_box": {
+          "x0": 797,
+          "y0": 637,
+          "x1": 1071,
+          "y1": 921
+        },
+        "easyocr_scores": {
+          "8": 0.9999996423721633
+        },
+        "rapidocr_scores": {
+          "8": 0.9997944235801697,
+          "80": 0.7000806629657745
+        },
+        "ocr_best_label": "8",
+        "ocr_best_score": 0.9999996423721633,
+        "ocr_second_score": 0.7000806629657745,
+        "gemini": null,
+        "final_ink_density": 0.23863636363636365,
+        "final_dark_pixels": 168,
+        "final_bbox_area": 504.0,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0,
+        "final_text_sanity_reason": "too_small"
+      },
+      "final_score": 0.6499916762113801,
+      "ocr_gap": 0.2999189794063888
+    },
+    {
+      "quad": [
+        [
+          927.0,
+          964.0
+        ],
+        [
+          946.0,
+          964.0
+        ],
+        [
+          946.0,
+          992.0
+        ],
+        [
+          927.0,
+          992.0
+        ]
+      ],
+      "bbox": {
+        "x": 927.0,
+        "y": 964.0,
+        "w": 19.0,
+        "h": 28.0,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 936.5,
+        "y": 978.0
+      },
+      "top_left": {
+        "x": 927.0,
+        "y": 964.0
+      },
+      "tile_index": 1,
+      "label": "7",
+      "status": "final_text_sanity_reject",
+      "recognition": {
+        "crop_box": {
+          "x0": 920,
+          "y0": 957,
+          "x1": 953,
+          "y1": 999
+        },
+        "context_box": {
+          "x0": 799,
+          "y0": 836,
+          "x1": 1074,
+          "y1": 1120
+        },
+        "easyocr_scores": {
+          "7": 0.9999980926522767
+        },
+        "rapidocr_scores": {
+          "7": 0.9985973238945007
+        },
+        "ocr_best_label": "7",
+        "ocr_best_score": 0.9999980926522767,
+        "ocr_second_score": 0.0,
+        "gemini": null,
+        "final_ink_density": 0.12771739130434784,
+        "final_dark_pixels": 94,
+        "final_bbox_area": 532.0,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0,
+        "final_text_sanity_reason": "too_small"
+      },
+      "final_score": 0.7199986267096392,
+      "ocr_gap": 0.9999980926522767
+    }
+  ]
+}

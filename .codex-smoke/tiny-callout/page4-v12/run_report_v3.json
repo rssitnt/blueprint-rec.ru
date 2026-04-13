@@ -1,0 +1,118 @@
+{
+  "generated_at": "2026-04-12T14:14:59.927360+00:00",
+  "source_image": "C:\\projects\\sites\\blueprint-rec-2\\blueprints-test\\page4.png",
+  "candidate_count": 22,
+  "accepted_before_merge": 18,
+  "final_marker_count": 17,
+  "final_text_sanity_rejected": 0,
+  "unique_labels": [
+    "1",
+    "10",
+    "11",
+    "13",
+    "14-1",
+    "14-2",
+    "14-3",
+    "14-4(1)",
+    "14-4(2)",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9"
+  ],
+  "allowed_labels": [
+    "13",
+    "9",
+    "4",
+    "11",
+    "10",
+    "3",
+    "8",
+    "6",
+    "1",
+    "2",
+    "7",
+    "5",
+    "14-1",
+    "14-2",
+    "14-3",
+    "14-4(1)",
+    "14-4(2)"
+  ],
+  "page_labels_source": "gemini_page",
+  "page_labels_result": {
+    "labels": [
+      "13",
+      "9",
+      "4",
+      "11",
+      "10",
+      "3",
+      "8",
+      "6",
+      "1",
+      "2",
+      "7",
+      "5",
+      "14-1",
+      "14-2",
+      "14-3",
+      "14-4(1)",
+      "14-4(2)"
+    ],
+    "confidence": 1.0,
+    "reason": "The labels represent part numbers identified by leader lines in the exploded view diagram.",
+    "image_size": {
+      "width": 1191,
+      "height": 1684
+    }
+  },
+  "status_counts": {
+    "gemini_reject": 5,
+    "ocr_gemini_agree": 15,
+    "ocr_only": 1,
+    "page_furniture_reject": 1
+  },
+  "detect_debug": {
+    "tile_count": 2,
+    "detect_scales": [
+      1.0,
+      1.6
+    ],
+    "raw_counts_by_scale": {
+      "1.00": 20,
+      "1.60": 34
+    },
+    "raw_candidate_count": 54,
+    "deduped_candidate_count": 22
+  },
+  "settings": {
+    "ocr_engine": "both",
+    "tile_size": 1280,
+    "tile_overlap": 192,
+    "detect_scales": [
+      1.0,
+      1.6
+    ],
+    "strict_labels": true,
+    "gemini_enabled": true,
+    "paddle_enabled": true,
+    "gemini_model": "google/gemini-3.1-flash-lite-preview",
+    "gemini_page_labels_enabled": true,
+    "gemini_page_max_side": 1800,
+    "gemini_tile_proposals_enabled": true,
+    "gemini_proposal_tile_size": 1024,
+    "gemini_proposal_tile_overlap": 160,
+    "gemini_proposal_min_ink_density": 0.02,
+    "gemini_proposal_min_dark_pixels": 12,
+    "gemini_proposal_min_score": 0.55,
+    "final_min_ink_density": 0.07,
+    "final_min_dark_pixels": 120,
+    "final_min_bbox_area": 550.0,
+    "final_max_sparse_bbox_area": 10000.0
+  }
+}

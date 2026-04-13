@@ -1,0 +1,25 @@
+
+> blueprint-rec-2@0.1.0 dev:web
+> npm run dev --workspace @blueprint-rec/web
+
+
+> @blueprint-rec/web@0.1.0 dev
+> next dev
+
+   тЦ▓ Next.js 15.5.14
+   - Local:        http://localhost:3000
+   - Network:      http://172.16.0.1:3000
+   - Environments: .env.local
+
+ тЬУ Starting...
+ тЬУ Ready in 1736ms
+ тЪа Found a change in next.config.ts. Restarting the server to apply the changes...
+   тЦ▓ Next.js 15.5.14
+   - Local:        http://localhost:3000
+   - Network:      http://172.16.0.1:3000
+   - Environments: .env.local
+   - Experiments (use with caution):
+     тип devtoolSegmentExplorer
+
+ тЬУ Starting...
+ тЬУ Ready in 1651ms

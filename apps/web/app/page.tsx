@@ -1,5 +1,5 @@
-import { SessionHome } from "@/components/annotation/session-home";
+import { JobHome } from "@/components/annotation/job-home";
 
 export default function HomePage() {
-  return <SessionHome />;
+  return <JobHome />;
 }

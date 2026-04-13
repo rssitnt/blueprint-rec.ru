@@ -4,7 +4,11 @@ import { SiteShell } from "../components/layout/site-shell";
 
 export const metadata: Metadata = {
   title: "Blueprint Annotation Desk",
-  description: "Shared annotation workspace for AI and human point placement on drawings."
+  description: "Shared annotation workspace for AI and human point placement on drawings.",
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico"
+  }
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

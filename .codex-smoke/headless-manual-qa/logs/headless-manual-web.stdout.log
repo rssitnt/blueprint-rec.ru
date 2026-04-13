@@ -1,18 +1,16 @@
 
 > @blueprint-rec/web@0.1.0 dev
-> next dev --hostname 127.0.0.1 --port 62143
+> next dev --hostname 127.0.0.1 --port 61014
 
    ▲ Next.js 15.5.14
-   - Local:        http://127.0.0.1:62143
-   - Network:      http://127.0.0.1:62143
+   - Local:        http://127.0.0.1:61014
+   - Network:      http://127.0.0.1:61014
    - Environments: .env.local
 
  ✓ Starting...
- ✓ Ready in 1757ms
+ ✓ Ready in 1672ms
  ○ Compiling / ...
- ✓ Compiled / in 3.1s (641 modules)
- GET / 200 in 3440ms
- ○ Compiling /sessions/[sessionId] ...
- ✓ Compiled /sessions/[sessionId] in 563ms (659 modules)
- GET /sessions/c63b907a-3866-47fd-be95-036ab20e6e6a 200 in 1123ms
-   Reload env: .env.local
+ ✓ Compiled / in 2.6s (584 modules)
+ GET / 200 in 2843ms
+ ✓ Compiled /sessions/[sessionId] in 335ms (659 modules)
+ GET /sessions/18733b45-1c26-4b84-94e6-a4aaf9623918 200 in 810ms

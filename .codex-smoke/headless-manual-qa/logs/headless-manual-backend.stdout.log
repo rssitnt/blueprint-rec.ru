@@ -1,28 +1,29 @@
-INFO:     127.0.0.1:62160 - "GET /api/health HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62200 - "POST /api/sessions HTTP/1.1" 201 Created
-INFO:     127.0.0.1:62201 - "POST /api/sessions/575e60fa-92fc-4b76-ac4e-3d6177db5b20/document HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62200 - "POST /api/sessions/575e60fa-92fc-4b76-ac4e-3d6177db5b20/auto-annotate HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62201 - "POST /api/sessions HTTP/1.1" 201 Created
-INFO:     127.0.0.1:62200 - "POST /api/sessions/c63b907a-3866-47fd-be95-036ab20e6e6a/document HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62201 - "POST /api/sessions/c63b907a-3866-47fd-be95-036ab20e6e6a/auto-annotate HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59510 - "OPTIONS /api/sessions/c63b907a-3866-47fd-be95-036ab20e6e6a HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59510 - "GET /api/sessions/c63b907a-3866-47fd-be95-036ab20e6e6a HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59514 - "GET /storage/c63b907a-3866-47fd-be95-036ab20e6e6a/20260410071717192421-test1.jpg HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59521 - "GET /storage/c63b907a-3866-47fd-be95-036ab20e6e6a/candidates/26c8fff1-45c0-42c6-b8ed-dd29ed8b94d9.png HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59513 - "OPTIONS /api/sessions/c63b907a-3866-47fd-be95-036ab20e6e6a/commands HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59513 - "POST /api/sessions/c63b907a-3866-47fd-be95-036ab20e6e6a/commands HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59513 - "GET /storage/c63b907a-3866-47fd-be95-036ab20e6e6a/20260410071717192421-test1.jpg HTTP/1.1" 304 Not Modified
-INFO:     127.0.0.1:59513 - "OPTIONS /api/sessions/c63b907a-3866-47fd-be95-036ab20e6e6a/candidates/26c8fff1-45c0-42c6-b8ed-dd29ed8b94d9/reject HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59522 - "POST /api/sessions/c63b907a-3866-47fd-be95-036ab20e6e6a/candidates/26c8fff1-45c0-42c6-b8ed-dd29ed8b94d9/reject HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59521 - "GET /storage/c63b907a-3866-47fd-be95-036ab20e6e6a/candidates/748849b3-d6c0-4753-b514-db1cb22e916e.png HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59521 - "GET /storage/c63b907a-3866-47fd-be95-036ab20e6e6a/candidates/3828ff19-48e8-483e-88a3-6b48526b9402.png HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59522 - "OPTIONS /api/sessions/c63b907a-3866-47fd-be95-036ab20e6e6a/commands HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59513 - "POST /api/sessions/c63b907a-3866-47fd-be95-036ab20e6e6a/commands HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59513 - "OPTIONS /api/sessions/c63b907a-3866-47fd-be95-036ab20e6e6a/commands HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59522 - "POST /api/sessions/c63b907a-3866-47fd-be95-036ab20e6e6a/commands HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59522 - "OPTIONS /api/sessions/c63b907a-3866-47fd-be95-036ab20e6e6a/commands HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59513 - "POST /api/sessions/c63b907a-3866-47fd-be95-036ab20e6e6a/commands HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59513 - "OPTIONS /api/sessions/c63b907a-3866-47fd-be95-036ab20e6e6a/commands HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59522 - "POST /api/sessions/c63b907a-3866-47fd-be95-036ab20e6e6a/commands HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59532 - "GET /api/sessions/c63b907a-3866-47fd-be95-036ab20e6e6a/export HTTP/1.1" 400 Bad Request
-INFO:     127.0.0.1:59533 - "GET /api/sessions/575e60fa-92fc-4b76-ac4e-3d6177db5b20/export HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61051 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61117 - "POST /api/sessions HTTP/1.1" 201 Created
+INFO:     127.0.0.1:61118 - "POST /api/sessions/1053e784-726f-42d6-a205-f0c6b48f6b04/document HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61117 - "POST /api/sessions/1053e784-726f-42d6-a205-f0c6b48f6b04/auto-annotate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61118 - "POST /api/sessions HTTP/1.1" 201 Created
+INFO:     127.0.0.1:61117 - "POST /api/sessions/18733b45-1c26-4b84-94e6-a4aaf9623918/document HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61118 - "POST /api/sessions/18733b45-1c26-4b84-94e6-a4aaf9623918/auto-annotate HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58516 - "OPTIONS /api/sessions/18733b45-1c26-4b84-94e6-a4aaf9623918 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58516 - "GET /api/sessions/18733b45-1c26-4b84-94e6-a4aaf9623918 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58519 - "GET /storage/18733b45-1c26-4b84-94e6-a4aaf9623918/20260411180305858086-test1.jpg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58434 - "OPTIONS /api/sessions/82265d4d-6a26-4b96-b5d2-adfd73962cec HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:58436 - "GET /storage/18733b45-1c26-4b84-94e6-a4aaf9623918/candidates/dacf5cc6-4bc9-4254-84c3-ca1b9ccd447e.png HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58518 - "OPTIONS /api/sessions/18733b45-1c26-4b84-94e6-a4aaf9623918/commands HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58518 - "POST /api/sessions/18733b45-1c26-4b84-94e6-a4aaf9623918/commands HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58518 - "GET /storage/18733b45-1c26-4b84-94e6-a4aaf9623918/20260411180305858086-test1.jpg HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:58518 - "OPTIONS /api/sessions/18733b45-1c26-4b84-94e6-a4aaf9623918/candidates/dacf5cc6-4bc9-4254-84c3-ca1b9ccd447e/reject HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58437 - "POST /api/sessions/18733b45-1c26-4b84-94e6-a4aaf9623918/candidates/dacf5cc6-4bc9-4254-84c3-ca1b9ccd447e/reject HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58436 - "GET /storage/18733b45-1c26-4b84-94e6-a4aaf9623918/candidates/eb1e839b-d212-42f7-a6a2-f8281d54d184.png HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58436 - "GET /storage/18733b45-1c26-4b84-94e6-a4aaf9623918/candidates/c7836a8b-fb14-44bb-87f6-cc95b4a7a65b.png HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58437 - "OPTIONS /api/sessions/18733b45-1c26-4b84-94e6-a4aaf9623918/commands HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58518 - "POST /api/sessions/18733b45-1c26-4b84-94e6-a4aaf9623918/commands HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58518 - "OPTIONS /api/sessions/18733b45-1c26-4b84-94e6-a4aaf9623918/commands HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58437 - "POST /api/sessions/18733b45-1c26-4b84-94e6-a4aaf9623918/commands HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58437 - "OPTIONS /api/sessions/18733b45-1c26-4b84-94e6-a4aaf9623918/commands HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58518 - "POST /api/sessions/18733b45-1c26-4b84-94e6-a4aaf9623918/commands HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58518 - "OPTIONS /api/sessions/18733b45-1c26-4b84-94e6-a4aaf9623918/commands HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58437 - "POST /api/sessions/18733b45-1c26-4b84-94e6-a4aaf9623918/commands HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58445 - "GET /api/sessions/18733b45-1c26-4b84-94e6-a4aaf9623918/export HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:58446 - "GET /api/sessions/1053e784-726f-42d6-a205-f0c6b48f6b04/export HTTP/1.1" 200 OK

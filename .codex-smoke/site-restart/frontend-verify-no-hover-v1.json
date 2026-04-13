@@ -1,0 +1,30 @@
+{
+  "action": {
+    "backgroundColor": "rgb(43, 34, 29)",
+    "color": "rgb(255, 244, 234)",
+    "transitionProperty": "none",
+    "transitionDuration": "0s",
+    "transform": "none"
+  },
+  "reset": {
+    "backgroundColor": "rgb(29, 23, 19)",
+    "color": "rgb(220, 207, 194)",
+    "transitionProperty": "none",
+    "transitionDuration": "0s",
+    "transform": "none"
+  },
+  "drawingToggle": {
+    "backgroundColor": "rgb(43, 34, 29)",
+    "color": "rgb(255, 245, 235)",
+    "transitionProperty": "none",
+    "transitionDuration": "0s",
+    "transform": "none"
+  },
+  "archiveToggle": {
+    "backgroundColor": "rgb(21, 17, 14)",
+    "color": "rgb(202, 188, 174)",
+    "transitionProperty": "none",
+    "transitionDuration": "0s",
+    "transform": "none"
+  }
+}

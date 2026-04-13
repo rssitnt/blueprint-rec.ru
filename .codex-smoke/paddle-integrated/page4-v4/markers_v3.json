@@ -1,0 +1,1553 @@
+{
+  "generated_at": "2026-04-12T13:18:08.188298+00:00",
+  "source_image": "C:\\projects\\sites\\blueprint-rec-2\\blueprints-test\\page4.png",
+  "source_size": {
+    "width": 1191,
+    "height": 1684
+  },
+  "marker_count": 17,
+  "unique_label_count": 17,
+  "settings": {
+    "ocr_engine": "both",
+    "tile_size": 1280,
+    "tile_overlap": 192,
+    "detect_scales": [
+      1.0,
+      1.6
+    ],
+    "strict_labels": true,
+    "gemini_enabled": true,
+    "paddle_enabled": true,
+    "gemini_model": "google/gemini-3.1-flash-lite-preview",
+    "gemini_page_labels_enabled": true,
+    "gemini_page_max_side": 1800,
+    "gemini_tile_proposals_enabled": true,
+    "gemini_proposal_tile_size": 1024,
+    "gemini_proposal_tile_overlap": 160,
+    "gemini_proposal_min_ink_density": 0.02,
+    "gemini_proposal_min_dark_pixels": 12,
+    "gemini_proposal_min_score": 0.55,
+    "final_min_ink_density": 0.07,
+    "final_min_dark_pixels": 120,
+    "final_min_bbox_area": 550.0,
+    "final_max_sparse_bbox_area": 10000.0
+  },
+  "stats": {
+    "labels_with_duplicates": {},
+    "status_counts": {
+      "gemini_reject": 4,
+      "ocr_gemini_agree": 16,
+      "ocr_only": 2,
+      "page_furniture_reject": 1
+    },
+    "accepted_before_merge": 18,
+    "merged_out": 1,
+    "final_text_sanity_rejected": 0
+  },
+  "detect_debug": {
+    "tile_count": 2,
+    "detect_scales": [
+      1.0,
+      1.6
+    ],
+    "raw_counts_by_scale": {
+      "1.00": 20,
+      "1.60": 34
+    },
+    "raw_candidate_count": 54,
+    "deduped_candidate_count": 22
+  },
+  "run_debug": {
+    "gemini_enabled": true,
+    "paddle_enabled": true,
+    "gemini_page_labels_enabled": true,
+    "page_labels_source": "gemini_page",
+    "page_labels_result": {
+      "labels": [
+        "13",
+        "9",
+        "4",
+        "11",
+        "10",
+        "3",
+        "8",
+        "6",
+        "1",
+        "7",
+        "5",
+        "2",
+        "14-1",
+        "14-2",
+        "14-3",
+        "14-4(1)",
+        "14-4(2)"
+      ],
+      "confidence": 1.0,
+      "reason": "The labels are clearly identified as part callouts with leader lines pointing to specific components in the exploded view.",
+      "image_size": {
+        "width": 1191,
+        "height": 1684
+      }
+    },
+    "allowed_labels": [
+      "13",
+      "9",
+      "4",
+      "11",
+      "10",
+      "3",
+      "8",
+      "6",
+      "1",
+      "7",
+      "5",
+      "2",
+      "14-1",
+      "14-2",
+      "14-3",
+      "14-4(1)",
+      "14-4(2)"
+    ],
+    "candidate_count": 22,
+    "paddle_page_fallback_count": 0,
+    "paddle_crop_result_count": 22,
+    "paddle_crop_errors": 0,
+    "accepted_before_merge": 18,
+    "multi_split_expansions": 0,
+    "paddle_missing_candidates": 1,
+    "tile_proposals": 0,
+    "targeted_missing_proposals": 0,
+    "final_text_sanity_rejected": 0,
+    "status_counts": {
+      "gemini_reject": 4,
+      "ocr_gemini_agree": 16,
+      "ocr_only": 2,
+      "page_furniture_reject": 1
+    }
+  },
+  "markers": [
+    {
+      "quad": [
+        [
+          176.0,
+          131.0
+        ],
+        [
+          287.0,
+          131.0
+        ],
+        [
+          287.0,
+          157.0
+        ],
+        [
+          176.0,
+          157.0
+        ]
+      ],
+      "bbox": {
+        "x": 176.0,
+        "y": 131.0,
+        "w": 111.0,
+        "h": 26.0,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.0,
+      "center": {
+        "x": 231.5,
+        "y": 144.0
+      },
+      "top_left": {
+        "x": 176.0,
+        "y": 131.0
+      },
+      "tile_index": 0,
+      "label": "1",
+      "status": "ocr_only",
+      "recognition": {
+        "crop_box": {
+          "x0": 148,
+          "y0": 103,
+          "x1": 315,
+          "y1": 185
+        },
+        "context_box": {
+          "x0": 0,
+          "y0": 0,
+          "x1": 620,
+          "y1": 490
+        },
+        "easyocr_scores": {
+          "1": 0.9350570426721339
+        },
+        "rapidocr_scores": {},
+        "ocr_best_label": "1",
+        "ocr_best_score": 0.9350570426721339,
+        "ocr_second_score": 0.0,
+        "gemini": {
+          "status": "ok",
+          "label": null,
+          "confidence": 1.0,
+          "reason": "The highlighted text is a brand logo and slogan, not a part number callout.",
+          "raw_label": "NONE"
+        },
+        "final_ink_density": 0.20390509144834404,
+        "final_dark_pixels": 825,
+        "final_bbox_area": 2886.0,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.6732410707239364,
+      "ocr_gap": 0.9350570426721339
+    },
+    {
+      "quad": [
+        [
+          921.0,
+          429.0
+        ],
+        [
+          951.0,
+          429.0
+        ],
+        [
+          951.0,
+          463.0
+        ],
+        [
+          921.0,
+          463.0
+        ]
+      ],
+      "bbox": {
+        "x": 921.0,
+        "y": 429.0,
+        "w": 30.0,
+        "h": 34.0,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.0,
+      "center": {
+        "x": 936.0,
+        "y": 446.0
+      },
+      "top_left": {
+        "x": 921.0,
+        "y": 429.0
+      },
+      "tile_index": 0,
+      "label": "13",
+      "status": "ocr_gemini_agree",
+      "recognition": {
+        "crop_box": {
+          "x0": 913,
+          "y0": 421,
+          "x1": 959,
+          "y1": 471
+        },
+        "context_box": {
+          "x0": 793,
+          "y0": 301,
+          "x1": 1079,
+          "y1": 591
+        },
+        "paddle_scores": {
+          "13": 0.9997806549072266
+        },
+        "ocr_best_label": "13",
+        "ocr_best_score": 0.9997806549072266,
+        "ocr_second_score": 0.0,
+        "gemini": {
+          "status": "ok",
+          "label": "13",
+          "confidence": 1.0,
+          "reason": "The text 13 is clearly identified as a part callout with a leader line pointing to a component.",
+          "raw_label": "13"
+        },
+        "final_ink_density": 0.15092879256965944,
+        "final_dark_pixels": 195,
+        "final_bbox_area": 1020.0,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.9998420715332031,
+      "ocr_gap": 0.9997806549072266
+    },
+    {
+      "quad": [
+        [
+          281.0,
+          579.0
+        ],
+        [
+          300.0,
+          579.0
+        ],
+        [
+          300.0,
+          605.0
+        ],
+        [
+          281.0,
+          605.0
+        ]
+      ],
+      "bbox": {
+        "x": 281.0,
+        "y": 579.0,
+        "w": 19.0,
+        "h": 26.0,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 290.5,
+        "y": 592.0
+      },
+      "top_left": {
+        "x": 281.0,
+        "y": 579.0
+      },
+      "tile_index": 1,
+      "label": "9",
+      "status": "ocr_gemini_agree",
+      "recognition": {
+        "crop_box": {
+          "x0": 275,
+          "y0": 573,
+          "x1": 306,
+          "y1": 611
+        },
+        "context_box": {
+          "x0": 153,
+          "y0": 451,
+          "x1": 428,
+          "y1": 733
+        },
+        "paddle_scores": {
+          "9": 0.9998998641967773
+        },
+        "ocr_best_label": "9",
+        "ocr_best_score": 0.9998998641967773,
+        "ocr_second_score": 0.0,
+        "gemini": {
+          "status": "ok",
+          "label": "9",
+          "confidence": 1.0,
+          "reason": "The highlighted text is a clear part callout label pointing to a component in the assembly drawing.",
+          "raw_label": "9"
+        },
+        "final_ink_density": 0.18695652173913044,
+        "final_dark_pixels": 129,
+        "final_bbox_area": 494.0,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.9999279022216797,
+      "ocr_gap": 0.9998998641967773
+    },
+    {
+      "quad": [
+        [
+          280.724,
+          700.988
+        ],
+        [
+          295.276,
+          700.988
+        ],
+        [
+          295.276,
+          725.0120000000001
+        ],
+        [
+          280.724,
+          725.0120000000001
+        ]
+      ],
+      "bbox": {
+        "x": 280.724,
+        "y": 700.988,
+        "w": 14.552,
+        "h": 24.024,
+        "angle": 0.0
+      },
+      "source_kind": "paddle_page",
+      "detect_scale": 0.0,
+      "center": {
+        "x": 288.0,
+        "y": 713.0
+      },
+      "top_left": {
+        "x": 280.724,
+        "y": 700.988
+      },
+      "paddle_text": "4",
+      "paddle_score": 0.9999772310256958,
+      "recognition": {
+        "crop_box": {
+          "x0": 271,
+          "y0": 692,
+          "x1": 305,
+          "y1": 734
+        },
+        "context_box": {
+          "x0": 150,
+          "y0": 571,
+          "x1": 426,
+          "y1": 855
+        },
+        "paddle_scores": {
+          "4": 0.9999772310256958
+        },
+        "ocr_best_label": "4",
+        "ocr_best_score": 0.9999772310256958,
+        "ocr_second_score": 0.0,
+        "gemini": {
+          "status": "ok",
+          "label": "4",
+          "confidence": 1.0,
+          "reason": "The highlighted text is a part number callout with a leader line pointing to a bolt.",
+          "raw_label": "4"
+        },
+        "gemini_single_localize": {
+          "items": [
+            {
+              "label": "4",
+              "x0": 286.0,
+              "y0": 214.0,
+              "x1": 714.0,
+              "y1": 786.0
+            }
+          ],
+          "reason": ""
+        },
+        "final_ink_density": 0.18,
+        "final_dark_pixels": 108,
+        "final_bbox_area": 349.597248,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "label": "4",
+      "status": "gemini_single_localize",
+      "final_score": 0.999983606338501,
+      "ocr_gap": 0.9999772310256958
+    },
+    {
+      "quad": [
+        [
+          281.442,
+          761.25
+        ],
+        [
+          301.558,
+          761.25
+        ],
+        [
+          301.558,
+          787.75
+        ],
+        [
+          281.442,
+          787.75
+        ]
+      ],
+      "bbox": {
+        "x": 281.442,
+        "y": 761.25,
+        "w": 20.116,
+        "h": 26.5,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 291.5,
+        "y": 774.5
+      },
+      "top_left": {
+        "x": 281.442,
+        "y": 761.25
+      },
+      "tile_index": 0,
+      "label": "11",
+      "status": "gemini_single_localize",
+      "recognition": {
+        "crop_box": {
+          "x0": 268,
+          "y0": 748,
+          "x1": 315,
+          "y1": 801
+        },
+        "context_box": {
+          "x0": 149,
+          "y0": 629,
+          "x1": 434,
+          "y1": 920
+        },
+        "paddle_scores": {
+          "11": 0.9979969263076782
+        },
+        "ocr_best_label": "11",
+        "ocr_best_score": 0.9979969263076782,
+        "ocr_second_score": 0.0,
+        "gemini": {
+          "status": "ok",
+          "label": "11",
+          "confidence": 1.0,
+          "reason": "The highlighted text is a clear part callout with a leader line pointing to a component.",
+          "raw_label": "11"
+        },
+        "gemini_single_localize": {
+          "items": [
+            {
+              "label": "11",
+              "x0": 286.0,
+              "y0": 250.0,
+              "x1": 714.0,
+              "y1": 750.0
+            }
+          ],
+          "reason": ""
+        },
+        "final_ink_density": 0.20903225806451614,
+        "final_dark_pixels": 162,
+        "final_bbox_area": 533.074,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.9985577869415283,
+      "ocr_gap": 0.9979969263076782
+    },
+    {
+      "quad": [
+        [
+          925.2,
+          766.4
+        ],
+        [
+          942.8000000000001,
+          766.4
+        ],
+        [
+          942.8000000000001,
+          790.97
+        ],
+        [
+          925.2,
+          790.97
+        ]
+      ],
+      "bbox": {
+        "x": 925.2,
+        "y": 766.4,
+        "w": 17.6,
+        "h": 24.57,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 934.0,
+        "y": 778.685
+      },
+      "top_left": {
+        "x": 925.2,
+        "y": 766.4
+      },
+      "tile_index": 0,
+      "label": "8",
+      "status": "gemini_single_localize",
+      "recognition": {
+        "crop_box": {
+          "x0": 918,
+          "y0": 758,
+          "x1": 950,
+          "y1": 800
+        },
+        "context_box": {
+          "x0": 797,
+          "y0": 637,
+          "x1": 1071,
+          "y1": 921
+        },
+        "paddle_scores": {
+          "8": 0.999197781085968
+        },
+        "ocr_best_label": "8",
+        "ocr_best_score": 0.999197781085968,
+        "ocr_second_score": 0.0,
+        "gemini": {
+          "status": "ok",
+          "label": "8",
+          "confidence": 1.0,
+          "reason": "The highlighted text is a clear part callout label '8' with a leader line pointing to a component.",
+          "raw_label": "8"
+        },
+        "gemini_single_localize": {
+          "items": [
+            {
+              "label": "8",
+              "x0": 225.0,
+              "y0": 200.0,
+              "x1": 775.0,
+              "y1": 785.0
+            }
+          ],
+          "reason": ""
+        },
+        "final_ink_density": 0.2601880877742947,
+        "final_dark_pixels": 166,
+        "final_bbox_area": 432.432,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.999422402381897,
+      "ocr_gap": 0.999197781085968
+    },
+    {
+      "quad": [
+        [
+          278.923,
+          804.469
+        ],
+        [
+          302.077,
+          804.469
+        ],
+        [
+          302.077,
+          828.5310000000001
+        ],
+        [
+          278.923,
+          828.5310000000001
+        ]
+      ],
+      "bbox": {
+        "x": 278.923,
+        "y": 804.469,
+        "w": 23.154,
+        "h": 24.062,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 290.5,
+        "y": 816.5
+      },
+      "top_left": {
+        "x": 278.923,
+        "y": 804.469
+      },
+      "tile_index": 0,
+      "label": "10",
+      "status": "gemini_single_localize",
+      "recognition": {
+        "crop_box": {
+          "x0": 265,
+          "y0": 790,
+          "x1": 316,
+          "y1": 843
+        },
+        "context_box": {
+          "x0": 146,
+          "y0": 671,
+          "x1": 435,
+          "y1": 962
+        },
+        "paddle_scores": {
+          "10": 0.9990156292915344
+        },
+        "ocr_best_label": "10",
+        "ocr_best_score": 0.9990156292915344,
+        "ocr_second_score": 0.0,
+        "gemini": {
+          "status": "ok",
+          "label": "10",
+          "confidence": 1.0,
+          "reason": "The highlighted text is a clear part number callout pointing to a component in the assembly drawing.",
+          "raw_label": "10"
+        },
+        "gemini_single_localize": {
+          "items": [
+            {
+              "label": "10",
+              "x0": 273.0,
+              "y0": 273.0,
+              "x1": 727.0,
+              "y1": 727.0
+            }
+          ],
+          "reason": ""
+        },
+        "final_ink_density": 0.272294887039239,
+        "final_dark_pixels": 229,
+        "final_bbox_area": 557.1315480000001,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.9992912530899047,
+      "ocr_gap": 0.9990156292915344
+    },
+    {
+      "quad": [
+        [
+          925.168,
+          807.716
+        ],
+        [
+          941.158,
+          807.716
+        ],
+        [
+          941.158,
+          833.284
+        ],
+        [
+          925.168,
+          833.284
+        ]
+      ],
+      "bbox": {
+        "x": 925.168,
+        "y": 807.716,
+        "w": 15.99,
+        "h": 25.568,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 933.163,
+        "y": 820.5
+      },
+      "top_left": {
+        "x": 925.168,
+        "y": 807.716
+      },
+      "tile_index": 0,
+      "label": "6",
+      "status": "gemini_single_localize",
+      "recognition": {
+        "crop_box": {
+          "x0": 913,
+          "y0": 797,
+          "x1": 952,
+          "y1": 844
+        },
+        "context_box": {
+          "x0": 793,
+          "y0": 677,
+          "x1": 1072,
+          "y1": 964
+        },
+        "paddle_scores": {
+          "6": 0.9998617172241211
+        },
+        "ocr_best_label": "6",
+        "ocr_best_score": 0.9998617172241211,
+        "ocr_second_score": 0.0,
+        "gemini": {
+          "status": "ok",
+          "label": "6",
+          "confidence": 1.0,
+          "reason": "The highlighted text is a clear part label pointing to a component in the drawing.",
+          "raw_label": "6"
+        },
+        "gemini_single_localize": {
+          "items": [
+            {
+              "label": "6",
+              "x0": 312.0,
+              "y0": 228.0,
+              "x1": 722.0,
+              "y1": 772.0
+            }
+          ],
+          "reason": ""
+        },
+        "final_ink_density": 0.22427035330261136,
+        "final_dark_pixels": 146,
+        "final_bbox_area": 408.83232000000004,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.9999004364013672,
+      "ocr_gap": 0.9998617172241211
+    },
+    {
+      "quad": [
+        [
+          277.0,
+          901.0
+        ],
+        [
+          301.0,
+          901.0
+        ],
+        [
+          301.0,
+          932.0
+        ],
+        [
+          277.0,
+          932.0
+        ]
+      ],
+      "bbox": {
+        "x": 277.0,
+        "y": 901.0,
+        "w": 24.0,
+        "h": 31.0,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 289.0,
+        "y": 916.5
+      },
+      "top_left": {
+        "x": 277.0,
+        "y": 901.0
+      },
+      "tile_index": 0,
+      "label": "3",
+      "status": "ocr_gemini_agree",
+      "recognition": {
+        "crop_box": {
+          "x0": 269,
+          "y0": 893,
+          "x1": 309,
+          "y1": 940
+        },
+        "context_box": {
+          "x0": 149,
+          "y0": 773,
+          "x1": 429,
+          "y1": 1060
+        },
+        "paddle_scores": {
+          "3": 0.995429277420044
+        },
+        "ocr_best_label": "3",
+        "ocr_best_score": 0.995429277420044,
+        "ocr_second_score": 0.0,
+        "gemini": {
+          "status": "ok",
+          "label": "3",
+          "confidence": 1.0,
+          "reason": "The highlighted text is a clear part callout with a leader line pointing to a bolt.",
+          "raw_label": "3"
+        },
+        "final_ink_density": 0.11020408163265306,
+        "final_dark_pixels": 108,
+        "final_bbox_area": 744.0,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.9967090797424316,
+      "ocr_gap": 0.995429277420044
+    },
+    {
+      "quad": [
+        [
+          928.679,
+          964.35
+        ],
+        [
+          944.321,
+          964.35
+        ],
+        [
+          944.321,
+          991.65
+        ],
+        [
+          928.679,
+          991.65
+        ]
+      ],
+      "bbox": {
+        "x": 928.679,
+        "y": 964.35,
+        "w": 15.642,
+        "h": 27.3,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 936.5,
+        "y": 978.0
+      },
+      "top_left": {
+        "x": 928.679,
+        "y": 964.35
+      },
+      "tile_index": 1,
+      "label": "7",
+      "status": "gemini_single_localize",
+      "recognition": {
+        "crop_box": {
+          "x0": 920,
+          "y0": 957,
+          "x1": 953,
+          "y1": 999
+        },
+        "context_box": {
+          "x0": 799,
+          "y0": 836,
+          "x1": 1074,
+          "y1": 1120
+        },
+        "paddle_scores": {
+          "7": 0.9997859597206116
+        },
+        "ocr_best_label": "7",
+        "ocr_best_score": 0.9997859597206116,
+        "ocr_second_score": 0.0,
+        "gemini": {
+          "status": "ok",
+          "label": "7",
+          "confidence": 1.0,
+          "reason": "The highlighted text is a part callout label '7' with a leader line pointing to a component.",
+          "raw_label": "7"
+        },
+        "gemini_single_localize": {
+          "items": [
+            {
+              "label": "7",
+              "x0": 263.0,
+              "y0": 175.0,
+              "x1": 737.0,
+              "y1": 825.0
+            }
+          ],
+          "reason": ""
+        },
+        "final_ink_density": 0.13988095238095238,
+        "final_dark_pixels": 94,
+        "final_bbox_area": 427.0266,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.9998458909988404,
+      "ocr_gap": 0.9997859597206116
+    },
+    {
+      "quad": [
+        [
+          924.0,
+          1004.0
+        ],
+        [
+          944.0,
+          1004.0
+        ],
+        [
+          944.0,
+          1028.0
+        ],
+        [
+          924.0,
+          1028.0
+        ]
+      ],
+      "bbox": {
+        "x": 924.0,
+        "y": 1004.0,
+        "w": 20.0,
+        "h": 24.0,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 934.0,
+        "y": 1016.0
+      },
+      "top_left": {
+        "x": 924.0,
+        "y": 1004.0
+      },
+      "tile_index": 1,
+      "label": "5",
+      "status": "gemini_single_localize",
+      "recognition": {
+        "crop_box": {
+          "x0": 914,
+          "y0": 992,
+          "x1": 954,
+          "y1": 1040
+        },
+        "context_box": {
+          "x0": 794,
+          "y0": 872,
+          "x1": 1074,
+          "y1": 1160
+        },
+        "paddle_scores": {
+          "5": 0.9999688863754272
+        },
+        "ocr_best_label": "5",
+        "ocr_best_score": 0.9999688863754272,
+        "ocr_second_score": 0.0,
+        "gemini": {
+          "status": "ok",
+          "label": "5",
+          "confidence": 1.0,
+          "reason": "The highlighted text is a part number callout pointing to a nut in the assembly.",
+          "raw_label": "5"
+        },
+        "gemini_single_localize": {
+          "items": [
+            {
+              "label": "5",
+              "x0": 250.0,
+              "y0": 250.0,
+              "x1": 750.0,
+              "y1": 750.0
+            }
+          ],
+          "reason": ""
+        },
+        "final_ink_density": 0.19196428571428573,
+        "final_dark_pixels": 129,
+        "final_bbox_area": 480.0,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.9999775981903076,
+      "ocr_gap": 0.9999688863754272
+    },
+    {
+      "quad": [
+        [
+          279.0,
+          1022.0
+        ],
+        [
+          301.0,
+          1022.0
+        ],
+        [
+          301.0,
+          1053.0
+        ],
+        [
+          279.0,
+          1053.0
+        ]
+      ],
+      "bbox": {
+        "x": 279.0,
+        "y": 1022.0,
+        "w": 22.0,
+        "h": 31.0,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 290.0,
+        "y": 1037.5
+      },
+      "top_left": {
+        "x": 279.0,
+        "y": 1022.0
+      },
+      "tile_index": 0,
+      "label": "2",
+      "status": "ocr_gemini_agree",
+      "recognition": {
+        "crop_box": {
+          "x0": 271,
+          "y0": 1014,
+          "x1": 309,
+          "y1": 1061
+        },
+        "context_box": {
+          "x0": 151,
+          "y0": 894,
+          "x1": 429,
+          "y1": 1181
+        },
+        "paddle_scores": {
+          "2": 0.9988210797309875
+        },
+        "ocr_best_label": "2",
+        "ocr_best_score": 0.9988210797309875,
+        "ocr_second_score": 0.0,
+        "gemini": {
+          "status": "ok",
+          "label": "2",
+          "confidence": 1.0,
+          "reason": "The highlighted text is a clear part callout label with a leader line pointing to a component.",
+          "raw_label": "2"
+        },
+        "final_ink_density": 0.13186813186813187,
+        "final_dark_pixels": 120,
+        "final_bbox_area": 682.0,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.9991511774063111,
+      "ocr_gap": 0.9988210797309875
+    },
+    {
+      "quad": [
+        [
+          428.44,
+          1063.038
+        ],
+        [
+          478.39,
+          1063.038
+        ],
+        [
+          478.39,
+          1087.962
+        ],
+        [
+          428.44,
+          1087.962
+        ]
+      ],
+      "bbox": {
+        "x": 428.44,
+        "y": 1063.038,
+        "w": 49.95,
+        "h": 24.924,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 453.415,
+        "y": 1075.5
+      },
+      "top_left": {
+        "x": 428.44,
+        "y": 1063.038
+      },
+      "tile_index": 0,
+      "label": "14-1",
+      "status": "gemini_single_localize",
+      "recognition": {
+        "crop_box": {
+          "x0": 409,
+          "y0": 1042,
+          "x1": 499,
+          "y1": 1109
+        },
+        "context_box": {
+          "x0": 244,
+          "y0": 877,
+          "x1": 664,
+          "y1": 1274
+        },
+        "paddle_scores": {
+          "14-1": 0.9980686902999878
+        },
+        "ocr_best_label": "14-1",
+        "ocr_best_score": 0.9980686902999878,
+        "ocr_second_score": 0.0,
+        "gemini": {
+          "status": "ok",
+          "label": "14-1",
+          "confidence": 1.0,
+          "reason": "The text 14-1 is clearly identified as a part callout with a leader line pointing to the corresponding component.",
+          "raw_label": "14-1"
+        },
+        "gemini_single_localize": {
+          "items": [
+            {
+              "label": "14-1",
+              "x0": 216.0,
+              "y0": 314.0,
+              "x1": 771.0,
+              "y1": 686.0
+            }
+          ],
+          "reason": ""
+        },
+        "final_ink_density": 0.19184952978056427,
+        "final_dark_pixels": 306,
+        "final_bbox_area": 1244.9538,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.9986094570159912,
+      "ocr_gap": 0.9980686902999878
+    },
+    {
+      "quad": [
+        [
+          487.03,
+          1084.26
+        ],
+        [
+          540.7339999999999,
+          1084.26
+        ],
+        [
+          540.7339999999999,
+          1109.25
+        ],
+        [
+          487.03,
+          1109.25
+        ]
+      ],
+      "bbox": {
+        "x": 487.03,
+        "y": 1084.26,
+        "w": 53.704,
+        "h": 24.99,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 513.882,
+        "y": 1096.7549999999999
+      },
+      "top_left": {
+        "x": 487.03,
+        "y": 1084.26
+      },
+      "tile_index": 1,
+      "label": "14-2",
+      "status": "gemini_single_localize",
+      "recognition": {
+        "crop_box": {
+          "x0": 464,
+          "y0": 1062,
+          "x1": 562,
+          "y1": 1132
+        },
+        "context_box": {
+          "x0": 282,
+          "y0": 880,
+          "x1": 744,
+          "y1": 1314
+        },
+        "paddle_scores": {
+          "14-2": 0.9992846846580505
+        },
+        "ocr_best_label": "14-2",
+        "ocr_best_score": 0.9992846846580505,
+        "ocr_second_score": 0.0,
+        "gemini": {
+          "status": "ok",
+          "label": "14-2",
+          "confidence": 1.0,
+          "reason": "The text 14-2 is clearly visible and acts as a part callout with a leader line pointing to a component.",
+          "raw_label": "14-2"
+        },
+        "gemini_single_localize": {
+          "items": [
+            {
+              "label": "14-2",
+              "x0": 235.0,
+              "y0": 318.0,
+              "x1": 783.0,
+              "y1": 675.0
+            }
+          ],
+          "reason": ""
+        },
+        "final_ink_density": 0.19195402298850575,
+        "final_dark_pixels": 334,
+        "final_bbox_area": 1342.06296,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.9994849729537965,
+      "ocr_gap": 0.9992846846580505
+    },
+    {
+      "quad": [
+        [
+          550.902,
+          1105.4
+        ],
+        [
+          601.9440000000001,
+          1105.4
+        ],
+        [
+          601.9440000000001,
+          1130.356
+        ],
+        [
+          550.902,
+          1130.356
+        ]
+      ],
+      "bbox": {
+        "x": 550.902,
+        "y": 1105.4,
+        "w": 51.042,
+        "h": 24.956,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 576.423,
+        "y": 1117.8780000000002
+      },
+      "top_left": {
+        "x": 550.902,
+        "y": 1105.4
+      },
+      "tile_index": 0,
+      "label": "14-3",
+      "status": "gemini_single_localize",
+      "recognition": {
+        "crop_box": {
+          "x0": 529,
+          "y0": 1085,
+          "x1": 623,
+          "y1": 1153
+        },
+        "context_box": {
+          "x0": 359,
+          "y0": 915,
+          "x1": 793,
+          "y1": 1323
+        },
+        "paddle_scores": {
+          "14-3": 0.9982728362083435
+        },
+        "ocr_best_label": "14-3",
+        "ocr_best_score": 0.9982728362083435,
+        "ocr_second_score": 0.0,
+        "gemini": {
+          "status": "ok",
+          "label": "14-3",
+          "confidence": 1.0,
+          "reason": "The text 14-3 is clearly visible and acts as a part callout with a leader line pointing to the corresponding component.",
+          "raw_label": "14-3"
+        },
+        "gemini_single_localize": {
+          "items": [
+            {
+              "label": "14-3",
+              "x0": 233.0,
+              "y0": 300.0,
+              "x1": 776.0,
+              "y1": 667.0
+            }
+          ],
+          "reason": ""
+        },
+        "final_ink_density": 0.19702380952380952,
+        "final_dark_pixels": 331,
+        "final_bbox_area": 1273.804152,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.9987564420700074,
+      "ocr_gap": 0.9982728362083435
+    },
+    {
+      "quad": [
+        [
+          661.0,
+          1145.0
+        ],
+        [
+          749.0,
+          1145.0
+        ],
+        [
+          749.0,
+          1182.0
+        ],
+        [
+          661.0,
+          1182.0
+        ]
+      ],
+      "bbox": {
+        "x": 661.0,
+        "y": 1145.0,
+        "w": 88.0,
+        "h": 37.0,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 705.0,
+        "y": 1163.5
+      },
+      "top_left": {
+        "x": 661.0,
+        "y": 1145.0
+      },
+      "tile_index": 0,
+      "label": "14-4(1)",
+      "status": "ocr_gemini_agree",
+      "recognition": {
+        "crop_box": {
+          "x0": 639,
+          "y0": 1123,
+          "x1": 771,
+          "y1": 1204
+        },
+        "context_box": {
+          "x0": 397,
+          "y0": 881,
+          "x1": 1013,
+          "y1": 1446
+        },
+        "paddle_scores": {
+          "14-4(1)": 0.8149651288986206
+        },
+        "easyocr_scores": {},
+        "rapidocr_scores": {
+          "14-4(1)": 0.9768579431942531
+        },
+        "ocr_best_label": "14-4(1)",
+        "ocr_best_score": 0.9768579431942531,
+        "ocr_second_score": 0.0,
+        "gemini": {
+          "status": "ok",
+          "label": "14-4(1)",
+          "confidence": 1.0,
+          "reason": "The text matches the provided OCR suggestion and is clearly used as a part callout in the drawing.",
+          "raw_label": "14-4(1)"
+        },
+        "final_ink_density": 0.1310185185185185,
+        "final_dark_pixels": 566,
+        "final_bbox_area": 3256.0,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.9833377190998622,
+      "ocr_gap": 0.9768579431942531
+    },
+    {
+      "quad": [
+        [
+          658.0,
+          1357.0
+        ],
+        [
+          752.0,
+          1357.0
+        ],
+        [
+          752.0,
+          1394.0
+        ],
+        [
+          658.0,
+          1394.0
+        ]
+      ],
+      "bbox": {
+        "x": 658.0,
+        "y": 1357.0,
+        "w": 94.0,
+        "h": 37.0,
+        "angle": 0.0
+      },
+      "source_kind": "horizontal",
+      "detect_scale": 1.6,
+      "center": {
+        "x": 705.0,
+        "y": 1375.5
+      },
+      "top_left": {
+        "x": 658.0,
+        "y": 1357.0
+      },
+      "tile_index": 1,
+      "label": "14-4(2)",
+      "status": "ocr_gemini_agree",
+      "recognition": {
+        "crop_box": {
+          "x0": 634,
+          "y0": 1333,
+          "x1": 776,
+          "y1": 1418
+        },
+        "context_box": {
+          "x0": 376,
+          "y0": 1075,
+          "x1": 1034,
+          "y1": 1676
+        },
+        "paddle_scores": {
+          "14-4(2)": 0.8813754916191101
+        },
+        "easyocr_scores": {},
+        "rapidocr_scores": {
+          "14-4(2)": 0.9974367618560791
+        },
+        "ocr_best_label": "14-4(2)",
+        "ocr_best_score": 0.9974367618560791,
+        "ocr_second_score": 0.0,
+        "gemini": {
+          "status": "ok",
+          "label": "14-4(2)",
+          "confidence": 1.0,
+          "reason": "The text matches the allowed label and is clearly used as a part callout in the drawing.",
+          "raw_label": "14-4(2)"
+        },
+        "final_ink_density": 0.13071895424836602,
+        "final_dark_pixels": 600,
+        "final_bbox_area": 3478.0,
+        "final_min_ink_density_effective": 0.07,
+        "final_min_dark_pixels_effective": 120,
+        "final_min_bbox_area_effective": 550.0,
+        "final_max_sparse_bbox_area_effective": 10000.0
+      },
+      "final_score": 0.998154468536377,
+      "ocr_gap": 0.9974367618560791
+    }
+  ],
+  "final_text_sanity_rejected_markers": []
+}

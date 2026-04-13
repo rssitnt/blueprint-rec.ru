@@ -1,0 +1,8 @@
+INFO:     127.0.0.1:49252 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49281 - "OPTIONS /api/jobs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49282 - "OPTIONS /api/batches HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49281 - "GET /api/jobs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49283 - "GET /api/batches HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49283 - "OPTIONS /api/jobs/45371ee5-f96a-4a08-bf9d-f1f72432f479 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49281 - "GET /api/jobs/45371ee5-f96a-4a08-bf9d-f1f72432f479 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49284 - "GET /storage/jobs/45371ee5-f96a-4a08-bf9d-f1f72432f479/artifacts/primary/page-001.overlay.png HTTP/1.1" 200 OK

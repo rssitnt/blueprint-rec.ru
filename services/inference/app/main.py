@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -8,7 +9,8 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.datastructures import Headers
 from fastapi.staticfiles import StaticFiles
 
-from .api.sessions import router
+from .api.jobs import router as jobs_router, service as jobs_service
+from .api.sessions import router as sessions_router
 from .core.config import settings
 
 
@@ -49,7 +51,13 @@ def create_app() -> FastAPI:
     storage_root = Path(settings.storage_dir)
     storage_root.mkdir(parents=True, exist_ok=True)
     app.mount(settings.storage_mount_path, StorageStaticFiles(directory=storage_root), name="storage")
-    app.include_router(router)
+    app.include_router(sessions_router)
+    app.include_router(jobs_router)
+
+    @app.on_event("startup")
+    async def repair_stale_jobs_on_startup() -> None:
+        asyncio.create_task(jobs_service.repair_stale_jobs())
+
     return app
 
 

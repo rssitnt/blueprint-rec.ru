@@ -1,15 +1,15 @@
 # Headless Manual QA Report
 
-Generated: 2026-04-10T07:18:53.759Z
+Generated: 2026-04-11T18:04:56.400Z
 
 ## Live Sessions
 
 - Heavy file: `C:\projects\sites\blueprint-rec-2\blueprints-test\test1.jpg`
-- Heavy session: `c63b907a-3866-47fd-be95-036ab20e6e6a`
-- Heavy auto-annotate: `76.13s`
+- Heavy session: `18733b45-1c26-4b84-94e6-a4aaf9623918`
+- Heavy auto-annotate: `90.78s`
 - Light file: `C:\projects\sites\blueprint-rec-2\blueprints-test\image001.png`
-- Light session: `575e60fa-92fc-4b76-ac4e-3d6177db5b20`
-- Light auto-annotate: `1.49s`
+- Light session: `1053e784-726f-42d6-a205-f0c6b48f6b04`
+- Light auto-annotate: `1.81s`
 
 ## Checks
 

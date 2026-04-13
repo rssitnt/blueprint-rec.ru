@@ -1,0 +1,13 @@
+{
+  "url": "http://localhost:3010/",
+  "title": "Blueprint Annotation Desk",
+  "errorCount": 2,
+  "errors": [
+    "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+    "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+  ],
+  "hasForm": true,
+  "hasJobs": true,
+  "hasBatches": true,
+  "hasCompactMoreFiles": false
+}

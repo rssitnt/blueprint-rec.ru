@@ -1,0 +1,418 @@
+{
+  "job": {
+    "jobId": "d5ba7126-0b03-40ed-98f0-d49918fca41a",
+    "title": "Page4 compact rerun 2026-04-12T11:28:36",
+    "status": "completed",
+    "input": {
+      "drawingName": "page4.png",
+      "drawingUrl": "/storage/jobs/d5ba7126-0b03-40ed-98f0-d49918fca41a/input/drawing.png",
+      "labelsName": null,
+      "labelsUrl": null,
+      "hasLabels": false
+    },
+    "errorMessage": null,
+    "result": {
+      "sourceFile": "page4.png",
+      "sourceLabelsFile": null,
+      "pages": [
+        {
+          "pageIndex": 0,
+          "width": 1191,
+          "height": 1684,
+          "overlayUrl": "/storage/jobs/d5ba7126-0b03-40ed-98f0-d49918fca41a/artifacts/primary/page-001.overlay.png",
+          "rowCount": 15,
+          "heldBackCount": 0
+        }
+      ],
+      "rows": [
+        {
+          "row": 1,
+          "label": "13",
+          "pageIndex": 0,
+          "center": {
+            "x": 936.0,
+            "y": 446.0
+          },
+          "topLeft": {
+            "x": 921.0,
+            "y": 429.0
+          },
+          "bbox": {
+            "x": 921.0,
+            "y": 429.0,
+            "w": 30.0,
+            "h": 34.0
+          },
+          "finalScore": 0.9999038666042585,
+          "status": "found",
+          "note": "Gemini: The text 13 is clearly a part callout connected to the drawing via a leader line.",
+          "sourceKind": "horizontal"
+        },
+        {
+          "row": 2,
+          "label": "9",
+          "pageIndex": 0,
+          "center": {
+            "x": 290.5,
+            "y": 592.0
+          },
+          "topLeft": {
+            "x": 281.0,
+            "y": 579.0
+          },
+          "bbox": {
+            "x": 281.0,
+            "y": 579.0,
+            "w": 19.0,
+            "h": 26.0
+          },
+          "finalScore": 0.9050218777472264,
+          "status": "found",
+          "note": "Gemini: The highlighted text is a part callout number connected to a component via a leader line.",
+          "sourceKind": "horizontal"
+        },
+        {
+          "row": 3,
+          "label": "4",
+          "pageIndex": 0,
+          "center": {
+            "x": 286.92,
+            "y": 713.0
+          },
+          "topLeft": {
+            "x": 280.92,
+            "y": 700.78
+          },
+          "bbox": {
+            "x": 280.92,
+            "y": 700.78,
+            "w": 12.0,
+            "h": 24.44
+          },
+          "finalScore": 0.96,
+          "status": "found",
+          "note": "У кандидата мало тёмных пикселей, текст может быть слишком слабым или служебным.",
+          "sourceKind": null
+        },
+        {
+          "row": 4,
+          "label": "8",
+          "pageIndex": 0,
+          "center": {
+            "x": 932.0,
+            "y": 778.5
+          },
+          "topLeft": {
+            "x": 925.32,
+            "y": 765.75
+          },
+          "bbox": {
+            "x": 925.32,
+            "y": 765.75,
+            "w": 13.36,
+            "h": 25.5
+          },
+          "finalScore": 0.96,
+          "status": "found",
+          "note": null,
+          "sourceKind": null
+        },
+        {
+          "row": 5,
+          "label": "10",
+          "pageIndex": 0,
+          "center": {
+            "x": 290.5,
+            "y": 816.5
+          },
+          "topLeft": {
+            "x": 278.923,
+            "y": 804.469
+          },
+          "bbox": {
+            "x": 278.923,
+            "y": 804.469,
+            "w": 23.154,
+            "h": 24.062
+          },
+          "finalScore": 0.9996111869812012,
+          "status": "found",
+          "note": "Gemini: The text is a clear part-number callout with a leader line pointing to a component in an exploded view.",
+          "sourceKind": "horizontal"
+        },
+        {
+          "row": 6,
+          "label": "6",
+          "pageIndex": 0,
+          "center": {
+            "x": 933.085,
+            "y": 820.5
+          },
+          "topLeft": {
+            "x": 925.402,
+            "y": 807.857
+          },
+          "bbox": {
+            "x": 925.402,
+            "y": 807.857,
+            "w": 15.366,
+            "h": 25.286
+          },
+          "finalScore": 0.8989778232577054,
+          "status": "found",
+          "note": "OCR почти одинаково уверен сразу в двух вариантах; текущая метка '9' неоднозначна. Gemini: The highlighted text is a part callout number in an exploded view drawing.",
+          "sourceKind": "horizontal"
+        },
+        {
+          "row": 7,
+          "label": "3",
+          "pageIndex": 0,
+          "center": {
+            "x": 289.0,
+            "y": 916.5
+          },
+          "topLeft": {
+            "x": 277.0,
+            "y": 901.0
+          },
+          "bbox": {
+            "x": 277.0,
+            "y": 901.0,
+            "w": 24.0,
+            "h": 31.0
+          },
+          "finalScore": 0.9090179713493444,
+          "status": "found",
+          "note": "У кандидата мало тёмных пикселей, текст может быть слишком слабым или служебным. Gemini: The highlighted text is a clear part callout with a leader line pointing to a bolt.",
+          "sourceKind": "horizontal"
+        },
+        {
+          "row": 8,
+          "label": "7",
+          "pageIndex": 0,
+          "center": {
+            "x": 936.5,
+            "y": 978.0
+          },
+          "topLeft": {
+            "x": 927.755,
+            "y": 963.3
+          },
+          "bbox": {
+            "x": 927.755,
+            "y": 963.3,
+            "w": 17.49,
+            "h": 29.4
+          },
+          "finalScore": 0.9999986267096392,
+          "status": "found",
+          "note": "У кандидата мало тёмных пикселей, текст может быть слишком слабым или служебным. Gemini: The text is a clear part callout index with a leader line pointing to a component.",
+          "sourceKind": "horizontal"
+        },
+        {
+          "row": 9,
+          "label": "5",
+          "pageIndex": 0,
+          "center": {
+            "x": 936.4,
+            "y": 1016.36
+          },
+          "topLeft": {
+            "x": 929.4,
+            "y": 1004.0
+          },
+          "bbox": {
+            "x": 929.4,
+            "y": 1004.0,
+            "w": 14.0,
+            "h": 24.72
+          },
+          "finalScore": 0.9999640373906054,
+          "status": "found",
+          "note": "У кандидата мало тёмных пикселей, текст может быть слишком слабым или служебным. Gemini: The highlighted text is a part callout index pointing to a component in the assembly drawing.",
+          "sourceKind": "horizontal"
+        },
+        {
+          "row": 10,
+          "label": "2",
+          "pageIndex": 0,
+          "center": {
+            "x": 290.0,
+            "y": 1037.5
+          },
+          "topLeft": {
+            "x": 279.0,
+            "y": 1022.0
+          },
+          "bbox": {
+            "x": 279.0,
+            "y": 1022.0,
+            "w": 22.0,
+            "h": 31.0
+          },
+          "finalScore": 0.9999994850159613,
+          "status": "found",
+          "note": "Gemini: The highlighted text is a part callout index number connected to the drawing by a leader line.",
+          "sourceKind": "horizontal"
+        },
+        {
+          "row": 11,
+          "label": "14-1",
+          "pageIndex": 0,
+          "center": {
+            "x": 453.415,
+            "y": 1075.5
+          },
+          "topLeft": {
+            "x": 428.44,
+            "y": 1063.038
+          },
+          "bbox": {
+            "x": 428.44,
+            "y": 1063.038,
+            "w": 49.95,
+            "h": 24.924
+          },
+          "finalScore": 0.8910252094624923,
+          "status": "found",
+          "note": "OCR почти одинаково уверен сразу в двух вариантах; текущая метка '1' неоднозначна. Gemini: The text is a clear part-number callout with a leader line pointing to a specific component in the assembly drawing.",
+          "sourceKind": "horizontal"
+        },
+        {
+          "row": 12,
+          "label": "14-2",
+          "pageIndex": 0,
+          "center": {
+            "x": 513.882,
+            "y": 1096.7549999999999
+          },
+          "topLeft": {
+            "x": 487.03,
+            "y": 1084.26
+          },
+          "bbox": {
+            "x": 487.03,
+            "y": 1084.26,
+            "w": 53.704,
+            "h": 24.99
+          },
+          "finalScore": 0.8996565795103243,
+          "status": "found",
+          "note": "OCR почти одинаково уверен сразу в двух вариантах; текущая метка '1' неоднозначна. Gemini: The text is a clear part-number callout with a leader line pointing to a specific component in the assembly drawing.",
+          "sourceKind": "horizontal"
+        },
+        {
+          "row": 13,
+          "label": "14-3",
+          "pageIndex": 0,
+          "center": {
+            "x": 576.423,
+            "y": 1117.8780000000002
+          },
+          "topLeft": {
+            "x": 550.902,
+            "y": 1105.4
+          },
+          "bbox": {
+            "x": 550.902,
+            "y": 1105.4,
+            "w": 51.042,
+            "h": 24.956
+          },
+          "finalScore": 0.9044053857026056,
+          "status": "found",
+          "note": "Gemini: The text is a clear part callout with a leader line pointing to a specific component in the assembly drawing.",
+          "sourceKind": "horizontal"
+        },
+        {
+          "row": 14,
+          "label": "14-4(1)",
+          "pageIndex": 0,
+          "center": {
+            "x": 705.0,
+            "y": 1163.5
+          },
+          "topLeft": {
+            "x": 661.0,
+            "y": 1145.0
+          },
+          "bbox": {
+            "x": 661.0,
+            "y": 1145.0,
+            "w": 88.0,
+            "h": 37.0
+          },
+          "finalScore": 0.9833377190998622,
+          "status": "found",
+          "note": "Gemini: The text is a clear part callout with a leader line pointing to a specific component in the assembly drawing.",
+          "sourceKind": "horizontal"
+        },
+        {
+          "row": 15,
+          "label": "14-4(2)",
+          "pageIndex": 0,
+          "center": {
+            "x": 705.0,
+            "y": 1375.5
+          },
+          "topLeft": {
+            "x": 658.0,
+            "y": 1357.0
+          },
+          "bbox": {
+            "x": 658.0,
+            "y": 1357.0,
+            "w": 94.0,
+            "h": 37.0
+          },
+          "finalScore": 0.998154468536377,
+          "status": "found",
+          "note": "Gemini: The text is a clear part callout with a leader line pointing to a component in the drawing.",
+          "sourceKind": "horizontal"
+        }
+      ],
+      "heldBackRows": [],
+      "missingLabels": [],
+      "extraDetectedLabels": [],
+      "summary": {
+        "totalRows": 15,
+        "foundCount": 15,
+        "missingCount": 0,
+        "uncertainCount": 0,
+        "heldBackCount": 0,
+        "nearTieAmbiguityCount": 0,
+        "discardedCount": 0,
+        "documentConfidence": 0.9539,
+        "degradedRecognition": false,
+        "degradedReason": null,
+        "selectedOcrEngine": "both",
+        "fallbackUsed": false,
+        "fallbackAttempted": false,
+        "fallbackFailureCount": 0,
+        "emergencyFallbackUsed": false,
+        "emergencyFallbackReason": null,
+        "reviewRecommended": false,
+        "reviewReasons": [
+          "2 точек пришли из более слабого контекста и требуют ручной проверки."
+        ],
+        "statusText": "Готово: найдено 15 точек.",
+        "failureMessage": null
+      },
+      "artifacts": {
+        "overlayUrl": "/storage/jobs/d5ba7126-0b03-40ed-98f0-d49918fca41a/artifacts/primary/page-001.overlay.png",
+        "csvUrl": "/storage/jobs/d5ba7126-0b03-40ed-98f0-d49918fca41a/artifacts/page4.csv",
+        "xlsxUrl": "/storage/jobs/d5ba7126-0b03-40ed-98f0-d49918fca41a/artifacts/page4.xlsx",
+        "zipUrl": "/storage/jobs/d5ba7126-0b03-40ed-98f0-d49918fca41a/artifacts/page4.zip",
+        "reviewCsvUrl": "/storage/jobs/d5ba7126-0b03-40ed-98f0-d49918fca41a/artifacts/page4.review.csv",
+        "reviewXlsxUrl": "/storage/jobs/d5ba7126-0b03-40ed-98f0-d49918fca41a/artifacts/page4.review.xlsx",
+        "reviewZipUrl": "/storage/jobs/d5ba7126-0b03-40ed-98f0-d49918fca41a/artifacts/page4.review.zip",
+        "nearTieCsvUrl": null,
+        "nearTieJsonUrl": null,
+        "sourceJsonUrl": "/storage/jobs/d5ba7126-0b03-40ed-98f0-d49918fca41a/artifacts/source-markers.json",
+        "resultJsonUrl": "/storage/jobs/d5ba7126-0b03-40ed-98f0-d49918fca41a/artifacts/result.json"
+      }
+    },
+    "createdAt": "2026-04-12T08:28:36.427743",
+    "updatedAt": "2026-04-12T08:35:05.107568"
+  }
+}

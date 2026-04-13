@@ -1,5 +1,5 @@
 INFO:     Loading environment from 'C:/projects/sites/blueprint-rec-2/services/inference/.env.local'
-INFO:     Started server process [19040]
+INFO:     Started server process [62536]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-INFO:     Uvicorn running on http://127.0.0.1:58402 (Press CTRL+C to quit)
+INFO:     Uvicorn running on http://127.0.0.1:55777 (Press CTRL+C to quit)

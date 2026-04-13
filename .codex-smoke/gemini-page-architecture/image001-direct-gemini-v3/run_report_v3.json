@@ -1,0 +1,69 @@
+{
+  "generated_at": "2026-04-12T11:30:01.302586+00:00",
+  "source_image": "C:\\projects\\sites\\blueprint-rec-2\\blueprints-test\\image001.png",
+  "candidate_count": 3,
+  "accepted_before_merge": 3,
+  "final_marker_count": 3,
+  "final_text_sanity_rejected": 0,
+  "unique_labels": [
+    "26",
+    "27"
+  ],
+  "allowed_labels": [
+    "26",
+    "27"
+  ],
+  "page_labels_source": "gemini_page",
+  "page_labels_result": {
+    "labels": [
+      "26",
+      "27"
+    ],
+    "confidence": 1.0,
+    "reason": "The image contains two distinct callout labels, 26 and 27, which point to specific components within the drawing.",
+    "image_size": {
+      "width": 205,
+      "height": 174
+    }
+  },
+  "status_counts": {
+    "ocr_gemini_agree": 3
+  },
+  "detect_debug": {
+    "tile_count": 1,
+    "detect_scales": [
+      1.0,
+      1.6
+    ],
+    "raw_counts_by_scale": {
+      "1.00": 2,
+      "1.60": 2
+    },
+    "raw_candidate_count": 4,
+    "deduped_candidate_count": 3
+  },
+  "settings": {
+    "ocr_engine": "both",
+    "tile_size": 1280,
+    "tile_overlap": 192,
+    "detect_scales": [
+      1.0,
+      1.6
+    ],
+    "strict_labels": true,
+    "gemini_enabled": true,
+    "gemini_model": "google/gemini-3.1-flash-lite-preview",
+    "gemini_page_labels_enabled": true,
+    "gemini_page_max_side": 1800,
+    "gemini_tile_proposals_enabled": true,
+    "gemini_proposal_tile_size": 1024,
+    "gemini_proposal_tile_overlap": 160,
+    "gemini_proposal_min_ink_density": 0.02,
+    "gemini_proposal_min_dark_pixels": 12,
+    "gemini_proposal_min_score": 0.55,
+    "final_min_ink_density": 0.07,
+    "final_min_dark_pixels": 120,
+    "final_min_bbox_area": 550.0,
+    "final_max_sparse_bbox_area": 10000.0
+  }
+}

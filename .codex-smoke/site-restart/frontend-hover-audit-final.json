@@ -1,0 +1,47 @@
+{
+  "jobButton": {
+    "before": {
+      "backgroundColor": "rgba(0, 0, 0, 0)",
+      "color": "rgb(246, 239, 232)",
+      "borderColor": "rgb(229, 231, 235)",
+      "transform": "none"
+    },
+    "after": {
+      "backgroundColor": "rgba(0, 0, 0, 0)",
+      "color": "rgb(246, 239, 232)",
+      "borderColor": "rgb(229, 231, 235)",
+      "transform": "none"
+    },
+    "same": true
+  },
+  "openButton": {
+    "before": {
+      "backgroundColor": "rgb(43, 34, 29)",
+      "color": "rgb(255, 244, 234)",
+      "borderColor": "rgba(0, 0, 0, 0)",
+      "transform": "none"
+    },
+    "after": {
+      "backgroundColor": "rgb(43, 34, 29)",
+      "color": "rgb(255, 244, 234)",
+      "borderColor": "rgba(0, 0, 0, 0)",
+      "transform": "none"
+    },
+    "same": true
+  },
+  "archiveToggle": {
+    "before": {
+      "backgroundColor": "rgb(21, 17, 14)",
+      "color": "rgb(202, 188, 174)",
+      "borderColor": "rgb(229, 231, 235)",
+      "transform": "none"
+    },
+    "after": {
+      "backgroundColor": "rgb(21, 17, 14)",
+      "color": "rgb(202, 188, 174)",
+      "borderColor": "rgb(229, 231, 235)",
+      "transform": "none"
+    },
+    "same": true
+  }
+}
