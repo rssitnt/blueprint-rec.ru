@@ -951,7 +951,9 @@ class InMemorySessionStore:
             allowed_labels
             and any(any(char.isalpha() for char in label) or "-" in label for label in allowed_labels)
         )
-        group_limit = 24 if (not allowed_labels or has_letter_labels) else 8
+        group_limit = 24 if (not allowed_labels or has_letter_labels) else 12
+        if allowed_labels and len(allowed_labels) <= 4:
+            group_limit = max(group_limit, 18)
         for group in self._build_low_res_letter_tile_groups(pool)[:group_limit]:
             if len(group) < 2:
                 continue
@@ -1375,11 +1377,7 @@ class InMemorySessionStore:
     ) -> list[CalloutCandidate]:
         if not allowed_labels or not self._candidate_vlm_recognizer.is_enabled():
             return []
-        targeted_labels = {
-            label
-            for label in allowed_labels
-            if any(char.isalpha() for char in label) or "-" in label
-        }
+        targeted_labels = {normalize_label(label) for label in allowed_labels if normalize_label(label)}
         if not targeted_labels:
             return []
 
@@ -1403,7 +1401,7 @@ class InMemorySessionStore:
             return []
 
         accepted: list[CalloutCandidate] = []
-        budget = min(24, max(8, len(targeted_labels) * 4))
+        budget = 48 if len(targeted_labels) == 1 else min(32, max(10, len(targeted_labels) * 4))
         for candidate in sorted(pool, key=self._low_res_circle_geometry_priority, reverse=True)[:budget]:
             crop = self._build_candidate_ocr_crop(preview_image, candidate)
             local_suggestion = self._candidate_recognizer.recognize(crop, candidate.kind.value)
@@ -1446,6 +1444,7 @@ class InMemorySessionStore:
         if not normalized_vocab:
             return candidates
 
+        baseline_candidates = list(candidates)
         recovered = list(candidates)
         present = {
             normalize_label(candidate.suggested_label)
@@ -1474,71 +1473,11 @@ class InMemorySessionStore:
             if not missing:
                 return recovered
 
-        if 0 < len(missing) <= 8:
-            for target_label in sorted(missing):
-                single_target = {target_label}
-                targeted_ocr = self._build_low_res_missing_label_ocr_candidates(
-                    preview_image,
-                    base_candidates,
-                    recovered,
-                    allowed_labels=single_target,
-                )
-                if targeted_ocr:
-                    recovered = self._dedupe_composed_candidates([*recovered, *targeted_ocr])
-                    recovered = self._prune_low_res_oversized_circle_candidates(recovered)
-                present = {
-                    normalize_label(candidate.suggested_label)
-                    for candidate in recovered
-                    if normalize_label(candidate.suggested_label)
-                }
-                if target_label in present:
-                    continue
-
-                if any(char.isalpha() for char in target_label) or "-" in target_label:
-                    targeted_vlm = self._build_low_res_missing_label_vlm_candidates(
-                        preview_image,
-                        base_candidates,
-                        recovered,
-                        allowed_labels=single_target,
-                    )
-                    if targeted_vlm:
-                        recovered = self._dedupe_composed_candidates([*recovered, *targeted_vlm])
-                        recovered = self._prune_low_res_oversized_circle_candidates(recovered)
-                    present = {
-                        normalize_label(candidate.suggested_label)
-                        for candidate in recovered
-                        if normalize_label(candidate.suggested_label)
-                    }
-                    if target_label in present:
-                        continue
-
-                    targeted_letter_tile, targeted_reviewed = self._build_low_res_letter_tile_candidates(
-                        preview_image,
-                        base_candidates,
-                        recovered,
-                        allowed_labels=single_target,
-                    )
-                    if targeted_letter_tile:
-                        recovered = self._prune_low_res_candidates_after_tile_review(
-                            recovered,
-                            targeted_letter_tile,
-                            targeted_reviewed,
-                        )
-                        recovered = self._dedupe_composed_candidates([*recovered, *targeted_letter_tile])
-                        recovered = self._prune_low_res_oversized_circle_candidates(recovered)
-
-            present = {
-                normalize_label(candidate.suggested_label)
-                for candidate in recovered
-                if normalize_label(candidate.suggested_label)
-            }
-            missing = normalized_vocab - present
-            if not missing:
-                return recovered
-
         recovery_steps = (
             ("list", self._build_low_res_missing_label_vlm_candidates),
             ("tuple", self._build_low_res_letter_tile_candidates),
+            ("tuple", self._build_low_res_context_tile_candidates),
+            ("tuple", self._build_low_res_sequence_tile_candidates),
         )
 
         for step_kind, step in recovery_steps:
@@ -1573,7 +1512,92 @@ class InMemorySessionStore:
             }
             missing = normalized_vocab - present
 
-        return recovered
+        if 0 < len(missing) <= 12:
+            for target_label in sorted(missing):
+                single_target = {target_label}
+                targeted_ocr = self._build_low_res_missing_label_ocr_candidates(
+                    preview_image,
+                    base_candidates,
+                    recovered,
+                    allowed_labels=single_target,
+                )
+                if targeted_ocr:
+                    recovered = self._dedupe_composed_candidates([*recovered, *targeted_ocr])
+                    recovered = self._prune_low_res_oversized_circle_candidates(recovered)
+                present = {
+                    normalize_label(candidate.suggested_label)
+                    for candidate in recovered
+                    if normalize_label(candidate.suggested_label)
+                }
+                if target_label in present:
+                    continue
+
+                targeted_vlm = self._build_low_res_missing_label_vlm_candidates(
+                    preview_image,
+                    base_candidates,
+                    recovered,
+                    allowed_labels=single_target,
+                )
+                if targeted_vlm:
+                    recovered = self._dedupe_composed_candidates([*recovered, *targeted_vlm])
+                    recovered = self._prune_low_res_oversized_circle_candidates(recovered)
+                present = {
+                    normalize_label(candidate.suggested_label)
+                    for candidate in recovered
+                    if normalize_label(candidate.suggested_label)
+                }
+                if target_label in present:
+                    continue
+
+                targeted_letter_tile, targeted_reviewed = self._build_low_res_letter_tile_candidates(
+                    preview_image,
+                    base_candidates,
+                    recovered,
+                    allowed_labels=single_target,
+                )
+                if targeted_letter_tile:
+                    recovered = self._prune_low_res_candidates_after_tile_review(
+                        recovered,
+                        targeted_letter_tile,
+                        targeted_reviewed,
+                    )
+                    recovered = self._dedupe_composed_candidates([*recovered, *targeted_letter_tile])
+                    recovered = self._prune_low_res_oversized_circle_candidates(recovered)
+                present = {
+                    normalize_label(candidate.suggested_label)
+                    for candidate in recovered
+                    if normalize_label(candidate.suggested_label)
+                }
+                if target_label in present:
+                    continue
+
+                targeted_context_tile, targeted_context_reviewed = self._build_low_res_context_tile_candidates(
+                    preview_image,
+                    base_candidates,
+                    recovered,
+                    allowed_labels=single_target,
+                )
+                if targeted_context_tile:
+                    recovered = self._prune_low_res_candidates_after_tile_review(
+                        recovered,
+                        targeted_context_tile,
+                        targeted_context_reviewed,
+                    )
+                    recovered = self._dedupe_composed_candidates([*recovered, *targeted_context_tile])
+                    recovered = self._prune_low_res_oversized_circle_candidates(recovered)
+
+            present = {
+                normalize_label(candidate.suggested_label)
+                for candidate in recovered
+                if normalize_label(candidate.suggested_label)
+            }
+            missing = normalized_vocab - present
+            if not missing:
+                recovered = self._dedupe_composed_candidates([*baseline_candidates, *recovered])
+                return self._prune_low_res_oversized_circle_candidates(recovered)
+
+        recovered = self._dedupe_composed_candidates([*baseline_candidates, *recovered])
+        return self._prune_low_res_oversized_circle_candidates(recovered)
 
     @staticmethod
     def _dedupe_nearby_equal_labels(candidates: list[CalloutCandidate], max_distance: float = 48.0) -> list[CalloutCandidate]:

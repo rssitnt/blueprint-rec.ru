@@ -60,6 +60,12 @@ Last updated: 2026-04-13
   - truth-guided localization of small missing labels is still incomplete
   - next obvious upgrade path is wiring stronger Gemini 3.1 truth extraction into the backend, not relying on the current direct 2.5 vocab call
   - after switching the vocab step to full-image Gemini 3.1 Pro, the vocab step itself now returns 43 labels on `test1.jpg`, but the final pipeline still lands at 25 unique labels, so the bottleneck moved clearly to localization / candidate generation / candidate-to-truth merge
+  - missing-label localization is now partially truth-driven:
+    - recovery passes use the missing Gemini truth-set as `allowed_labels`
+    - low-res missing-label VLM recovery now works for numeric labels too, not only suffix / compound labels
+    - on `test1.jpg` this raised the final unique labels from `25` to `27`
+    - newly recovered labels include `21`, `29A`, `29B`
+    - still missing after the latest pass: `4, 5, 6, 8, 10, 11, 13, 14, 15, 17, 20, 24, 31, 37, 38, 42`
 
 ## Important backend fixes already present
 
@@ -157,6 +163,10 @@ Last updated: 2026-04-13
   - `C:/projects/sites/blueprint-rec-2/.codex-smoke/test1-full-run/summary.json`
   - `C:/projects/sites/blueprint-rec-2/.codex-smoke/test1-full-run/truth-compare.json`
   - `C:/projects/sites/blueprint-rec-2/.codex-smoke/test1-full-run/markers-overlay.png`
+- Targeted missing-label recovery rerun on `test1.jpg`:
+  - `C:/projects/sites/blueprint-rec-2/.codex-smoke/test1-targeted-run-v3/summary.json`
+  - `C:/projects/sites/blueprint-rec-2/.codex-smoke/test1-targeted-run-v3/truth-compare.json`
+  - `C:/projects/sites/blueprint-rec-2/.codex-smoke/test1-targeted-run-v3/markers-overlay.png`
 - No-table status fix:
   - `C:/projects/sites/blueprint-rec-2/.codex-smoke/no-table-status-fix/final-v2.json`
 - Legacy/no-table auto-repair:
