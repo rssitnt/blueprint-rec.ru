@@ -21,7 +21,7 @@ Last updated: 2026-04-13
 - Any browser automation must stay headless / hidden / offscreen.
 - Always keep compact context markdown files up to date.
 - Use full absolute Windows paths in user-facing responses.
-- User expects changes for this project to be pushed by default after edits, but as of 2026-04-13 `C:/projects/sites/blueprint-rec-2` has no configured git remote yet.
+- User expects changes for this project to be pushed by default after edits.
 - Startup script now points to `C:/projects/sites/blueprint-rec-2/scripts/run_webui_public_tunnel.ps1` to avoid VBS errors after cleanup.
 
 ## Product shape
