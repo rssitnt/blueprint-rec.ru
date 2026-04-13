@@ -171,6 +171,7 @@ export function JobHome() {
         .filter((reason): reason is string => Boolean(reason)),
     [activeJob?.result?.summary.reviewReasons]
   );
+  const hasReviewNotice = activeReviewReasons.length > 0;
 
   const applyDroppedFiles = useCallback((files: File[]) => {
     const archives = files.filter(isArchiveFile);
@@ -934,7 +935,7 @@ export function JobHome() {
                       <div
                         key={job.jobId}
                         className={[
-                          "flex flex-wrap items-start justify-between gap-3 rounded-[1rem] px-3.5 py-3",
+                          "flex flex-wrap items-start justify-between gap-2.5 rounded-[0.9rem] px-3 py-2",
                           activeJob?.jobId === job.jobId ? "bg-[#261b16]" : "bg-[#17120f]"
                         ].join(" ")}
                       >
@@ -944,26 +945,21 @@ export function JobHome() {
                           onClick={() => void handleOpenJob(job.jobId)}
                         >
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className={`inline-flex min-h-7 items-center rounded-full border px-2.5 text-[11px] font-semibold ${statusClasses[job.status]}`}>
+                            <span className={`inline-flex min-h-6 items-center rounded-full border px-2 text-[10px] font-semibold ${statusClasses[job.status]}`}>
                               {statusLabels[job.status]}
                             </span>
                             <span className="text-sm font-semibold text-[#fff8f1]">{job.title}</span>
-                            {activeJob?.jobId === job.jobId && (
-                              <span className="inline-flex min-h-7 items-center rounded-full bg-[#2b221d] px-2.5 text-[11px] font-semibold text-[#fff4ea]">
-                                Открыта
-                              </span>
-                            )}
                           </div>
                           <p className="mt-1 text-xs text-[#cbbfb1]">{job.drawingName}</p>
-                          <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-[#aa9a8c]">
-                            {formatDate(job.updatedAt)} · уверенность {formatConfidence(job.documentConfidence)}
+                          <p className="mt-0.5 text-[11px] text-[#aa9a8c]">
+                            {formatDate(job.updatedAt)} · {formatConfidence(job.documentConfidence)}
                           </p>
                         </button>
                         <div className="flex shrink-0 items-center gap-2">
                           <Button
                             type="button"
                             variant="outline"
-                            className="min-h-8 rounded-full border-0 bg-[#2b221d] px-3 text-xs font-semibold text-[#fff4ea] shadow-none"
+                            className="min-h-7 rounded-full border-0 bg-[#2b221d] px-2.5 text-[11px] font-semibold text-[#fff4ea] shadow-none"
                             onClick={() => void handleOpenJob(job.jobId)}
                           >
                             Открыть
@@ -972,7 +968,7 @@ export function JobHome() {
                             type="button"
                             variant="outline"
                             disabled={isDeleting}
-                            className="min-h-8 rounded-full !border-0 !bg-[#2a1715] px-3 text-xs font-semibold !text-[#ffb3ac] shadow-none"
+                            className="min-h-7 rounded-full !border-0 !bg-[#2a1715] px-2.5 text-[11px] font-semibold !text-[#ffb3ac] shadow-none"
                             onClick={() => void handleDeleteJob(job)}
                           >
                             {isDeleting ? "Удаляю" : "Удалить"}
@@ -1012,7 +1008,7 @@ export function JobHome() {
                       <div
                         key={batch.batchId}
                         className={[
-                          "flex flex-wrap items-start justify-between gap-3 rounded-[1rem] px-3.5 py-3",
+                          "flex flex-wrap items-start justify-between gap-2.5 rounded-[0.9rem] px-3 py-2",
                           isActiveBatch ? "bg-[#261b16]" : "bg-[#17120f]"
                         ].join(" ")}
                       >
@@ -1022,27 +1018,22 @@ export function JobHome() {
                           onClick={() => void handleOpenBatch(batch.batchId)}
                         >
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="inline-flex min-h-7 items-center rounded-full border border-transparent bg-[#221a15] px-2.5 text-[11px] font-semibold text-[#efd7c2]">
+                            <span className="inline-flex min-h-6 items-center rounded-full border border-transparent bg-[#221a15] px-2 text-[10px] font-semibold text-[#efd7c2]">
                               {finished ? "Готово" : "В работе"}
                             </span>
                             <span className="text-sm font-semibold text-[#fff8f1]">{batch.title}</span>
-                            {isActiveBatch && (
-                              <span className="inline-flex min-h-7 items-center rounded-full bg-[#2b221d] px-2.5 text-[11px] font-semibold text-[#fff4ea]">
-                                Открыт
-                              </span>
-                            )}
                           </div>
                           <p className="mt-1 text-xs text-[#cbbfb1]">{batch.archiveName} · задач: {batch.jobCount}</p>
-                          <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-[#aa9a8c]">{formatDate(batch.updatedAt)}</p>
+                          <p className="mt-0.5 text-[11px] text-[#aa9a8c]">{formatDate(batch.updatedAt)}</p>
                         </button>
                         <div className="flex shrink-0 items-center gap-2">
                           <Button
                             type="button"
                             variant="outline"
-                            className="min-h-8 rounded-full border-0 bg-[#2b221d] px-3 text-xs font-semibold text-[#fff4ea] shadow-none"
+                            className="min-h-7 rounded-full border-0 bg-[#2b221d] px-2.5 text-[11px] font-semibold text-[#fff4ea] shadow-none"
                             onClick={() => void handleOpenBatch(batch.batchId)}
                           >
-                            {isActiveBatch ? "Открыт" : "Открыть"}
+                            Открыть
                           </Button>
                         </div>
                       </div>
@@ -1070,11 +1061,17 @@ export function JobHome() {
                   <p className="mt-1 text-xs text-[#cbbfb1]">{activeBatch.batch.archiveName}</p>
                   <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-[#aa9a8c]">{formatDate(activeBatch.batch.updatedAt)}</p>
                 </div>
-                <div className="grid gap-2 sm:grid-cols-2">
-                  <div className="rounded-[0.9rem] bg-[#1d1713] px-3 py-2 text-xs text-[#e7dbce]">Всего: {activeBatchSummary?.totalJobs ?? 0}</div>
-                  <div className="rounded-[0.9rem] bg-[#1d1713] px-3 py-2 text-xs text-[#e7dbce]">Готово: {activeBatchSummary?.completedJobs ?? 0}</div>
-                  <div className="rounded-[0.9rem] bg-[#1d1713] px-3 py-2 text-xs text-[#e7dbce]">Ошибки: {activeBatchSummary?.failedJobs ?? 0}</div>
-                  <div className="rounded-[0.9rem] bg-[#1d1713] px-3 py-2 text-xs text-[#e7dbce]">В работе: {(activeBatchSummary?.runningJobs ?? 0) + (activeBatchSummary?.queuedJobs ?? 0)}</div>
+                <div className="flex flex-wrap gap-2 text-xs text-[#e7dbce]">
+                  {[
+                    ["Всего", activeBatchSummary?.totalJobs ?? 0],
+                    ["Готово", activeBatchSummary?.completedJobs ?? 0],
+                    ["Ошибки", activeBatchSummary?.failedJobs ?? 0],
+                    ["В работе", (activeBatchSummary?.runningJobs ?? 0) + (activeBatchSummary?.queuedJobs ?? 0)]
+                  ].map(([label, value]) => (
+                    <div key={label} className="rounded-full bg-[#1d1713] px-3 py-1">
+                      {label}: {value}
+                    </div>
+                  ))}
                 </div>
                 {activeBatchProductionExportUrl && (
                   <div className="flex flex-wrap gap-2">
@@ -1093,17 +1090,17 @@ export function JobHome() {
                 )}
               </div>
             ) : activeJob ? (
-              <div ref={activeResultRef} className="space-y-4">
+              <div ref={activeResultRef} className="space-y-3">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className={`inline-flex min-h-7 items-center rounded-full border px-2.5 text-[11px] font-semibold ${statusClasses[activeJob.status]}`}>
+                    <span className={`inline-flex min-h-6 items-center rounded-full border px-2 text-[10px] font-semibold ${statusClasses[activeJob.status]}`}>
                       {statusLabels[activeJob.status]}
                     </span>
                     <p className="text-sm font-semibold text-[#fff8f1]">{activeJob.title}</p>
                   </div>
                   <p className="mt-1 text-xs text-[#cbbfb1]">{activeJob.input.drawingName}</p>
-                  <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-[#aa9a8c]">
-                    Уверенность: {formatConfidence(activeJob.result?.summary.documentConfidence)} · {formatDate(activeJob.updatedAt)}
+                  <p className="mt-0.5 text-[11px] text-[#aa9a8c]">
+                    {formatConfidence(activeJob.result?.summary.documentConfidence)} · {formatDate(activeJob.updatedAt)}
                   </p>
                 </div>
 
@@ -1125,7 +1122,7 @@ export function JobHome() {
                 </div>
 
                 {activeFailureMessage && (
-                  <div className="rounded-[0.9rem] bg-[#2b1917] px-3 py-2 text-xs leading-5 text-[#f5b6b0]">
+                  <div className="rounded-full bg-[#2b1917] px-3 py-1 text-xs text-[#f5b6b0]">
                     {activeFailureMessage}
                   </div>
                 )}
@@ -1145,11 +1142,9 @@ export function JobHome() {
                   </div>
                 )}
 
-                {activeReviewReasons.length > 0 && (
-                  <div className="rounded-[0.9rem] bg-[#1d1611] px-3 py-2 text-xs leading-5 text-[#f0d9bb]">
-                    {activeReviewReasons.slice(0, 2).map((reason, index) => (
-                      <p key={`${reason}-${index}`}>{reason}</p>
-                    ))}
+                {hasReviewNotice && (
+                  <div className="rounded-full bg-[#1d1611] px-3 py-1 text-xs text-[#f0d9bb]">
+                    Есть спорные места — проверь вручную.
                   </div>
                 )}
 
