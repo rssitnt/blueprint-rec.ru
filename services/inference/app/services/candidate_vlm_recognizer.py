@@ -32,7 +32,7 @@ class VisionLLMCandidateRecognizer:
     def is_enabled(self) -> bool:
         return bool(self._openrouter_enabled() or self._gemini_enabled() or self._openai_enabled())
 
-    def extract_label_vocabulary(self, image: Image.Image, max_tiles: int = 6) -> set[str]:
+    def extract_label_vocabulary(self, image: Image.Image, max_tiles: int = 6, *, heavy_sheet: bool = False) -> set[str]:
         if not self.is_enabled():
             return set()
 
@@ -53,7 +53,7 @@ class VisionLLMCandidateRecognizer:
 
         _, primary_call = provider_calls[0]
         prompt = self._build_vocabulary_prompt()
-        return set(primary_call(payload_image, prompt))
+        return set(primary_call(payload_image, prompt, heavy_sheet=heavy_sheet))
 
     def recognize(
         self,
@@ -64,6 +64,7 @@ class VisionLLMCandidateRecognizer:
         allowed_labels: list[str] | None = None,
         *,
         use_consensus: bool = True,
+        heavy_sheet: bool = False,
     ) -> CandidateSuggestion:
         if not self.is_enabled():
             return CandidateSuggestion(label=None, confidence=None, source=None)
@@ -87,7 +88,7 @@ class VisionLLMCandidateRecognizer:
             return CandidateSuggestion(label=None, confidence=None, source=None)
 
         primary_name, primary_call = provider_calls[0]
-        primary = primary_call(payload_image, prompt, kind)
+        primary = primary_call(payload_image, prompt, kind, heavy_sheet=heavy_sheet)
         suggestions: list[tuple[str, CandidateSuggestion]] = [(primary_name, primary)]
 
         if (
@@ -101,7 +102,7 @@ class VisionLLMCandidateRecognizer:
             return primary
 
         for provider_name, provider_call in provider_calls[1:]:
-            suggestion = provider_call(payload_image, prompt, kind)
+            suggestion = provider_call(payload_image, prompt, kind, heavy_sheet=heavy_sheet)
             suggestions.append((provider_name, suggestion))
 
         return self._aggregate_candidate_suggestions(
@@ -110,7 +111,14 @@ class VisionLLMCandidateRecognizer:
             local_confidence=local_confidence,
         )
 
-    def _recognize_with_openai(self, payload_image: Image.Image, prompt: str, kind: str) -> CandidateSuggestion:
+    def _recognize_with_openai(
+        self,
+        payload_image: Image.Image,
+        prompt: str,
+        kind: str,
+        *,
+        heavy_sheet: bool = False,
+    ) -> CandidateSuggestion:
         client = self._get_client()
         if client is None:
             return CandidateSuggestion(label=None, confidence=None, source=None)
@@ -148,7 +156,7 @@ class VisionLLMCandidateRecognizer:
             source=f"openai-vlm:{settings.openai_vision_model}",
         )
 
-    def _extract_vocabulary_with_openai(self, payload_image: Image.Image, prompt: str) -> set[str]:
+    def _extract_vocabulary_with_openai(self, payload_image: Image.Image, prompt: str, *, heavy_sheet: bool = False) -> set[str]:
         client = self._get_client()
         if client is None:
             return set()
@@ -203,7 +211,14 @@ class VisionLLMCandidateRecognizer:
             and OpenAI is not None
         )
 
-    def _recognize_with_gemini(self, payload_image: Image.Image, prompt: str, kind: str) -> CandidateSuggestion:
+    def _recognize_with_gemini(
+        self,
+        payload_image: Image.Image,
+        prompt: str,
+        kind: str,
+        *,
+        heavy_sheet: bool = False,
+    ) -> CandidateSuggestion:
         if not self._gemini_enabled():
             return CandidateSuggestion(label=None, confidence=None, source=None)
 
@@ -257,7 +272,7 @@ class VisionLLMCandidateRecognizer:
             source=f"gemini-vlm:{settings.gemini_vision_model}",
         )
 
-    def _extract_vocabulary_with_gemini(self, payload_image: Image.Image, prompt: str) -> set[str]:
+    def _extract_vocabulary_with_gemini(self, payload_image: Image.Image, prompt: str, *, heavy_sheet: bool = False) -> set[str]:
         if not self._gemini_enabled():
             return set()
 
@@ -303,16 +318,24 @@ class VisionLLMCandidateRecognizer:
     def _openrouter_enabled() -> bool:
         return bool(settings.enable_openrouter_vision and settings.openrouter_api_key)
 
-    def _recognize_with_openrouter(self, payload_image: Image.Image, prompt: str, kind: str) -> CandidateSuggestion:
+    def _recognize_with_openrouter(
+        self,
+        payload_image: Image.Image,
+        prompt: str,
+        kind: str,
+        *,
+        heavy_sheet: bool = False,
+    ) -> CandidateSuggestion:
         if not self._openrouter_enabled():
             return CandidateSuggestion(label=None, confidence=None, source=None)
 
-        output_text = self._openrouter_chat_json(
+        output_text, model_used = self._openrouter_chat_json(
             payload_image=payload_image,
             system_prompt="Return only valid JSON. If uncertain, prefer is_callout=false.",
             user_prompt=prompt,
+            heavy_sheet=heavy_sheet,
         )
-        if output_text is None:
+        if output_text is None or model_used is None:
             return CandidateSuggestion(label=None, confidence=None, source=None)
 
         label, confidence, no_callout = self._parse_response(str(output_text or ""), kind)
@@ -320,29 +343,30 @@ class VisionLLMCandidateRecognizer:
             return CandidateSuggestion(
                 label=None,
                 confidence=1.0 if no_callout else None,
-                source=f"openrouter-vlm:{settings.openrouter_vision_model}:no-callout" if no_callout else None,
+                source=f"openrouter-vlm:{model_used}:no-callout" if no_callout else None,
             )
 
         return CandidateSuggestion(
             label=label,
             confidence=confidence,
-            source=f"openrouter-vlm:{settings.openrouter_vision_model}",
+            source=f"openrouter-vlm:{model_used}",
         )
 
-    def _extract_vocabulary_with_openrouter(self, payload_image: Image.Image, prompt: str) -> set[str]:
+    def _extract_vocabulary_with_openrouter(self, payload_image: Image.Image, prompt: str, *, heavy_sheet: bool = False) -> set[str]:
         if not self._openrouter_enabled():
             return set()
 
-        output_text = self._openrouter_chat_json(
+        output_text, _ = self._openrouter_chat_json(
             payload_image=payload_image,
             system_prompt="Return only valid JSON with a top-level 'labels' array.",
             user_prompt=prompt,
+            heavy_sheet=heavy_sheet,
         )
         if output_text is None:
             return set()
         return self._parse_vocabulary_labels(str(output_text or ""))
 
-    def resolve_indexed_tile(self, payload_image: Image.Image) -> list[tuple[str, str, float, str]]:
+    def resolve_indexed_tile(self, payload_image: Image.Image, *, heavy_sheet: bool = False) -> list[tuple[str, str, float, str]]:
         prompt = (
             "You are reviewing a zoomed technical drawing tile. "
             "Red circles with letter badges mark candidate callout bubbles. "
@@ -354,19 +378,26 @@ class VisionLLMCandidateRecognizer:
             'Return JSON only: {"items":[{"index":"A","label":"string","confidence":0-1}]}.'
         )
         provider_results = [
-            ("openrouter", self._resolve_indexed_tile_with_openrouter(payload_image, prompt)),
+            ("openrouter", self._resolve_indexed_tile_with_openrouter(payload_image, prompt, heavy_sheet=heavy_sheet)),
             ("openai", self._resolve_indexed_tile_with_openai(payload_image, prompt)),
             ("gemini", self._resolve_indexed_tile_with_gemini(payload_image, prompt)),
         ]
         return self._aggregate_indexed_tile_votes(provider_results)
 
-    def _resolve_indexed_tile_with_openrouter(self, payload_image: Image.Image, prompt: str) -> list[tuple[str, str, float]]:
+    def _resolve_indexed_tile_with_openrouter(
+        self,
+        payload_image: Image.Image,
+        prompt: str,
+        *,
+        heavy_sheet: bool = False,
+    ) -> list[tuple[str, str, float]]:
         if not self._openrouter_enabled():
             return []
-        output_text = self._openrouter_chat_json(
+        output_text, _ = self._openrouter_chat_json(
             payload_image=payload_image,
             system_prompt="Return only valid JSON. Badge letters are NOT the answer. If uncertain, omit.",
             user_prompt=prompt,
+            heavy_sheet=heavy_sheet,
         )
         return self._parse_indexed_tile_items(output_text)
 
@@ -689,46 +720,73 @@ class VisionLLMCandidateRecognizer:
         payload_image: Image.Image,
         system_prompt: str,
         user_prompt: str,
-    ) -> str | None:
-        body = {
-            "model": settings.openrouter_vision_model,
-            "temperature": 0,
-            "messages": [
-                {
-                    "role": "system",
-                    "content": system_prompt,
-                },
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "text", "text": user_prompt},
-                        {"type": "image_url", "image_url": {"url": self._image_to_data_uri(payload_image)}},
-                    ],
-                },
-            ],
-        }
+        *,
+        heavy_sheet: bool = False,
+    ) -> tuple[str | None, str | None]:
         headers = {
             "Authorization": f"Bearer {settings.openrouter_api_key}",
             "Content-Type": "application/json",
             "HTTP-Referer": "http://localhost",
             "X-Title": "blueprint-rec-2",
         }
-        try:
-            response = requests.post(
-                "https://openrouter.ai/api/v1/chat/completions",
-                headers=headers,
-                json=body,
-                timeout=settings.openai_vision_timeout_seconds,
+        for model_name in self._openrouter_model_chain(heavy_sheet=heavy_sheet):
+            body = {
+                "model": model_name,
+                "temperature": 0,
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": system_prompt,
+                    },
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": user_prompt},
+                            {"type": "image_url", "image_url": {"url": self._image_to_data_uri(payload_image)}},
+                        ],
+                    },
+                ],
+            }
+            try:
+                response = requests.post(
+                    "https://openrouter.ai/api/v1/chat/completions",
+                    headers=headers,
+                    json=body,
+                    timeout=settings.openai_vision_timeout_seconds,
+                )
+                response.raise_for_status()
+                payload = response.json()
+                return (
+                    payload.get("choices", [{}])[0]
+                    .get("message", {})
+                    .get("content", ""),
+                    model_name,
+                )
+            except Exception:
+                continue
+        return None, None
+
+    @staticmethod
+    def _openrouter_model_chain(*, heavy_sheet: bool) -> list[str]:
+        ordered: list[str] = []
+        if heavy_sheet:
+            ordered.extend(
+                [
+                    settings.openrouter_vision_model_heavy,
+                    settings.openrouter_vision_model_fallback,
+                ]
             )
-            response.raise_for_status()
-            payload = response.json()
-            return (
-                payload.get("choices", [{}])[0]
-                .get("message", {})
-                .get("content", "")
-            )
-        except Exception:
-            return None
+        else:
+            ordered.append(settings.openrouter_vision_model)
+        deduped: list[str] = []
+        seen: set[str] = set()
+        for item in ordered:
+            model_name = str(item or "").strip()
+            if not model_name or model_name in seen:
+                continue
+            seen.add(model_name)
+            deduped.append(model_name)
+        return deduped
 
     @staticmethod
     def _prepare_crop(crop: Image.Image) -> Image.Image:

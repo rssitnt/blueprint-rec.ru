@@ -548,6 +548,7 @@ class InMemorySessionStore:
                 label_vocabulary = self._candidate_vlm_recognizer.extract_label_vocabulary(
                     preview_image,
                     max_tiles=settings.openai_vision_vocab_max_tiles,
+                    heavy_sheet=low_res_circle_mode,
                 )
                 if label_vocabulary:
                     normalized_label_vocabulary = {normalize_label(label) for label in label_vocabulary}
@@ -770,6 +771,7 @@ class InMemorySessionStore:
                 local_label=candidate.suggested_label,
                 local_confidence=candidate.suggested_confidence,
                 use_consensus=not low_res_circle_mode,
+                heavy_sheet=low_res_circle_mode,
             )
             coerced_label = self._coerce_to_allowed_label(allowed_labels, suggestion.label)
             if suggestion.label and not coerced_label:
@@ -963,7 +965,7 @@ class InMemorySessionStore:
                 continue
 
             resolved_any = False
-            for tile_item in self._candidate_vlm_recognizer.resolve_indexed_tile(tile_image):
+            for tile_item in self._candidate_vlm_recognizer.resolve_indexed_tile(tile_image, heavy_sheet=True):
                 if len(tile_item) >= 4:
                     index_letter, label, confidence, source = tile_item
                 else:
@@ -1060,7 +1062,7 @@ class InMemorySessionStore:
                 continue
 
             resolved_any = False
-            for tile_item in self._candidate_vlm_recognizer.resolve_indexed_tile(tile_image):
+            for tile_item in self._candidate_vlm_recognizer.resolve_indexed_tile(tile_image, heavy_sheet=True):
                 if len(tile_item) >= 4:
                     index_letter, label, confidence, source = tile_item
                 else:
@@ -1127,7 +1129,7 @@ class InMemorySessionStore:
                 continue
 
             resolved_any = False
-            for tile_item in self._candidate_vlm_recognizer.resolve_indexed_tile(tile_image):
+            for tile_item in self._candidate_vlm_recognizer.resolve_indexed_tile(tile_image, heavy_sheet=True):
                 if len(tile_item) >= 4:
                     index_letter, label, confidence, source = tile_item
                 else:
@@ -1411,6 +1413,7 @@ class InMemorySessionStore:
                 local_label=local_suggestion.label,
                 local_confidence=local_suggestion.confidence,
                 allowed_labels=sorted({label.upper() for label in targeted_labels}),
+                heavy_sheet=True,
             )
             coerced_label = self._coerce_to_allowed_label(targeted_labels, vlm_suggestion.label)
             if vlm_suggestion.label and not coerced_label:

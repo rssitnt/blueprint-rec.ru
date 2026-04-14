@@ -38,7 +38,18 @@ class Settings:
         self.openai_vision_timeout_seconds = max(5.0, float(os.getenv("INFERENCE_OPENAI_VISION_TIMEOUT_SECONDS", "45")))
         self.openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
         self.enable_openrouter_vision = os.getenv("INFERENCE_ENABLE_OPENROUTER_VISION", "true").lower() in {"1", "true", "yes"}
-        self.openrouter_vision_model = os.getenv("INFERENCE_OPENROUTER_VISION_MODEL", "google/gemini-3.1-pro-preview")
+        self.openrouter_vision_model = os.getenv(
+            "INFERENCE_OPENROUTER_VISION_MODEL",
+            "google/gemini-3.1-flash-image-preview",
+        )
+        self.openrouter_vision_model_heavy = os.getenv(
+            "INFERENCE_OPENROUTER_VISION_MODEL_HEAVY",
+            "google/gemini-3.1-pro-preview",
+        )
+        self.openrouter_vision_model_fallback = os.getenv(
+            "INFERENCE_OPENROUTER_VISION_MODEL_FALLBACK",
+            "google/gemini-3.1-flash-image-preview",
+        )
         self.gemini_api_key = os.getenv("GEMINI_API_KEY")
         self.enable_gemini_vision = os.getenv("INFERENCE_ENABLE_GEMINI", "true").lower() in {"1", "true", "yes"}
         self.gemini_vision_model = os.getenv("INFERENCE_GEMINI_VISION_MODEL", "gemini-2.5-flash")

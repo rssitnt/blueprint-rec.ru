@@ -55,6 +55,22 @@ Last updated: 2026-04-14
     - returned full label set `1..42` with `29A`, `29B`, `30A`
   - `google/gemini-3.1-flash-image-preview`
     - returned near-full list with duplicates/repeats
+- OpenRouter routing is now split by sheet type:
+  - regular sheets:
+    - `google/gemini-3.1-flash-image-preview`
+  - heavy low-res sheets:
+    - primary:
+      - `google/gemini-3.1-pro-preview`
+    - fallback:
+      - `google/gemini-3.1-flash-image-preview`
+- This heavy-sheet routing is wired into:
+  - full-page vocabulary extraction
+  - final per-candidate VLM review
+  - indexed tile recovery
+  - targeted missing-label VLM recovery
+- Fallback was verified explicitly:
+  - with heavy model intentionally set to a fake id, the same heavy candidate resolved through:
+    - `openrouter-vlm:google/gemini-3.1-flash-image-preview`
 - Main remaining recognition gap:
   - dense exploded-view sheets like `test1.jpg`
   - truth-guided localization of small missing labels is still incomplete
@@ -196,6 +212,11 @@ Last updated: 2026-04-14
   - `C:/projects/sites/blueprint-rec-2/.codex-smoke/test1-targeted-run-v3/summary.json`
   - `C:/projects/sites/blueprint-rec-2/.codex-smoke/test1-targeted-run-v3/truth-compare.json`
   - `C:/projects/sites/blueprint-rec-2/.codex-smoke/test1-targeted-run-v3/markers-overlay.png`
+- Heavy OpenRouter routing checks:
+  - `C:/projects/sites/blueprint-rec-2/.codex-smoke/heavy-openrouter-page4/summary.json`
+  - `C:/projects/sites/blueprint-rec-2/.codex-smoke/heavy-openrouter-page4/artifacts/markers_v3.overlay.png`
+  - `C:/projects/sites/blueprint-rec-2/.codex-smoke/heavy-openrouter-page4/candidate-sources.json`
+  - `C:/projects/sites/blueprint-rec-2/.codex-smoke/heavy-openrouter-page4/fallback-check.json`
 - No-table status fix:
   - `C:/projects/sites/blueprint-rec-2/.codex-smoke/no-table-status-fix/final-v2.json`
 - Legacy/no-table auto-repair:
@@ -224,5 +245,6 @@ Last updated: 2026-04-14
 ## Current priorities
 
 1. Improve heavy-sheet recognition quality on dense exploded-view drawings.
+   - `page4` still misses visible labels `5` and `10`; model routing is improved, but the current internal low-res route still under-localizes these two positions.
 2. Keep old jobs and batches self-healing so the UI does not show stale broken history.
 3. Keep project context files compact and clean for future agents.
