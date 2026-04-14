@@ -233,6 +233,26 @@ Last updated: 2026-04-14
 - startup flow now restarts frontend once more if the homepage smoke-check fails
 - startup flow now also restarts backend when backend source files are newer than the running uvicorn process
   - this closes the class of bugs where backend code changed but the health check stayed green and old logic kept serving
+- Started migration away from Cloudflare as the public HTTP entrypoint.
+  - practical target shape:
+    - `blueprint-rec.ru -> Vercel`
+    - Vercel production rewrites -> temporary non-Cloudflare upstream
+    - current upstream:
+      - `https://1728c6181fc90a.lhr.life`
+  - Vercel production deployment is live and serves the site correctly on:
+    - `https://blueprint-rec.vercel.app`
+  - Cloudflare DNS apex record for `blueprint-rec.ru` was switched from tunnel CNAME to:
+    - `A 76.76.21.21`
+    - proxy disabled
+  - old `www.blueprint-rec.ru` tunnel record was removed from Cloudflare DNS
+  - replacement `www` DNS record now points to:
+    - `cname.vercel-dns.com`
+    - proxy disabled
+  - remaining caveat:
+    - public recursive resolvers were still returning the old Cloudflare tunnel answer right after the switch, so final outside behavior may lag until DNS propagation catches up
+  - separate Vercel caveat:
+    - `www.blueprint-rec.ru` still has an internal Vercel alias conflict from an accidental earlier CLI add against the wrong linked project
+    - apex `blueprint-rec.ru` is the main path and is configured on the correct Vercel project
 - public tunnel no longer points directly to `next start`
   - new public path is:
     - `cloudflared -> C:/projects/sites/blueprint-rec-2/scripts/web_public_proxy.mjs -> next start`
