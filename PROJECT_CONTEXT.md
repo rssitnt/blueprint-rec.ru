@@ -155,6 +155,11 @@ Last updated: 2026-04-13
   - `/_next/static/*.css` and `/_next/static/*.js` returned `400`
   - fixed by rebuilding the web app and hardening `C:/projects/sites/blueprint-rec-2/scripts/run_webui_public_tunnel.ps1`
   - the startup script now ensures a production web build exists before launching the frontend on `3010`
+  - the startup script now also probes real frontend asset health, not just "port is listening"
+  - the startup script also probes backend `/health`, so a stale dead process on `8010` gets restarted
+  - follow-up scan found and fixed a PowerShell bug in the same startup script:
+    - local variable `$home` collided with built-in `$HOME`
+    - renamed to avoid random startup failure
 
 ## Useful verification artifacts
 
