@@ -23,6 +23,8 @@ Last updated: 2026-04-14
 - Use full absolute Windows paths in user-facing responses.
 - User expects changes for this project to be pushed by default after edits.
 - Startup script now points to `C:/projects/sites/blueprint-rec-2/scripts/run_webui_public_tunnel.ps1` to avoid VBS errors after cleanup.
+- Startup entry restored via:
+  - `C:/Users/qwert/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/BlueprintRecWebUI.cmd`
 
 ## Product shape
 
