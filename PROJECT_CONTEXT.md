@@ -176,6 +176,22 @@ Last updated: 2026-04-14
 - Domain traffic goes through Cloudflare tunnel to local frontend/backend.
 - Cloudflare 1033 resolved by restarting the `cloudflared` tunnel for `blueprint-rec`.
 - `cloudflared` is currently running and tunnel reports as connected (external check also succeeds), but user still reports timeouts on mobile — likely intermittent tunnel uptime, PC sleep, or network path issues.
+- Strong external diagnosis for Russia:
+  - the site answers `200` from outside Russia
+  - Cloudflare officially reported on `2025-06-26` that since `2025-06-09` Russian ISPs throttle and block traffic to Cloudflare-protected sites
+  - Cloudflare states this affects HTTP/1.1, HTTP/2, and HTTP/3/QUIC, and that they cannot restore reliable access for Russia-based users on their side
+  - this matches the user's symptom: works in some environments, but times out on Russian mobile/Wi‑Fi without VPN
+- Practical conclusion:
+  - if stable access from Russia is required, the public user path should not depend on Cloudflare Tunnel / Cloudflare proxy
+  - next infra direction is a non-Cloudflare public entrypoint
+- Added a second public ingress mode for immediate fallback without Cloudflare:
+  - script:
+    - `C:/projects/sites/blueprint-rec-2/scripts/run_webui_public_tunnel.ps1 -Provider localhostrun`
+  - it starts an SSH reverse tunnel to `localhost.run` against the local public proxy on `3020`
+  - current tunnel URL is written to:
+    - `C:/projects/sites/blueprint-rec-2/.codex-smoke/localhostrun.url.txt`
+  - this path works as a quick public fallback, but the URL is temporary and changes after restart
+  - so it is useful as an emergency external link, not yet as a permanent replacement for `blueprint-rec.ru`
 - Tunnel ownership cleaned up:
   - `cloudflared` Windows service is now the only intended tunnel owner
   - startup script no longer spawns an extra manual tunnel when the service is already running

@@ -1,4 +1,5 @@
 param(
+    [ValidateSet("cloudflared-named", "localhostrun")]
     [string]$Provider = "cloudflared-named",
     [switch]$KeepBackendRunning
 )
@@ -13,6 +14,11 @@ $pythonExe = "C:\Users\qwert\AppData\Local\Programs\Python\Python311\python.exe"
 $cloudflaredExe = "C:\Program Files (x86)\cloudflared\cloudflared.exe"
 $cloudflaredConfig = "C:\Users\qwert\.cloudflared\config.yml"
 $cloudflaredProtocol = "quic"
+$sshExe = "C:\Windows\System32\OpenSSH\ssh.exe"
+$smokeDir = Join-Path $repoRoot ".codex-smoke"
+$localhostRunOutLog = Join-Path $smokeDir "localhostrun.out.log"
+$localhostRunErrLog = Join-Path $smokeDir "localhostrun.err.log"
+$localhostRunUrlFile = Join-Path $smokeDir "localhostrun.url.txt"
 $frontendPort = 3010
 $publicProxyPort = 3020
 
@@ -213,6 +219,60 @@ function Stop-PublicProxyProcesses {
     }
 }
 
+function Stop-LocalhostRunProcesses {
+    $sshProcesses = Get-CimInstance Win32_Process | Where-Object {
+        $_.Name -eq "ssh.exe" -and $_.CommandLine -like "*nokey@localhost.run*" -and $_.CommandLine -like "*127.0.0.1:$publicProxyPort*"
+    }
+    foreach ($proc in $sshProcesses) {
+        Stop-Process -Id $proc.ProcessId -Force -ErrorAction SilentlyContinue
+    }
+}
+
+function Get-LocalhostRunUrl {
+    if (-not (Test-Path $localhostRunOutLog)) {
+        return $null
+    }
+
+    $content = Get-Content $localhostRunOutLog -Raw -ErrorAction SilentlyContinue
+    if ([string]::IsNullOrWhiteSpace($content)) {
+        return $null
+    }
+
+    $match = [regex]::Match($content, 'https://[a-zA-Z0-9.-]+')
+    if (-not $match.Success) {
+        return $null
+    }
+
+    return $match.Value
+}
+
+function Start-LocalhostRunProcess {
+    if (-not (Test-Path $smokeDir)) {
+        New-Item -ItemType Directory -Path $smokeDir -Force | Out-Null
+    }
+
+    Remove-Item $localhostRunOutLog,$localhostRunErrLog,$localhostRunUrlFile -Force -ErrorAction SilentlyContinue
+
+    Start-Process -FilePath $sshExe `
+        -ArgumentList "-o","StrictHostKeyChecking=no","-o","ServerAliveInterval=30","-R","80:127.0.0.1:$publicProxyPort","nokey@localhost.run" `
+        -WindowStyle Hidden `
+        -RedirectStandardOutput $localhostRunOutLog `
+        -RedirectStandardError $localhostRunErrLog `
+        -WorkingDirectory $repoRoot | Out-Null
+}
+
+function Wait-LocalhostRunUrl {
+    for ($i = 0; $i -lt 20; $i++) {
+        $url = Get-LocalhostRunUrl
+        if ($url) {
+            Set-Content -Path $localhostRunUrlFile -Value $url -Encoding UTF8
+            return $url
+        }
+        Start-Sleep -Seconds 2
+    }
+    return $null
+}
+
 function Ensure-CloudflaredConfig {
     if (-not (Test-Path $cloudflaredConfig)) {
         throw "Cloudflared config not found: $cloudflaredConfig"
@@ -345,6 +405,19 @@ if (-not (Test-PortListening -Port 8010)) {
     Stop-BackendProcesses
     Start-Sleep -Seconds 2
     Start-Process -FilePath $pythonExe -ArgumentList "-m","uvicorn","app.main:app","--app-dir","services/inference","--env-file","services/inference/.env.local","--host","127.0.0.1","--port","8010" -WorkingDirectory $repoRoot -WindowStyle Hidden | Out-Null
+}
+
+if ($Provider -eq "localhostrun") {
+    Stop-LocalhostRunProcesses
+    Start-Sleep -Seconds 1
+    Start-LocalhostRunProcess
+    $localhostRunUrl = Wait-LocalhostRunUrl
+    if (-not $localhostRunUrl) {
+        throw "localhost.run tunnel did not return a public URL"
+    }
+
+    Write-Output "localhost.run URL: $localhostRunUrl"
+    exit 0
 }
 
 $cloudflaredConfigChanged = Ensure-CloudflaredConfig
