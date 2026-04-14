@@ -261,7 +261,22 @@ class InMemoryJobStore:
             self._persist_job(job)
 
         try:
-            output = await asyncio.to_thread(run_job_pipeline, self._job_dir(job_id), snapshot)
+            output = await asyncio.wait_for(
+                asyncio.to_thread(run_job_pipeline, self._job_dir(job_id), snapshot),
+                timeout=settings.job_max_runtime_seconds,
+            )
+        except asyncio.TimeoutError:
+            async with self._lock:
+                live_job = self._get_job(job_id)
+                live_job.status = DrawingJobStatus.FAILED
+                live_job.error_message = (
+                    "Задача обрабатывалась слишком долго и была остановлена. "
+                    "Попробуй запустить ещё раз."
+                )
+                live_job.result = None
+                live_job.updated_at = datetime.utcnow()
+                self._persist_job(live_job)
+            return
         except Exception as exc:
             async with self._lock:
                 live_job = self._get_job(job_id)

@@ -1062,11 +1062,7 @@ export function JobHome() {
           <div className="self-start rounded-[1.2rem] bg-[#15110e] p-4 lg:sticky lg:top-4">
             {listTab === "batches" && activeBatch ? (
               <div ref={activeBatchRef} className="space-y-3">
-                <div>
-                  <p className="text-sm font-semibold text-[#fff8f1]">{activeBatch.batch.title}</p>
-                  <p className="mt-1 text-xs text-[#cbbfb1]">{activeBatch.batch.archiveName}</p>
-                  <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-[#aa9a8c]">{formatDate(activeBatch.batch.updatedAt)}</p>
-                </div>
+                <p className="text-[11px] uppercase tracking-[0.18em] text-[#aa9a8c]">Сводка batch</p>
                 <div className="flex flex-wrap gap-2 text-xs text-[#e7dbce]">
                   {[
                     ["Всего", activeBatchSummary?.totalJobs ?? 0],
@@ -1097,18 +1093,7 @@ export function JobHome() {
               </div>
             ) : activeJob ? (
               <div ref={activeResultRef} className="space-y-3">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className={`inline-flex min-h-6 items-center rounded-full border px-2 text-[10px] font-semibold ${statusClasses[activeJob.status]}`}>
-                      {statusLabels[activeJob.status]}
-                    </span>
-                    <p className="text-sm font-semibold text-[#fff8f1]">{activeJob.title}</p>
-                  </div>
-                  <p className="mt-1 text-xs text-[#cbbfb1]">{activeJob.input.drawingName}</p>
-                  <p className="mt-0.5 text-[11px] text-[#aa9a8c]">
-                    {formatConfidence(activeJob.result?.summary.documentConfidence)} · {formatDate(activeJob.updatedAt)}
-                  </p>
-                </div>
+                <p className="text-[11px] uppercase tracking-[0.18em] text-[#aa9a8c]">Действия и итог</p>
 
                 <div className="flex flex-wrap items-center gap-2">
                   <Button
@@ -1145,6 +1130,12 @@ export function JobHome() {
                         {label}: {value}
                       </div>
                     ))}
+                  </div>
+                )}
+
+                {!activeSummary && activeJob.status !== "failed" && (
+                  <div className="rounded-full bg-[#1d1713] px-3 py-1 text-xs text-[#d8ccbf]">
+                    Задача еще обрабатывается. Статус и время видны в списке слева.
                   </div>
                 )}
 

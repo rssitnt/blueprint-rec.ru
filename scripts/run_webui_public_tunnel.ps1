@@ -344,6 +344,56 @@ function Stop-BackendProcesses {
     }
 }
 
+function Get-BackendProcess {
+    return Get-CimInstance Win32_Process | Where-Object {
+        $_.Name -eq "python.exe" -and (
+            $_.CommandLine -like "*uvicorn*127.0.0.1*8010*" -or
+            $_.CommandLine -like "*app.main:app*--port 8010*"
+        )
+    } | Select-Object -First 1
+}
+
+function Test-BackendProcessOutdated {
+    $backendProcess = Get-BackendProcess
+    if (-not $backendProcess) {
+        return $false
+    }
+    if ([string]::IsNullOrWhiteSpace($backendProcess.CreationDate)) {
+        return $false
+    }
+
+    try {
+        $processStartTime = [Management.ManagementDateTimeConverter]::ToDateTime($backendProcess.CreationDate).ToUniversalTime()
+    }
+    catch {
+        return $false
+    }
+
+    $codeRoots = @(
+        (Join-Path $repoRoot "services\inference\app"),
+        (Join-Path $repoRoot "services\inference\.env.local")
+    ) | Where-Object { Test-Path $_ }
+
+    $newestWriteTime = $null
+    foreach ($root in $codeRoots) {
+        $item = Get-Item $root
+        if ($item.PSIsContainer) {
+            $candidate = Get-ChildItem -Path $root -Recurse -File | Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1
+            if ($candidate -and ($newestWriteTime -eq $null -or $candidate.LastWriteTimeUtc -gt $newestWriteTime)) {
+                $newestWriteTime = $candidate.LastWriteTimeUtc
+            }
+        } elseif ($newestWriteTime -eq $null -or $item.LastWriteTimeUtc -gt $newestWriteTime) {
+            $newestWriteTime = $item.LastWriteTimeUtc
+        }
+    }
+
+    if ($newestWriteTime -eq $null) {
+        return $false
+    }
+
+    return $newestWriteTime -gt $processStartTime.AddSeconds(2)
+}
+
 function Ensure-WebProductionBuild {
     if (Test-WebProductionBuild) {
         return
@@ -401,7 +451,7 @@ if (-not (Wait-PublicProxyHealthy)) {
 
 if (-not (Test-PortListening -Port 8010)) {
     Start-Process -FilePath $pythonExe -ArgumentList "-m","uvicorn","app.main:app","--app-dir","services/inference","--env-file","services/inference/.env.local","--host","127.0.0.1","--port","8010" -WorkingDirectory $repoRoot -WindowStyle Hidden | Out-Null
-} elseif (-not (Test-BackendHealthy)) {
+} elseif ((Test-BackendProcessOutdated) -or -not (Test-BackendHealthy)) {
     Stop-BackendProcesses
     Start-Sleep -Seconds 2
     Start-Process -FilePath $pythonExe -ArgumentList "-m","uvicorn","app.main:app","--app-dir","services/inference","--env-file","services/inference/.env.local","--host","127.0.0.1","--port","8010" -WorkingDirectory $repoRoot -WindowStyle Hidden | Out-Null

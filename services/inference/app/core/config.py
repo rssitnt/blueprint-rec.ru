@@ -88,7 +88,7 @@ class Settings:
         )
         self.job_max_runtime_seconds = max(
             300,
-            int(os.getenv("INFERENCE_JOB_MAX_RUNTIME_SECONDS", "2700")),
+            int(os.getenv("INFERENCE_JOB_MAX_RUNTIME_SECONDS", "900")),
         )
 
 

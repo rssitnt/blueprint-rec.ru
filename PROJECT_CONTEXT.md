@@ -100,7 +100,12 @@ Last updated: 2026-04-14
 - Missing external legacy script no longer blocks job execution.
   - file:
     - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/job_runner.py`
-- Stale RUNNING jobs now auto-fail after a max runtime (default 45 minutes) so the UI doesn't stay "processing" forever.
+- Stale RUNNING jobs now auto-fail after a max runtime so the UI doesn't stay "processing" forever.
+  - current default:
+    - 15 minutes
+  - file:
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/job_store.py`
+- Running jobs now also have a hard execution timeout around the real background pipeline call, not only stale-state cleanup on read.
   - file:
     - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/job_store.py`
 - Built-in fallback with labels now matches base table labels to drawing subpositions.
@@ -133,6 +138,12 @@ Last updated: 2026-04-14
 - Home screen uses a two-column architecture:
   - Left: compact tabbed lists (jobs / batches) with internal scroll.
   - Right: sticky detail panel for the active job or batch, keeping exports/actions visible.
+- Home screen right panel no longer repeats the same job card metadata already shown on the left.
+  - for jobs, the right side now focuses on:
+    - actions
+    - exports
+    - failure/review notices
+    - numeric result summary
 - Non-workspace pages now allow vertical page scroll again (layout shell no longer locks overflow).
 - Global dark background tweaked slightly darker for better contrast.
 - Job list "Открыть" now opens a preview session for completed jobs (fallback to detail for unfinished).
@@ -219,8 +230,10 @@ Last updated: 2026-04-14
     - Next CSS asset is attached
     - heading is visibly styled
     - no browser console or page errors
-  - startup flow now restarts frontend once more if the homepage smoke-check fails
-  - public tunnel no longer points directly to `next start`
+- startup flow now restarts frontend once more if the homepage smoke-check fails
+- startup flow now also restarts backend when backend source files are newer than the running uvicorn process
+  - this closes the class of bugs where backend code changed but the health check stayed green and old logic kept serving
+- public tunnel no longer points directly to `next start`
   - new public path is:
     - `cloudflared -> C:/projects/sites/blueprint-rec-2/scripts/web_public_proxy.mjs -> next start`
   - reason:
