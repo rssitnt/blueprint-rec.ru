@@ -8,9 +8,12 @@ $ErrorActionPreference = "Stop"
 $repoRoot = "C:\projects\sites\blueprint-rec-2"
 $webRoot = Join-Path $repoRoot "apps\web"
 $homepageSmokeScript = Join-Path $repoRoot "scripts\verify_homepage_smoke.mjs"
+$publicProxyScript = Join-Path $repoRoot "scripts\web_public_proxy.mjs"
 $pythonExe = "C:\Users\qwert\AppData\Local\Programs\Python\Python311\python.exe"
 $cloudflaredExe = "C:\Program Files (x86)\cloudflared\cloudflared.exe"
 $cloudflaredConfig = "C:\Users\qwert\.cloudflared\config.yml"
+$frontendPort = 3010
+$publicProxyPort = 3020
 
 function Test-PortListening {
     param([int]$Port)
@@ -19,7 +22,7 @@ function Test-PortListening {
 }
 
 function Test-FrontendHealthy {
-    param([string]$BaseUrl = "http://127.0.0.1:3010")
+    param([string]$BaseUrl = "http://127.0.0.1:$frontendPort")
     try {
         $homeResponse = Invoke-WebRequest -UseBasicParsing "$BaseUrl/" -TimeoutSec 10
         if ($homeResponse.StatusCode -ne 200 -or [string]::IsNullOrWhiteSpace($homeResponse.Content)) {
@@ -62,7 +65,7 @@ function Test-BackendHealthy {
 
 function Invoke-FrontendSmokeCheck {
     param(
-        [string]$BaseUrl = "http://127.0.0.1:3010",
+        [string]$BaseUrl = "http://127.0.0.1:$publicProxyPort",
         [string]$OutDir = "C:\projects\sites\blueprint-rec-2\.codex-smoke\startup-home-smoke"
     )
     if (-not (Test-Path $homepageSmokeScript)) {
@@ -82,7 +85,7 @@ function Invoke-FrontendSmokeCheck {
 }
 
 function Wait-FrontendHealthy {
-    param([string]$BaseUrl = "http://127.0.0.1:3010")
+    param([string]$BaseUrl = "http://127.0.0.1:$frontendPort")
     for ($i = 0; $i -lt 30; $i++) {
         if (Test-FrontendHealthy -BaseUrl $BaseUrl) {
             return $true
@@ -94,7 +97,53 @@ function Wait-FrontendHealthy {
 
 function Start-FrontendProcess {
     Ensure-WebProductionBuild
-    Start-Process -FilePath "cmd.exe" -ArgumentList "/c", "npm run start --workspace @blueprint-rec/web -- --port 3010" -WorkingDirectory $repoRoot -WindowStyle Hidden | Out-Null
+    Start-Process -FilePath "cmd.exe" -ArgumentList "/c", "npm run start --workspace @blueprint-rec/web -- --port $frontendPort" -WorkingDirectory $repoRoot -WindowStyle Hidden | Out-Null
+}
+
+function Test-PublicProxyHealthy {
+    param([string]$BaseUrl = "http://127.0.0.1:$publicProxyPort")
+    try {
+        $homeResponse = Invoke-WebRequest -UseBasicParsing "$BaseUrl/" -TimeoutSec 10
+        if ($homeResponse.StatusCode -ne 200 -or [string]::IsNullOrWhiteSpace($homeResponse.Content)) {
+            return $false
+        }
+        $jsMatch = [regex]::Match($homeResponse.Content, 'src="([^"]+/_next/static/[^"]+\.js)"')
+        if (-not $jsMatch.Success) {
+            return $false
+        }
+        $jsUrl = if ($jsMatch.Groups[1].Value.StartsWith("http")) {
+            $jsMatch.Groups[1].Value
+        } else {
+            "$BaseUrl$($jsMatch.Groups[1].Value)"
+        }
+        $js = Invoke-WebRequest -UseBasicParsing $jsUrl -TimeoutSec 15
+        if ($js.StatusCode -ne 200) {
+            return $false
+        }
+        $contentType = [string]($js.Headers["Content-Type"])
+        return ($contentType -like "application/javascript*" -or $contentType -like "text/javascript*")
+    }
+    catch {
+        return $false
+    }
+}
+
+function Wait-PublicProxyHealthy {
+    param([string]$BaseUrl = "http://127.0.0.1:$publicProxyPort")
+    for ($i = 0; $i -lt 20; $i++) {
+        if (Test-PublicProxyHealthy -BaseUrl $BaseUrl) {
+            return $true
+        }
+        Start-Sleep -Seconds 2
+    }
+    return $false
+}
+
+function Start-PublicProxyProcess {
+    if (-not (Test-Path $publicProxyScript)) {
+        throw "Public proxy script not found: $publicProxyScript"
+    }
+    Start-Process -FilePath "cmd.exe" -ArgumentList "/c", "set BLUEPRINT_UPSTREAM_PORT=$frontendPort&& set BLUEPRINT_PUBLIC_PROXY_PORT=$publicProxyPort&& node $publicProxyScript" -WorkingDirectory $repoRoot -WindowStyle Hidden | Out-Null
 }
 
 function Test-WebProductionBuild {
@@ -112,9 +161,58 @@ function Test-WebProductionBuild {
 
 function Stop-FrontendProcesses {
     $frontendProcesses = Get-CimInstance Win32_Process | Where-Object {
-        $_.CommandLine -like "*next start*3010*" -or $_.CommandLine -like "*@blueprint-rec/web*3010*"
+        $_.CommandLine -like "*next start*$frontendPort*" -or $_.CommandLine -like "*@blueprint-rec/web*$frontendPort*"
     }
     foreach ($proc in $frontendProcesses) {
+        Stop-Process -Id $proc.ProcessId -Force -ErrorAction SilentlyContinue
+    }
+}
+
+function Stop-PublicProxyProcesses {
+    $proxyProcesses = Get-CimInstance Win32_Process | Where-Object {
+        $_.CommandLine -like "*web_public_proxy.mjs*" -or $_.CommandLine -like "*BLUEPRINT_PUBLIC_PROXY_PORT=$publicProxyPort*"
+    }
+    foreach ($proc in $proxyProcesses) {
+        Stop-Process -Id $proc.ProcessId -Force -ErrorAction SilentlyContinue
+    }
+}
+
+function Ensure-CloudflaredConfig {
+    if (-not (Test-Path $cloudflaredConfig)) {
+        throw "Cloudflared config not found: $cloudflaredConfig"
+    }
+    $lines = [System.Collections.Generic.List[string]](Get-Content $cloudflaredConfig)
+    $targetService = "service: http://127.0.0.1:$publicProxyPort"
+    $changed = $false
+    for ($i = 0; $i -lt $lines.Count; $i++) {
+        if ($lines[$i] -match 'hostname:\s*blueprint-rec\.ru') {
+            for ($j = $i + 1; $j -lt [Math]::Min($i + 6, $lines.Count); $j++) {
+                if ($lines[$j] -match '^\s*service:\s*http://127\.0\.0\.1:\d+\s*$') {
+                    if ($lines[$j].Trim() -ne $targetService) {
+                        $indent = ([regex]::Match($lines[$j], '^\s*')).Value
+                        $lines[$j] = "$indent$targetService"
+                        $changed = $true
+                    }
+                    if ($changed) {
+                        Set-Content -Path $cloudflaredConfig -Value $lines -Encoding UTF8
+                    }
+                    return $changed
+                }
+                if ($lines[$j] -match '^\s*-\s*service:') {
+                    break
+                }
+            }
+            throw "Could not find service line for blueprint-rec.ru in cloudflared config"
+        }
+    }
+    throw "Could not find hostname blueprint-rec.ru in cloudflared config"
+}
+
+function Stop-CloudflaredProcesses {
+    $cloudflaredProcesses = Get-CimInstance Win32_Process | Where-Object {
+        $_.Name -eq "cloudflared.exe" -and $_.CommandLine -like "*tunnel run blueprint-rec*"
+    }
+    foreach ($proc in $cloudflaredProcesses) {
         Stop-Process -Id $proc.ProcessId -Force -ErrorAction SilentlyContinue
     }
 }
@@ -144,7 +242,7 @@ function Ensure-WebProductionBuild {
     }
 }
 
-if (-not (Test-PortListening -Port 3010)) {
+if (-not (Test-PortListening -Port $frontendPort)) {
     Start-FrontendProcess
 } elseif (-not (Test-WebProductionBuild) -or -not (Test-FrontendHealthy)) {
     Stop-FrontendProcesses
@@ -168,12 +266,34 @@ if (-not (Invoke-FrontendSmokeCheck)) {
     }
 }
 
+if (-not (Test-PortListening -Port $publicProxyPort)) {
+    Start-PublicProxyProcess
+} elseif (-not (Test-PublicProxyHealthy)) {
+    Stop-PublicProxyProcesses
+    Start-Sleep -Seconds 2
+    Start-PublicProxyProcess
+}
+
+if (-not (Wait-PublicProxyHealthy)) {
+    Stop-PublicProxyProcesses
+    Start-Sleep -Seconds 2
+    Start-PublicProxyProcess
+    [void](Wait-PublicProxyHealthy)
+}
+
 if (-not (Test-PortListening -Port 8010)) {
     Start-Process -FilePath $pythonExe -ArgumentList "-m","uvicorn","app.main:app","--app-dir","services/inference","--env-file","services/inference/.env.local","--host","127.0.0.1","--port","8010" -WorkingDirectory $repoRoot -WindowStyle Hidden | Out-Null
 } elseif (-not (Test-BackendHealthy)) {
     Stop-BackendProcesses
     Start-Sleep -Seconds 2
     Start-Process -FilePath $pythonExe -ArgumentList "-m","uvicorn","app.main:app","--app-dir","services/inference","--env-file","services/inference/.env.local","--host","127.0.0.1","--port","8010" -WorkingDirectory $repoRoot -WindowStyle Hidden | Out-Null
+}
+
+$cloudflaredConfigChanged = Ensure-CloudflaredConfig
+
+if ($cloudflaredConfigChanged) {
+    Stop-CloudflaredProcesses
+    Start-Sleep -Seconds 2
 }
 
 $cf = Get-CimInstance Win32_Process | Where-Object {

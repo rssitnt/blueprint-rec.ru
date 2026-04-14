@@ -166,6 +166,16 @@ Last updated: 2026-04-14
     - heading is visibly styled
     - no browser console or page errors
   - startup flow now restarts frontend once more if the homepage smoke-check fails
+  - public tunnel no longer points directly to `next start`
+  - new public path is:
+    - `cloudflared -> C:/projects/sites/blueprint-rec-2/scripts/web_public_proxy.mjs -> next start`
+  - reason:
+    - some users hit intermittent `ERR_CONNECTION_RESET` on `/_next/static/*.js`
+    - the proxy now serves `/_next/static/*` directly from disk with fixed `content-length`
+    - only page/app/API traffic is proxied upstream
+  - local public proxy port:
+    - `http://127.0.0.1:3020`
+  - cloudflared config for `blueprint-rec.ru` is now rewritten automatically to target `3020`
   - follow-up scan found and fixed a PowerShell bug in the same startup script:
     - local variable `$home` collided with built-in `$HOME`
     - renamed to avoid random startup failure
@@ -204,6 +214,10 @@ Last updated: 2026-04-14
   - `C:/projects/sites/blueprint-rec-2/.codex-smoke/startup-home-smoke-local/homepage.png`
   - `C:/projects/sites/blueprint-rec-2/.codex-smoke/startup-home-smoke-manual/homepage-smoke.json`
   - `C:/projects/sites/blueprint-rec-2/.codex-smoke/startup-home-smoke-manual/homepage.png`
+- Public-proxy / chunk stability checks:
+  - `C:/projects/sites/blueprint-rec-2/.codex-smoke/domain-after-proxy/homepage-smoke.json`
+  - `C:/projects/sites/blueprint-rec-2/.codex-smoke/domain-after-proxy/homepage.png`
+  - `C:/projects/sites/blueprint-rec-2/.codex-smoke/proxy-chunk-probe.json`
 - Favicon checks:
   - `C:/projects/sites/blueprint-rec-2/.codex-smoke/favicon-check-v4/check.json`
 
