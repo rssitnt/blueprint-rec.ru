@@ -29,6 +29,7 @@ Last updated: 2026-04-14
   - Task: `BlueprintRecWebUI`
   - Runs: `C:/projects/sites/blueprint-rec-2/scripts/run_webui_public_tunnel.ps1`
 - cloudflared updated to 2026.3.0.
+- Tried forcing tunnel startup to `http2`, but Cloudflare edge returned TLS EOF on handshake here; kept `quic`.
 
 ## Product shape
 

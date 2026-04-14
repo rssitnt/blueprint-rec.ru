@@ -12,6 +12,7 @@ $publicProxyScript = Join-Path $repoRoot "scripts\web_public_proxy.mjs"
 $pythonExe = "C:\Users\qwert\AppData\Local\Programs\Python\Python311\python.exe"
 $cloudflaredExe = "C:\Program Files (x86)\cloudflared\cloudflared.exe"
 $cloudflaredConfig = "C:\Users\qwert\.cloudflared\config.yml"
+$cloudflaredProtocol = "quic"
 $frontendPort = 3010
 $publicProxyPort = 3020
 
@@ -301,5 +302,5 @@ $cf = Get-CimInstance Win32_Process | Where-Object {
 } | Select-Object -First 1
 
 if (-not $cf) {
-    Start-Process -FilePath $cloudflaredExe -ArgumentList "--config",$cloudflaredConfig,"tunnel","run","blueprint-rec" -WorkingDirectory $repoRoot -WindowStyle Hidden | Out-Null
+    Start-Process -FilePath $cloudflaredExe -ArgumentList "--config",$cloudflaredConfig,"tunnel","--protocol",$cloudflaredProtocol,"run","blueprint-rec" -WorkingDirectory $repoRoot -WindowStyle Hidden | Out-Null
 }
