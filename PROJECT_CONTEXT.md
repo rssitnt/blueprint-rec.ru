@@ -266,6 +266,12 @@ Last updated: 2026-04-14
   - current working production path is back on:
     - user -> `blueprint-rec.ru` -> Vercel
     - Vercel -> current `localhost.run` upstream from `C:/projects/sites/blueprint-rec-2/.codex-smoke/localhostrun.url.txt`
+  - later live check showed this fallback can also die while the SSH process is still present:
+    - symptom: `blueprint-rec.ru` returns `503` and body `no tunnel here :(`
+    - root cause was a dead `localhost.run` target behind Vercel
+  - as of the latest fix on 2026-04-14, production Vercel rewrite was manually switched back to:
+    - `https://blueprint-rec.blueprint-rec.ru/$1`
+    - and `blueprint-rec.ru` again returned `200`
   - live failure causes found and fixed:
     - Vercel rewrite generator in `C:/projects/sites/blueprint-rec-2/scripts/run_webui_public_tunnel.ps1` was writing broken destination text (`/\\"` instead of `/$1`)
     - `C:/projects/sites/blueprint-rec-2/.codex-smoke/vercel-proxy` could silently deploy into the wrong Vercel project because its local `.vercel/project.json` drifted
