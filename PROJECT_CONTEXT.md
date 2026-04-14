@@ -150,6 +150,11 @@ Last updated: 2026-04-13
   - `/storage/*`
 - Favicon is served from:
   - `C:/projects/sites/blueprint-rec-2/apps/web/public/favicon.ico`
+- Plain-HTML / no-style failure root cause:
+  - `next start` was serving from a broken / non-production `.next` state
+  - `/_next/static/*.css` and `/_next/static/*.js` returned `400`
+  - fixed by rebuilding the web app and hardening `C:/projects/sites/blueprint-rec-2/scripts/run_webui_public_tunnel.ps1`
+  - the startup script now ensures a production web build exists before launching the frontend on `3010`
 
 ## Useful verification artifacts
 
@@ -177,6 +182,9 @@ Last updated: 2026-04-13
   - `C:/projects/sites/blueprint-rec-2/.codex-smoke/startup-auto-repair/synthetic-startup-after.json`
 - Public domain checks:
   - `C:/projects/sites/blueprint-rec-2/.codex-smoke/public-domain-check/check.json`
+- Site style fix verification:
+  - `C:/projects/sites/blueprint-rec-2/.codex-smoke/site-style-fix/check.json`
+  - `C:/projects/sites/blueprint-rec-2/.codex-smoke/site-style-fix/home.png`
 - Favicon checks:
   - `C:/projects/sites/blueprint-rec-2/.codex-smoke/favicon-check-v4/check.json`
 

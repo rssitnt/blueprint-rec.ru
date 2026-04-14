@@ -6,6 +6,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 $repoRoot = "C:\projects\sites\blueprint-rec-2"
+$webRoot = Join-Path $repoRoot "apps\web"
 $pythonExe = "C:\Users\qwert\AppData\Local\Programs\Python\Python311\python.exe"
 $cloudflaredExe = "C:\Program Files (x86)\cloudflared\cloudflared.exe"
 $cloudflaredConfig = "C:\Users\qwert\.cloudflared\config.yml"
@@ -16,7 +17,51 @@ function Test-PortListening {
     return [bool]$conn
 }
 
+function Test-WebProductionBuild {
+    $buildIdPath = Join-Path $webRoot ".next\BUILD_ID"
+    $cssDir = Join-Path $webRoot ".next\static\css"
+    if (-not (Test-Path $buildIdPath)) {
+        return $false
+    }
+    if (-not (Test-Path $cssDir)) {
+        return $false
+    }
+    $cssFile = Get-ChildItem -Path $cssDir -Recurse -Filter *.css -ErrorAction SilentlyContinue | Select-Object -First 1
+    return [bool]$cssFile
+}
+
+function Stop-FrontendProcesses {
+    $frontendProcesses = Get-CimInstance Win32_Process | Where-Object {
+        $_.CommandLine -like "*next start*3010*" -or $_.CommandLine -like "*@blueprint-rec/web*3010*"
+    }
+    foreach ($proc in $frontendProcesses) {
+        Stop-Process -Id $proc.ProcessId -Force -ErrorAction SilentlyContinue
+    }
+}
+
+function Ensure-WebProductionBuild {
+    if (Test-WebProductionBuild) {
+        return
+    }
+    Push-Location $repoRoot
+    try {
+        & cmd.exe /c "npm run build --workspace @blueprint-rec/web"
+        if ($LASTEXITCODE -ne 0) {
+            throw "Frontend production build failed with exit code $LASTEXITCODE"
+        }
+    }
+    finally {
+        Pop-Location
+    }
+}
+
 if (-not (Test-PortListening -Port 3010)) {
+    Ensure-WebProductionBuild
+    Start-Process -FilePath "cmd.exe" -ArgumentList "/c", "npm run start --workspace @blueprint-rec/web -- --port 3010" -WorkingDirectory $repoRoot -WindowStyle Hidden | Out-Null
+} elseif (-not (Test-WebProductionBuild)) {
+    Stop-FrontendProcesses
+    Start-Sleep -Seconds 2
+    Ensure-WebProductionBuild
     Start-Process -FilePath "cmd.exe" -ArgumentList "/c", "npm run start --workspace @blueprint-rec/web -- --port 3010" -WorkingDirectory $repoRoot -WindowStyle Hidden | Out-Null
 }
 
