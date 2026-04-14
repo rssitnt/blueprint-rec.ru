@@ -253,6 +253,17 @@ Last updated: 2026-04-14
   - separate Vercel caveat:
     - `www.blueprint-rec.ru` still has an internal Vercel alias conflict from an accidental earlier CLI add against the wrong linked project
     - apex `blueprint-rec.ru` is the main path and is configured on the correct Vercel project
+  - failure pattern discovered:
+    - if the temporary `localhost.run` URL dies, Vercel starts returning `503` and the page body becomes:
+      - `no tunnel here :(`
+  - current mitigation added:
+    - `C:/projects/sites/blueprint-rec-2/scripts/run_webui_public_tunnel.ps1 -Provider localhostrun`
+      now also rewrites:
+      - `C:/projects/sites/blueprint-rec-2/.codex-smoke/vercel-proxy/vercel.json`
+      and redeploys the Vercel proxy project automatically when a fresh localhost.run URL is created
+  - practical limitation remains:
+    - this still depends on the local machine and on the temporary upstream provider
+    - for a real stable public site, backend / worker execution must move off this PC
 - public tunnel no longer points directly to `next start`
   - new public path is:
     - `cloudflared -> C:/projects/sites/blueprint-rec-2/scripts/web_public_proxy.mjs -> next start`

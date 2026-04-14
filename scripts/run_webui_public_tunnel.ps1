@@ -16,6 +16,9 @@ $cloudflaredConfig = "C:\Users\qwert\.cloudflared\config.yml"
 $cloudflaredProtocol = "quic"
 $sshExe = "C:\Windows\System32\OpenSSH\ssh.exe"
 $smokeDir = Join-Path $repoRoot ".codex-smoke"
+$vercelProxyDir = Join-Path $smokeDir "vercel-proxy"
+$vercelProxyConfig = Join-Path $vercelProxyDir "vercel.json"
+$vercelProjectLink = Join-Path $repoRoot ".vercel\project.json"
 $localhostRunOutLog = Join-Path $smokeDir "localhostrun.out.log"
 $localhostRunErrLog = Join-Path $smokeDir "localhostrun.err.log"
 $localhostRunUrlFile = Join-Path $smokeDir "localhostrun.url.txt"
@@ -273,6 +276,55 @@ function Wait-LocalhostRunUrl {
     return $null
 }
 
+function Sync-VercelProxyToUpstream {
+    param([string]$UpstreamUrl)
+
+    if ([string]::IsNullOrWhiteSpace($UpstreamUrl)) {
+        throw "Upstream URL is required for Vercel proxy sync"
+    }
+
+    if (-not (Test-Path $vercelProxyDir)) {
+        New-Item -ItemType Directory -Path $vercelProxyDir -Force | Out-Null
+    }
+
+    $vercelConfig = [ordered]@{
+        '$schema' = "https://openapi.vercel.sh/vercel.json"
+        rewrites  = @(
+            [ordered]@{
+                source = "/(.*)"
+                destination = "$UpstreamUrl/\$1"
+            }
+        )
+    }
+    $vercelConfig | ConvertTo-Json -Depth 5 | Set-Content -Path $vercelProxyConfig -Encoding UTF8
+
+    if (-not $env:VERCEL_TOKEN) {
+        return
+    }
+
+    if (-not (Test-Path $vercelProjectLink)) {
+        return
+    }
+
+    $project = Get-Content $vercelProjectLink -Raw | ConvertFrom-Json
+    if ([string]::IsNullOrWhiteSpace($project.orgId) -or [string]::IsNullOrWhiteSpace($project.projectId)) {
+        return
+    }
+
+    $env:VERCEL_ORG_ID = $project.orgId
+    $env:VERCEL_PROJECT_ID = $project.projectId
+    Push-Location $vercelProxyDir
+    try {
+        & vercel deploy --prod --force --yes --token $env:VERCEL_TOKEN | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            throw "Vercel proxy deploy failed with exit code $LASTEXITCODE"
+        }
+    }
+    finally {
+        Pop-Location
+    }
+}
+
 function Ensure-CloudflaredConfig {
     if (-not (Test-Path $cloudflaredConfig)) {
         throw "Cloudflared config not found: $cloudflaredConfig"
@@ -466,6 +518,7 @@ if ($Provider -eq "localhostrun") {
         throw "localhost.run tunnel did not return a public URL"
     }
 
+    Sync-VercelProxyToUpstream -UpstreamUrl $localhostRunUrl
     Write-Output "localhost.run URL: $localhostRunUrl"
     exit 0
 }
