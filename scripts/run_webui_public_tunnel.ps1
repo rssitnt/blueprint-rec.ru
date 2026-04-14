@@ -7,6 +7,7 @@ $ErrorActionPreference = "Stop"
 
 $repoRoot = "C:\projects\sites\blueprint-rec-2"
 $webRoot = Join-Path $repoRoot "apps\web"
+$homepageSmokeScript = Join-Path $repoRoot "scripts\verify_homepage_smoke.mjs"
 $pythonExe = "C:\Users\qwert\AppData\Local\Programs\Python\Python311\python.exe"
 $cloudflaredExe = "C:\Program Files (x86)\cloudflared\cloudflared.exe"
 $cloudflaredConfig = "C:\Users\qwert\.cloudflared\config.yml"
@@ -59,6 +60,43 @@ function Test-BackendHealthy {
     }
 }
 
+function Invoke-FrontendSmokeCheck {
+    param(
+        [string]$BaseUrl = "http://127.0.0.1:3010",
+        [string]$OutDir = "C:\projects\sites\blueprint-rec-2\.codex-smoke\startup-home-smoke"
+    )
+    if (-not (Test-Path $homepageSmokeScript)) {
+        return $false
+    }
+    Push-Location $repoRoot
+    try {
+        & node $homepageSmokeScript --url "$BaseUrl/" --out-dir $OutDir | Out-Null
+        return ($LASTEXITCODE -eq 0)
+    }
+    catch {
+        return $false
+    }
+    finally {
+        Pop-Location
+    }
+}
+
+function Wait-FrontendHealthy {
+    param([string]$BaseUrl = "http://127.0.0.1:3010")
+    for ($i = 0; $i -lt 30; $i++) {
+        if (Test-FrontendHealthy -BaseUrl $BaseUrl) {
+            return $true
+        }
+        Start-Sleep -Seconds 2
+    }
+    return $false
+}
+
+function Start-FrontendProcess {
+    Ensure-WebProductionBuild
+    Start-Process -FilePath "cmd.exe" -ArgumentList "/c", "npm run start --workspace @blueprint-rec/web -- --port 3010" -WorkingDirectory $repoRoot -WindowStyle Hidden | Out-Null
+}
+
 function Test-WebProductionBuild {
     $buildIdPath = Join-Path $webRoot ".next\BUILD_ID"
     $cssDir = Join-Path $webRoot ".next\static\css"
@@ -107,13 +145,27 @@ function Ensure-WebProductionBuild {
 }
 
 if (-not (Test-PortListening -Port 3010)) {
-    Ensure-WebProductionBuild
-    Start-Process -FilePath "cmd.exe" -ArgumentList "/c", "npm run start --workspace @blueprint-rec/web -- --port 3010" -WorkingDirectory $repoRoot -WindowStyle Hidden | Out-Null
+    Start-FrontendProcess
 } elseif (-not (Test-WebProductionBuild) -or -not (Test-FrontendHealthy)) {
     Stop-FrontendProcesses
     Start-Sleep -Seconds 2
-    Ensure-WebProductionBuild
-    Start-Process -FilePath "cmd.exe" -ArgumentList "/c", "npm run start --workspace @blueprint-rec/web -- --port 3010" -WorkingDirectory $repoRoot -WindowStyle Hidden | Out-Null
+    Start-FrontendProcess
+}
+
+if (-not (Wait-FrontendHealthy)) {
+    Stop-FrontendProcesses
+    Start-Sleep -Seconds 2
+    Start-FrontendProcess
+    [void](Wait-FrontendHealthy)
+}
+
+if (-not (Invoke-FrontendSmokeCheck)) {
+    Stop-FrontendProcesses
+    Start-Sleep -Seconds 2
+    Start-FrontendProcess
+    if (Wait-FrontendHealthy) {
+        [void](Invoke-FrontendSmokeCheck)
+    }
 }
 
 if (-not (Test-PortListening -Port 8010)) {

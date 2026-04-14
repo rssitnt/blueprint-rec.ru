@@ -1,6 +1,6 @@
 # Project Context
 
-Last updated: 2026-04-13
+Last updated: 2026-04-14
 
 ## Current product state
 
@@ -157,6 +157,15 @@ Last updated: 2026-04-13
   - the startup script now ensures a production web build exists before launching the frontend on `3010`
   - the startup script now also probes real frontend asset health, not just "port is listening"
   - the startup script also probes backend `/health`, so a stale dead process on `8010` gets restarted
+  - the startup script now runs a headless homepage smoke-check through:
+    - `C:/projects/sites/blueprint-rec-2/scripts/verify_homepage_smoke.mjs`
+  - smoke-check success rules are now practical instead of fragile:
+    - page title is correct
+    - key UI texts are present
+    - Next CSS asset is attached
+    - heading is visibly styled
+    - no browser console or page errors
+  - startup flow now restarts frontend once more if the homepage smoke-check fails
   - follow-up scan found and fixed a PowerShell bug in the same startup script:
     - local variable `$home` collided with built-in `$HOME`
     - renamed to avoid random startup failure
@@ -190,6 +199,11 @@ Last updated: 2026-04-13
 - Site style fix verification:
   - `C:/projects/sites/blueprint-rec-2/.codex-smoke/site-style-fix/check.json`
   - `C:/projects/sites/blueprint-rec-2/.codex-smoke/site-style-fix/home.png`
+- Startup homepage smoke:
+  - `C:/projects/sites/blueprint-rec-2/.codex-smoke/startup-home-smoke-local/homepage-smoke.json`
+  - `C:/projects/sites/blueprint-rec-2/.codex-smoke/startup-home-smoke-local/homepage.png`
+  - `C:/projects/sites/blueprint-rec-2/.codex-smoke/startup-home-smoke-manual/homepage-smoke.json`
+  - `C:/projects/sites/blueprint-rec-2/.codex-smoke/startup-home-smoke-manual/homepage.png`
 - Favicon checks:
   - `C:/projects/sites/blueprint-rec-2/.codex-smoke/favicon-check-v4/check.json`
 
