@@ -256,14 +256,25 @@ Last updated: 2026-04-14
   - failure pattern discovered:
     - if the temporary `localhost.run` URL dies, Vercel starts returning `503` and the page body becomes:
       - `no tunnel here :(`
-  - current mitigation added:
-    - `C:/projects/sites/blueprint-rec-2/scripts/run_webui_public_tunnel.ps1 -Provider localhostrun`
-      now also rewrites:
-      - `C:/projects/sites/blueprint-rec-2/.codex-smoke/vercel-proxy/vercel.json`
-      and redeploys the Vercel proxy project automatically when a fresh localhost.run URL is created
+  - attempted improved public chain:
+    - user -> `blueprint-rec.ru` -> Vercel
+    - Vercel -> `https://blueprint-rec.blueprint-rec.ru`
+    - internal tunnel hostname -> local public proxy on `3020`
+  - current reality after live checks:
+    - this internal-hop chain is not yet reliable enough for production
+    - Vercel sometimes gets `no tunnel here :(` or `502` from that hostname
+  - current working production path is back on:
+    - user -> `blueprint-rec.ru` -> Vercel
+    - Vercel -> current `localhost.run` upstream from `C:/projects/sites/blueprint-rec-2/.codex-smoke/localhostrun.url.txt`
+  - live failure causes found and fixed:
+    - Vercel rewrite generator in `C:/projects/sites/blueprint-rec-2/scripts/run_webui_public_tunnel.ps1` was writing broken destination text (`/\\"` instead of `/$1`)
+    - `C:/projects/sites/blueprint-rec-2/.codex-smoke/vercel-proxy` could silently deploy into the wrong Vercel project because its local `.vercel/project.json` drifted
+  - startup script now also:
+    - copies the root Vercel project link into `C:/projects/sites/blueprint-rec-2/.codex-smoke/vercel-proxy/.vercel/project.json`
+    - writes `C:/projects/sites/blueprint-rec-2/.codex-smoke/vercel-proxy/.vercelignore` to exclude deploy logs from proxy deploys
   - practical limitation remains:
-    - this still depends on the local machine and on the temporary upstream provider
-    - for a real stable public site, backend / worker execution must move off this PC
+    - backend / OCR execution is still on this PC
+    - for a truly stable service, worker execution must still move off this machine later
 - public tunnel no longer points directly to `next start`
   - new public path is:
     - `cloudflared -> C:/projects/sites/blueprint-rec-2/scripts/web_public_proxy.mjs -> next start`

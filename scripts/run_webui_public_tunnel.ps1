@@ -19,6 +19,9 @@ $smokeDir = Join-Path $repoRoot ".codex-smoke"
 $vercelProxyDir = Join-Path $smokeDir "vercel-proxy"
 $vercelProxyConfig = Join-Path $vercelProxyDir "vercel.json"
 $vercelProjectLink = Join-Path $repoRoot ".vercel\project.json"
+$vercelProxyProjectLink = Join-Path $vercelProxyDir ".vercel\project.json"
+$vercelProxyIgnore = Join-Path $vercelProxyDir ".vercelignore"
+$vercelStableUpstream = "https://blueprint-rec.blueprint-rec.ru"
 $localhostRunOutLog = Join-Path $smokeDir "localhostrun.out.log"
 $localhostRunErrLog = Join-Path $smokeDir "localhostrun.err.log"
 $localhostRunUrlFile = Join-Path $smokeDir "localhostrun.url.txt"
@@ -287,12 +290,25 @@ function Sync-VercelProxyToUpstream {
         New-Item -ItemType Directory -Path $vercelProxyDir -Force | Out-Null
     }
 
+    $vercelProxyMetaDir = Split-Path $vercelProxyProjectLink -Parent
+    if (-not (Test-Path $vercelProxyMetaDir)) {
+        New-Item -ItemType Directory -Path $vercelProxyMetaDir -Force | Out-Null
+    }
+    if (Test-Path $vercelProjectLink) {
+        Copy-Item -Path $vercelProjectLink -Destination $vercelProxyProjectLink -Force
+    }
+
+    @"
+deploy*.txt
+deploy*.log
+"@ | Set-Content -Path $vercelProxyIgnore -Encoding UTF8
+
     $vercelConfig = [ordered]@{
         '$schema' = "https://openapi.vercel.sh/vercel.json"
         rewrites  = @(
             [ordered]@{
                 source = "/(.*)"
-                destination = "$UpstreamUrl/\$1"
+                destination = "$UpstreamUrl/`$1"
             }
         )
     }
@@ -326,34 +342,23 @@ function Sync-VercelProxyToUpstream {
 }
 
 function Ensure-CloudflaredConfig {
-    if (-not (Test-Path $cloudflaredConfig)) {
-        throw "Cloudflared config not found: $cloudflaredConfig"
+    $desiredConfig = @"
+tunnel: 0e227ae3-823b-44d1-aae2-893111599775
+credentials-file: C:\Users\qwert\.cloudflared\0e227ae3-823b-44d1-aae2-893111599775.json
+ingress:
+  - hostname: blueprint-rec.ru
+    service: http://127.0.0.1:$publicProxyPort
+  - hostname: blueprint-rec.blueprint-rec.ru
+    service: http://127.0.0.1:$publicProxyPort
+  - service: http_status:404
+"@
+
+    if ((Test-Path $cloudflaredConfig) -and ((Get-Content $cloudflaredConfig -Raw) -eq $desiredConfig)) {
+        return $false
     }
-    $lines = [System.Collections.Generic.List[string]](Get-Content $cloudflaredConfig)
-    $targetService = "service: http://127.0.0.1:$publicProxyPort"
-    $changed = $false
-    for ($i = 0; $i -lt $lines.Count; $i++) {
-        if ($lines[$i] -match 'hostname:\s*blueprint-rec\.ru') {
-            for ($j = $i + 1; $j -lt [Math]::Min($i + 6, $lines.Count); $j++) {
-                if ($lines[$j] -match '^\s*service:\s*http://127\.0\.0\.1:\d+\s*$') {
-                    if ($lines[$j].Trim() -ne $targetService) {
-                        $indent = ([regex]::Match($lines[$j], '^\s*')).Value
-                        $lines[$j] = "$indent$targetService"
-                        $changed = $true
-                    }
-                    if ($changed) {
-                        Set-Content -Path $cloudflaredConfig -Value $lines -Encoding UTF8
-                    }
-                    return $changed
-                }
-                if ($lines[$j] -match '^\s*-\s*service:') {
-                    break
-                }
-            }
-            throw "Could not find service line for blueprint-rec.ru in cloudflared config"
-        }
-    }
-    throw "Could not find hostname blueprint-rec.ru in cloudflared config"
+
+    Set-Content -Path $cloudflaredConfig -Value $desiredConfig -Encoding UTF8
+    return $true
 }
 
 function Stop-CloudflaredProcesses {
@@ -539,3 +544,5 @@ if (-not (Test-CloudflaredServiceRunning)) {
         Start-Process -FilePath $cloudflaredExe -ArgumentList "--config",$cloudflaredConfig,"tunnel","--protocol",$cloudflaredProtocol,"run","blueprint-rec" -WorkingDirectory $repoRoot -WindowStyle Hidden | Out-Null
     }
 }
+
+Sync-VercelProxyToUpstream -UpstreamUrl $vercelStableUpstream
