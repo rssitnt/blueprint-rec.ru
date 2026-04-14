@@ -25,6 +25,10 @@ Last updated: 2026-04-14
 - Startup script now points to `C:/projects/sites/blueprint-rec-2/scripts/run_webui_public_tunnel.ps1` to avoid VBS errors after cleanup.
 - Startup entry restored via:
   - `C:/Users/qwert/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/BlueprintRecWebUI.cmd`
+- Added an elevated Windows Scheduled Task (ONLOGON) for stable autostart:
+  - Task: `BlueprintRecWebUI`
+  - Runs: `C:/projects/sites/blueprint-rec-2/scripts/run_webui_public_tunnel.ps1`
+- cloudflared updated to 2026.3.0.
 
 ## Product shape
 
