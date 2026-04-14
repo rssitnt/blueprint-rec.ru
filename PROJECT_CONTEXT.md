@@ -167,6 +167,8 @@ Last updated: 2026-04-14
 - Annotation rails now default to compact mode with popover lists for candidates/markers and collapsible inspector blocks to avoid vertical scrolling in left/right panels.
 - Left rail condensed mode now hides long AI/vocabulary blocks and replaces them with a short summary plus quick-open buttons for overlays.
 - Right rail condensed mode now collapses guidance, related-candidate lists, and coordinate fields behind toggles.
+- Preview workspace now loads the drawing through a real image loader with auto-retry instead of relying only on CSS background-image.
+- Imported preview sessions no longer try to auto-run annotation again on open.
 
 ## Public deploy notes
 
@@ -210,6 +212,9 @@ Last updated: 2026-04-14
   - follow-up scan found and fixed a PowerShell bug in the same startup script:
     - local variable `$home` collided with built-in `$HOME`
     - renamed to avoid random startup failure
+  - follow-up fix for session crashes after rebuild:
+    - startup script now restarts `next start` automatically when `.next/BUILD_ID` is newer than the running frontend process
+    - this prevents old HTML from referencing deleted JS chunks after a rebuild
 
 ## Useful verification artifacts
 

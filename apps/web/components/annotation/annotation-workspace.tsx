@@ -1980,10 +1980,14 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
   const [, setImageDataVersion] = useState(0);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
   const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [documentImageUrl, setDocumentImageUrl] = useState("");
+  const [documentImageState, setDocumentImageState] = useState<"idle" | "loading" | "loaded" | "error">("idle");
+  const [documentImageAttempt, setDocumentImageAttempt] = useState(0);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const inlineInputRef = useRef<HTMLInputElement | null>(null);
   const viewportRef = useRef<Viewport | null>(null);
   const viewportCommitRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const documentImageRetryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSavedViewportRef = useRef<Viewport | null>(null);
   const suppressCanvasClickRef = useRef(false);
   const sourceImageDataRef = useRef<ImageData | null>(null);
@@ -2007,6 +2011,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
   }, []);
 
   const document = session?.document ?? null;
+  const documentAssetUrl = document ? resolveAssetUrl(document.storageUrl) : "";
   const importedJobEntry =
     session?.actionLog.find(
       (entry) =>
@@ -2773,12 +2778,21 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
     void reloadCurrentSession({ preferFit: true });
     return () => {
       sessionLoadRequestIdRef.current += 1;
+      if (documentImageRetryTimerRef.current) {
+        clearTimeout(documentImageRetryTimerRef.current);
+        documentImageRetryTimerRef.current = null;
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId]);
 
   useEffect(() => {
     if (!session?.document) {
+      autoAnnotateKeyRef.current = null;
+      return;
+    }
+
+    if (isImportedJobPreviewSession) {
       autoAnnotateKeyRef.current = null;
       return;
     }
@@ -2795,7 +2809,7 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
 
     autoAnnotateKeyRef.current = detectionKey;
     void runAutoAnnotateRef.current?.({ quiet: true });
-  }, [session]);
+  }, [isImportedJobPreviewSession, session]);
 
   useEffect(() => {
     if (markerConflicts.length === 0) {
@@ -2811,10 +2825,69 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
   }, [activeConflictIndex, markerConflicts.length]);
 
   useEffect(() => {
+    if (documentImageRetryTimerRef.current) {
+      clearTimeout(documentImageRetryTimerRef.current);
+      documentImageRetryTimerRef.current = null;
+    }
+
+    if (!documentAssetUrl) {
+      setDocumentImageUrl("");
+      setDocumentImageState("idle");
+      setDocumentImageAttempt(0);
+      return;
+    }
+
+    setDocumentImageAttempt(0);
+  }, [documentAssetUrl]);
+
+  useEffect(() => {
+    if (!documentAssetUrl) {
+      return;
+    }
+
+    const requestUrl = `${documentAssetUrl}${documentAssetUrl.includes("?") ? "&" : "?"}v=${Date.now()}-${documentImageAttempt}`;
+    let cancelled = false;
+    const image = new window.Image();
+    image.decoding = "async";
+    image.crossOrigin = "anonymous";
+
+    setDocumentImageUrl(requestUrl);
+    setDocumentImageState("loading");
+
+    image.onload = () => {
+      if (cancelled) {
+        return;
+      }
+      setDocumentImageState("loaded");
+    };
+
+    image.onerror = () => {
+      if (cancelled) {
+        return;
+      }
+
+      if (documentImageAttempt < 3) {
+        documentImageRetryTimerRef.current = setTimeout(() => {
+          setDocumentImageAttempt((current) => current + 1);
+        }, 700 * (documentImageAttempt + 1));
+        return;
+      }
+
+      setDocumentImageState("error");
+    };
+
+    image.src = requestUrl;
+
+    return () => {
+      cancelled = true;
+    };
+  }, [documentAssetUrl, documentImageAttempt]);
+
+  useEffect(() => {
     sourceImageDataRef.current = null;
     setImageDataVersion((current) => current + 1);
 
-    if (!document) {
+    if (!document || !documentImageUrl || documentImageState !== "loaded") {
       return;
     }
 
@@ -2843,12 +2916,12 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
       sourceImageDataRef.current = null;
       setImageDataVersion((current) => current + 1);
     };
-    image.src = resolveAssetUrl(document.storageUrl);
+    image.src = documentImageUrl;
 
     return () => {
       cancelled = true;
     };
-  }, [document]);
+  }, [document, documentImageState, documentImageUrl]);
 
   useLayoutEffect(() => {
     if (!containerRef.current) {
@@ -4353,20 +4426,35 @@ export function AnnotationWorkspace({ sessionId }: { sessionId: string }) {
                   <div
                     aria-label={document.fileName}
                     role="img"
-                    className="absolute left-0 top-0 block select-none shadow-[0_28px_72px_rgba(15,18,32,0.14)]"
+                    className="absolute left-0 top-0 block select-none overflow-hidden shadow-[0_28px_72px_rgba(15,18,32,0.14)]"
                     style={{
                       left: 0,
                       top: 0,
                       width: document.width,
                       height: document.height,
                       maxWidth: "none",
-                      pointerEvents: "none",
-                      backgroundImage: `url(${resolveAssetUrl(document.storageUrl)})`,
-                      backgroundPosition: "center",
-                      backgroundRepeat: "no-repeat",
-                      backgroundSize: "100% 100%"
+                      pointerEvents: "none"
                     }}
-                  />
+                  >
+                    {documentImageUrl ? (
+                      <>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        alt={document.fileName}
+                        src={documentImageUrl}
+                        className="block h-full w-full"
+                        draggable={false}
+                      />
+                      </>
+                    ) : null}
+                    {documentImageState !== "loaded" ? (
+                      <div className="absolute inset-0 flex items-center justify-center bg-white/72">
+                        <span className="rounded-full bg-[#2b221d] px-3 py-1 text-xs font-semibold text-[#fff4ea]">
+                          {documentImageState === "error" ? "Не удалось загрузить чертёж" : "Загружаю чертёж"}
+                        </span>
+                      </div>
+                    ) : null}
+                  </div>
 
                   {session.markers.map((marker) => {
                     const isTopLeftPoint = marker.pointType === "top_left";

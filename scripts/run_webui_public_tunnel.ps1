@@ -160,9 +160,34 @@ function Test-WebProductionBuild {
     return [bool]$cssFile
 }
 
+function Get-FrontendProcess {
+    return Get-CimInstance Win32_Process | Where-Object {
+        $_.Name -eq "node.exe" -and $_.CommandLine -like "*next*start*3010*"
+    } | Select-Object -First 1
+}
+
+function Test-FrontendProcessOutdated {
+    $buildIdPath = Join-Path $webRoot ".next\BUILD_ID"
+    if (-not (Test-Path $buildIdPath)) {
+        return $false
+    }
+
+    $frontendProcess = Get-FrontendProcess
+    if (-not $frontendProcess) {
+        return $false
+    }
+
+    $buildWriteTime = (Get-Item $buildIdPath).LastWriteTimeUtc
+    $processStartTime = [Management.ManagementDateTimeConverter]::ToDateTime($frontendProcess.CreationDate).ToUniversalTime()
+    return $buildWriteTime -gt $processStartTime.AddSeconds(2)
+}
+
 function Stop-FrontendProcesses {
     $frontendProcesses = Get-CimInstance Win32_Process | Where-Object {
-        $_.CommandLine -like "*next start*$frontendPort*" -or $_.CommandLine -like "*@blueprint-rec/web*$frontendPort*"
+        $_.Name -eq "node.exe" -and (
+            $_.CommandLine -like "*next*start*$frontendPort*" -or
+            $_.CommandLine -like "*@blueprint-rec/web*$frontendPort*"
+        )
     }
     foreach ($proc in $frontendProcesses) {
         Stop-Process -Id $proc.ProcessId -Force -ErrorAction SilentlyContinue
@@ -245,7 +270,7 @@ function Ensure-WebProductionBuild {
 
 if (-not (Test-PortListening -Port $frontendPort)) {
     Start-FrontendProcess
-} elseif (-not (Test-WebProductionBuild) -or -not (Test-FrontendHealthy)) {
+} elseif (-not (Test-WebProductionBuild) -or (Test-FrontendProcessOutdated) -or -not (Test-FrontendHealthy)) {
     Stop-FrontendProcesses
     Start-Sleep -Seconds 2
     Start-FrontendProcess
