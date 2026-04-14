@@ -94,6 +94,9 @@ Last updated: 2026-04-14
 - Missing external legacy script no longer blocks job execution.
   - file:
     - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/job_runner.py`
+- Stale RUNNING jobs now auto-fail after a max runtime (default 45 minutes) so the UI doesn't stay "processing" forever.
+  - file:
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/job_store.py`
 - Built-in fallback with labels now matches base table labels to drawing subpositions.
   - example:
     - table `14`
@@ -164,6 +167,7 @@ Last updated: 2026-04-14
 
 - Domain traffic goes through Cloudflare tunnel to local frontend/backend.
 - Cloudflare 1033 resolved by restarting the `cloudflared` tunnel for `blueprint-rec`.
+- `cloudflared` is currently running and tunnel reports as connected (external check also succeeds), but user still reports timeouts on mobile — likely intermittent tunnel uptime, PC sleep, or network path issues.
 - Active project path for site and API is:
   - `C:/projects/sites/blueprint-rec-2`
 - Old mirror tree is gone; local services and tunnel must not reference `C:/projects/sites/blueprint-rec` anymore.

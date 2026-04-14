@@ -4,7 +4,7 @@ import asyncio
 import json
 import shutil
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import BinaryIO
 from uuid import uuid4
@@ -108,7 +108,31 @@ class InMemoryJobStore:
             return False
         return not result.rows and not result.held_back_rows
 
+    def _job_is_stale_running(self, job: DrawingJob) -> bool:
+        if job.status != DrawingJobStatus.RUNNING:
+            return False
+        max_runtime = timedelta(seconds=settings.job_max_runtime_seconds)
+        return datetime.utcnow() - job.updated_at > max_runtime
+
+    async def _fail_stale_running_job(self, snapshot: DrawingJob) -> DrawingJob:
+        if not self._job_is_stale_running(snapshot):
+            return snapshot
+        async with self._lock:
+            live_job = self._get_job(snapshot.job_id)
+            if not self._job_is_stale_running(live_job):
+                return live_job.model_copy(deep=True)
+            live_job.status = DrawingJobStatus.FAILED
+            live_job.error_message = (
+                "Задача не завершилась за допустимое время. "
+                "Запусти ещё раз."
+            )
+            live_job.result = None
+            live_job.updated_at = datetime.utcnow()
+            self._persist_job(live_job)
+            return live_job.model_copy(deep=True)
+
     async def _repair_job_if_needed(self, snapshot: DrawingJob) -> DrawingJob:
+        snapshot = await self._fail_stale_running_job(snapshot)
         if self._job_needs_legacy_repair(snapshot):
             await self.process_job(snapshot.job_id)
             async with self._lock:
@@ -120,6 +144,10 @@ class InMemoryJobStore:
             snapshots = [job.model_copy(deep=True) for job in self._jobs.values()]
         repaired = 0
         for snapshot in snapshots:
+            if self._job_is_stale_running(snapshot):
+                await self._fail_stale_running_job(snapshot)
+                repaired += 1
+                continue
             if not self._job_needs_legacy_repair(snapshot):
                 continue
             await self._repair_job_if_needed(snapshot)

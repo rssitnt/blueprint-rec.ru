@@ -86,6 +86,10 @@ class Settings:
             30,
             int(os.getenv("INFERENCE_LEGACY_EMERGENCY_FALLBACK_PIPELINE_TIMEOUT_SECONDS", "120")),
         )
+        self.job_max_runtime_seconds = max(
+            300,
+            int(os.getenv("INFERENCE_JOB_MAX_RUNTIME_SECONDS", "2700")),
+        )
 
 
 settings = Settings()
