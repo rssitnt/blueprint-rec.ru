@@ -178,7 +178,17 @@ function Test-FrontendProcessOutdated {
     }
 
     $buildWriteTime = (Get-Item $buildIdPath).LastWriteTimeUtc
-    $processStartTime = [Management.ManagementDateTimeConverter]::ToDateTime($frontendProcess.CreationDate).ToUniversalTime()
+    if ([string]::IsNullOrWhiteSpace($frontendProcess.CreationDate)) {
+        return $false
+    }
+
+    try {
+        $processStartTime = [Management.ManagementDateTimeConverter]::ToDateTime($frontendProcess.CreationDate).ToUniversalTime()
+    }
+    catch {
+        return $false
+    }
+
     return $buildWriteTime -gt $processStartTime.AddSeconds(2)
 }
 
@@ -240,6 +250,28 @@ function Stop-CloudflaredProcesses {
     }
     foreach ($proc in $cloudflaredProcesses) {
         Stop-Process -Id $proc.ProcessId -Force -ErrorAction SilentlyContinue
+    }
+}
+
+function Test-CloudflaredServiceRunning {
+    $service = Get-Service -Name "cloudflared" -ErrorAction SilentlyContinue
+    return [bool]($service -and $service.Status -eq "Running")
+}
+
+function Restart-CloudflaredService {
+    try {
+        $service = Get-Service -Name "cloudflared" -ErrorAction Stop
+        if ($service.Status -eq "Running") {
+            Restart-Service -Name "cloudflared" -Force -ErrorAction Stop
+        } else {
+            Start-Service -Name "cloudflared" -ErrorAction Stop
+        }
+
+        Start-Sleep -Seconds 3
+        return $true
+    }
+    catch {
+        return $false
     }
 }
 
@@ -317,15 +349,17 @@ if (-not (Test-PortListening -Port 8010)) {
 
 $cloudflaredConfigChanged = Ensure-CloudflaredConfig
 
-if ($cloudflaredConfigChanged) {
+if ($cloudflaredConfigChanged -and -not (Restart-CloudflaredService)) {
     Stop-CloudflaredProcesses
     Start-Sleep -Seconds 2
 }
 
-$cf = Get-CimInstance Win32_Process | Where-Object {
-    $_.Name -eq "cloudflared.exe" -and $_.CommandLine -like "*tunnel run blueprint-rec*"
-} | Select-Object -First 1
+if (-not (Test-CloudflaredServiceRunning)) {
+    $cf = Get-CimInstance Win32_Process | Where-Object {
+        $_.Name -eq "cloudflared.exe" -and $_.CommandLine -like "*tunnel run blueprint-rec*"
+    } | Select-Object -First 1
 
-if (-not $cf) {
-    Start-Process -FilePath $cloudflaredExe -ArgumentList "--config",$cloudflaredConfig,"tunnel","--protocol",$cloudflaredProtocol,"run","blueprint-rec" -WorkingDirectory $repoRoot -WindowStyle Hidden | Out-Null
+    if (-not $cf) {
+        Start-Process -FilePath $cloudflaredExe -ArgumentList "--config",$cloudflaredConfig,"tunnel","--protocol",$cloudflaredProtocol,"run","blueprint-rec" -WorkingDirectory $repoRoot -WindowStyle Hidden | Out-Null
+    }
 }

@@ -23,13 +23,14 @@ Last updated: 2026-04-14
 - Use full absolute Windows paths in user-facing responses.
 - User expects changes for this project to be pushed by default after edits.
 - Startup script now points to `C:/projects/sites/blueprint-rec-2/scripts/run_webui_public_tunnel.ps1` to avoid VBS errors after cleanup.
-- Startup entry restored via:
-  - `C:/Users/qwert/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/BlueprintRecWebUI.cmd`
 - Added an elevated Windows Scheduled Task (ONLOGON) for stable autostart:
   - Task: `BlueprintRecWebUI`
   - Runs: `C:/projects/sites/blueprint-rec-2/scripts/run_webui_public_tunnel.ps1`
 - cloudflared updated to 2026.3.0.
 - Tried forcing tunnel startup to `http2`, but Cloudflare edge returned TLS EOF on handshake here; kept `quic`.
+- Old Startup leftovers removed:
+  - `C:/Users/qwert/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/BlueprintRecWebUI.cmd`
+  - `C:/Users/qwert/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/BlueprintRecWebUI.vbs`
 
 ## Product shape
 
@@ -175,6 +176,10 @@ Last updated: 2026-04-14
 - Domain traffic goes through Cloudflare tunnel to local frontend/backend.
 - Cloudflare 1033 resolved by restarting the `cloudflared` tunnel for `blueprint-rec`.
 - `cloudflared` is currently running and tunnel reports as connected (external check also succeeds), but user still reports timeouts on mobile — likely intermittent tunnel uptime, PC sleep, or network path issues.
+- Tunnel ownership cleaned up:
+  - `cloudflared` Windows service is now the only intended tunnel owner
+  - startup script no longer spawns an extra manual tunnel when the service is already running
+  - stale manual tunnel processes from earlier runs were terminated
 - Active project path for site and API is:
   - `C:/projects/sites/blueprint-rec-2`
 - Old mirror tree is gone; local services and tunnel must not reference `C:/projects/sites/blueprint-rec` anymore.
@@ -215,6 +220,7 @@ Last updated: 2026-04-14
   - follow-up fix for session crashes after rebuild:
     - startup script now restarts `next start` automatically when `.next/BUILD_ID` is newer than the running frontend process
     - this prevents old HTML from referencing deleted JS chunks after a rebuild
+  - startup script also no longer crashes when `Win32_Process.CreationDate` is missing or malformed for the running frontend process
 
 ## Useful verification artifacts
 
