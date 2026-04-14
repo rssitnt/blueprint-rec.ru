@@ -68,6 +68,10 @@ Last updated: 2026-04-14
   - final per-candidate VLM review
   - indexed tile recovery
   - targeted missing-label VLM recovery
+- VLM vocabulary extraction is now enabled for "heavy" sheets (min side <= 1600) even when the low-res circle mode does not trigger.
+- Targeted missing-label recovery now includes a VLM locator pass:
+  - Gemini is asked to return normalized center coordinates for missing labels
+  - local OCR is used to confirm when possible
 - Fallback was verified explicitly:
   - with heavy model intentionally set to a fake id, the same heavy candidate resolved through:
     - `openrouter-vlm:google/gemini-3.1-flash-image-preview`
@@ -217,6 +221,8 @@ Last updated: 2026-04-14
   - `C:/projects/sites/blueprint-rec-2/.codex-smoke/heavy-openrouter-page4/artifacts/markers_v3.overlay.png`
   - `C:/projects/sites/blueprint-rec-2/.codex-smoke/heavy-openrouter-page4/candidate-sources.json`
   - `C:/projects/sites/blueprint-rec-2/.codex-smoke/heavy-openrouter-page4/fallback-check.json`
+- Latest page4 run (after locator + forced vocab):
+  - `C:/projects/sites/blueprint-rec-2/.codex-smoke/heavy-openrouter-page4-v8/job/page4_20260414_123841/work/pipeline/primary/page-001/markers_v3.overlay.png`
 - No-table status fix:
   - `C:/projects/sites/blueprint-rec-2/.codex-smoke/no-table-status-fix/final-v2.json`
 - Legacy/no-table auto-repair:

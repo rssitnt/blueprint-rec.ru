@@ -135,7 +135,7 @@ class DrawingCandidateRecognizer:
             source=best_source,
         )
 
-    def detect_document_text(self, image: Image.Image) -> list[DocumentTextRegion]:
+    def detect_document_text(self, image: Image.Image, include_tiles: bool = True) -> list[DocumentTextRegion]:
         if RapidOCR is None or np is None or cv2 is None:
             return []
 
@@ -144,7 +144,7 @@ class DrawingCandidateRecognizer:
             return []
 
         regions: list[DocumentTextRegion] = []
-        for variant_name, variant, scale, offset_x, offset_y in self._iter_page_ocr_views(image):
+        for variant_name, variant, scale, offset_x, offset_y in self._iter_page_ocr_views(image, include_tiles=include_tiles):
             try:
                 result, _ = engine(np.array(variant.convert("RGB")))
             except Exception:
@@ -194,7 +194,7 @@ class DrawingCandidateRecognizer:
         resolved.sort(key=lambda item: (item.bbox_y, item.bbox_x))
         return resolved[:96]
 
-    def _iter_page_ocr_views(self, image: Image.Image):
+    def _iter_page_ocr_views(self, image: Image.Image, include_tiles: bool = True):
         min_side = min(image.size)
         gray = ImageOps.grayscale(image.convert("RGB"))
         gray_auto = ImageOps.autocontrast(gray, cutoff=1)
@@ -232,7 +232,7 @@ class DrawingCandidateRecognizer:
                 0.0,
             )
 
-        if min_side < 500:
+        if min_side < 500 or not include_tiles:
             return
 
         tile_size = 560 if min_side <= 1500 else 720

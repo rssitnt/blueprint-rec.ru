@@ -55,6 +55,66 @@ class VisionLLMCandidateRecognizer:
         prompt = self._build_vocabulary_prompt()
         return set(primary_call(payload_image, prompt, heavy_sheet=heavy_sheet))
 
+    def locate_labels(
+        self,
+        image: Image.Image,
+        labels: list[str],
+        *,
+        heavy_sheet: bool = False,
+    ) -> list[dict[str, float | str]]:
+        if not labels or not self._openrouter_enabled():
+            return []
+
+        payload_image = self._prepare_vocabulary_image(image)
+        if payload_image is None:
+            return []
+
+        label_list = ", ".join(sorted({label for label in labels if label}))
+        prompt = (
+            "You are looking at a technical drawing. "
+            "Find the center point of each callout label from this list: "
+            f"{label_list}. "
+            "Return JSON only: {\"items\":[{\"label\":\"5\",\"x\":0-1,\"y\":0-1,\"confidence\":0-1}]}. "
+            "x and y are normalized coordinates of the label center relative to the full image. "
+            "If a label is not found, omit it. Do not guess."
+        )
+
+        output_text, _ = self._openrouter_chat_json(
+            payload_image=payload_image,
+            system_prompt="Return only valid JSON with a top-level 'items' array.",
+            user_prompt=prompt,
+            heavy_sheet=heavy_sheet,
+        )
+        match = re.search(r"\{.*\}", str(output_text), re.DOTALL)
+        raw_json = match.group(0) if match else str(output_text)
+        try:
+            payload = json.loads(raw_json)
+        except Exception:
+            return []
+
+        items = payload.get("items") or []
+        resolved: list[dict[str, float | str]] = []
+        allowed = {label.strip() for label in labels if label}
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            label = str(item.get("label") or "").strip()
+            if not label or label not in allowed:
+                continue
+            try:
+                x = float(item.get("x"))
+                y = float(item.get("y"))
+            except Exception:
+                continue
+            if not (0.0 <= x <= 1.0 and 0.0 <= y <= 1.0):
+                continue
+            try:
+                confidence = float(item.get("confidence", 0.0))
+            except Exception:
+                confidence = 0.0
+            resolved.append({"label": label, "x": x, "y": y, "confidence": confidence})
+        return resolved
+
     def recognize(
         self,
         crop: Image.Image,

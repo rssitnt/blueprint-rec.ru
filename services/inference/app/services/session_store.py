@@ -542,13 +542,16 @@ class InMemorySessionStore:
                 candidate.updated_at = candidate.created_at
                 base_candidates.append(candidate)
 
-            low_res_circle_mode = min(width, height) <= 1100 and len(raw_candidates) >= 180
+            min_side = min(width, height)
+            low_res_circle_mode = min_side <= 1100 and len(raw_candidates) >= 180
+            heavy_vlm_sheet = min_side <= 1600
+            enable_vlm_vocabulary = low_res_circle_mode or heavy_vlm_sheet
             normalized_label_vocabulary: set[str] | None = None
-            if low_res_circle_mode:
+            if enable_vlm_vocabulary:
                 label_vocabulary = self._candidate_vlm_recognizer.extract_label_vocabulary(
                     preview_image,
                     max_tiles=settings.openai_vision_vocab_max_tiles,
-                    heavy_sheet=low_res_circle_mode,
+                    heavy_sheet=heavy_vlm_sheet,
                 )
                 if label_vocabulary:
                     normalized_label_vocabulary = {normalize_label(label) for label in label_vocabulary}
@@ -651,7 +654,7 @@ class InMemorySessionStore:
                 low_res_circle_mode,
                 allowed_labels=normalized_label_vocabulary,
             )
-            if low_res_circle_mode and label_vocabulary:
+            if enable_vlm_vocabulary and label_vocabulary:
                 self._apply_label_vocabulary(candidates, label_vocabulary)
                 candidates = self._recover_missing_low_res_vocabulary_labels(
                     preview_image,
@@ -1370,6 +1373,404 @@ class InMemorySessionStore:
             return []
         return self._dedupe_composed_candidates(accepted)
 
+    def _build_low_res_missing_label_text_candidates(
+        self,
+        preview_image: Image.Image,
+        base_candidates: list[CalloutCandidate],
+        produced_candidates: list[CalloutCandidate],
+        allowed_labels: set[str] | None = None,
+    ) -> list[CalloutCandidate]:
+        if not allowed_labels:
+            return []
+
+        header_cutoff = self._infer_header_cutoff(base_candidates, preview_image.width, preview_image.height)
+        text_candidates = [candidate for candidate in base_candidates if candidate.kind == CandidateKind.TEXT]
+        pool = [
+            candidate.model_copy(deep=True)
+            for candidate in text_candidates
+            if not self._candidate_is_strongly_covered(candidate, produced_candidates)
+            and (header_cutoff is None or candidate.center_y > header_cutoff)
+            and candidate.bbox_width <= 120
+            and candidate.bbox_height <= 48
+        ]
+        if not pool:
+            return []
+
+        accepted: list[CalloutCandidate] = []
+        limit = 160 if len(allowed_labels) <= 24 else 220
+        allowed_upper = {label.upper() for label in allowed_labels if label}
+        for candidate in sorted(pool, key=self._candidate_quality, reverse=True)[:limit]:
+            neighbor_count = self._text_neighbor_count(candidate, text_candidates)
+            crop = self._build_candidate_ocr_crop(preview_image, candidate)
+            suggestion = self._candidate_recognizer.recognize(crop, candidate.kind.value)
+            coerced_label = self._coerce_to_allowed_label(allowed_upper, suggestion.label)
+            if suggestion.label and not coerced_label:
+                continue
+            if coerced_label:
+                suggestion.label = coerced_label
+
+            confidence = suggestion.confidence or 0.0
+            compact_numeric = self._is_compact_numeric_text_candidate(candidate)
+            if compact_numeric:
+                min_conf = 0.6 if len(allowed_upper) <= 12 else 0.7
+                if confidence < min_conf or neighbor_count > 2:
+                    continue
+            else:
+                if confidence < 0.8 or neighbor_count > 1:
+                    continue
+
+            if self._should_replace_candidate_suggestion(candidate, suggestion.label, suggestion.confidence, suggestion.source):
+                candidate.suggested_label = suggestion.label
+                candidate.suggested_confidence = suggestion.confidence
+                candidate.suggested_source = suggestion.source
+            if candidate.suggested_label:
+                accepted.append(candidate)
+
+        if not accepted:
+            return []
+        return self._dedupe_composed_candidates(accepted)
+
+    def _build_relaxed_text_candidates(self, preview_image: Image.Image) -> list[CalloutCandidate]:
+        try:
+            import cv2  # type: ignore
+            import numpy as np  # type: ignore
+        except Exception:
+            return []
+
+        rgb = preview_image.convert("RGB")
+        gray = cv2.cvtColor(np.array(rgb), cv2.COLOR_RGB2GRAY)
+        height, width = gray.shape[:2]
+        if height <= 0 or width <= 0:
+            return []
+
+        upscale = 2 if min(width, height) <= 1400 else 1
+        working = (
+            cv2.resize(gray, None, fx=upscale, fy=upscale, interpolation=cv2.INTER_CUBIC)
+            if upscale > 1
+            else gray
+        )
+        blurred = cv2.GaussianBlur(working, (5, 5), 0)
+        _, threshold = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+
+        num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(threshold, connectivity=8)
+        min_side = min(working.shape[:2])
+        min_char_h = max(6, int(min_side * 0.006))
+        max_char_h = max(min_char_h + 8, int(min_side * 0.06))
+        max_char_w = max(min_char_h + 18, int(min_side * 0.12))
+
+        glyphs: list[dict[str, float]] = []
+        for index in range(1, num_labels):
+            x = int(stats[index, cv2.CC_STAT_LEFT])
+            y = int(stats[index, cv2.CC_STAT_TOP])
+            w = int(stats[index, cv2.CC_STAT_WIDTH])
+            h = int(stats[index, cv2.CC_STAT_HEIGHT])
+            area = int(stats[index, cv2.CC_STAT_AREA])
+            if area < 8:
+                continue
+            if h < min_char_h or h > max_char_h:
+                continue
+            if w < 2 or w > max_char_w:
+                continue
+            fill_ratio = area / float(max(w * h, 1))
+            if fill_ratio < 0.04 or fill_ratio > 0.92:
+                continue
+            cx, cy = centroids[index]
+            glyphs.append(
+                {
+                    "x": float(x),
+                    "y": float(y),
+                    "w": float(w),
+                    "h": float(h),
+                    "area": float(area),
+                    "cx": float(cx),
+                    "cy": float(cy),
+                }
+            )
+
+        if not glyphs:
+            return []
+
+        glyphs.sort(key=lambda item: (item["cy"], item["cx"]))
+        clusters: list[list[dict[str, float]]] = []
+        used = [False] * len(glyphs)
+
+        for index, glyph in enumerate(glyphs):
+            if used[index]:
+                continue
+            cluster = [glyph]
+            used[index] = True
+            changed = True
+            while changed:
+                changed = False
+                cluster_left = min(item["x"] for item in cluster)
+                cluster_top = min(item["y"] for item in cluster)
+                cluster_right = max(item["x"] + item["w"] for item in cluster)
+                cluster_bottom = max(item["y"] + item["h"] for item in cluster)
+                cluster_height = cluster_bottom - cluster_top
+                for other_index, other in enumerate(glyphs):
+                    if used[other_index]:
+                        continue
+                    vertical_gate = max(cluster_height, other["h"]) * 0.9
+                    horizontal_gap = min(
+                        abs(other["x"] - cluster_right),
+                        abs(cluster_left - (other["x"] + other["w"])),
+                    )
+                    same_row = abs(other["cy"] - (cluster_top + cluster_bottom) / 2) <= vertical_gate
+                    overlaps_x = not (other["x"] + other["w"] < cluster_left or other["x"] > cluster_right)
+                    close_enough = horizontal_gap <= max(24.0, cluster_height * 2.0) or overlaps_x
+                    if same_row and close_enough:
+                        cluster.append(other)
+                        used[other_index] = True
+                        changed = True
+
+            if 1 <= len(cluster) <= 10:
+                clusters.append(cluster)
+
+        candidates: list[CalloutCandidate] = []
+        max_text_width = max(60, int(min_side * 0.35))
+        max_text_height = max(24, int(min_side * 0.08))
+        for cluster in clusters:
+            left = min(item["x"] for item in cluster)
+            top = min(item["y"] for item in cluster)
+            right = max(item["x"] + item["w"] for item in cluster)
+            bottom = max(item["y"] + item["h"] for item in cluster)
+            width_box = right - left
+            height_box = bottom - top
+            if width_box < 8 or height_box < min_char_h:
+                continue
+            if width_box > max_text_width or height_box > max_text_height:
+                continue
+
+            area_sum = sum(item["area"] for item in cluster)
+            fill_ratio = area_sum / float(max(width_box * height_box, 1))
+            if fill_ratio < 0.04 or fill_ratio > 0.85:
+                continue
+
+            score = float(len(cluster) * 40 + min(width_box, 140) * 0.5 + fill_ratio * 140)
+            candidates.append(
+                CalloutCandidate(
+                    kind=CandidateKind.TEXT,
+                    center_x=(left + width_box / 2) / upscale,
+                    center_y=(top + height_box / 2) / upscale,
+                    bbox_x=left / upscale,
+                    bbox_y=top / upscale,
+                    bbox_width=width_box / upscale,
+                    bbox_height=height_box / upscale,
+                    score=score,
+                )
+            )
+
+        return candidates
+
+    def _build_low_res_missing_label_document_text_candidates(
+        self,
+        preview_image: Image.Image,
+        base_candidates: list[CalloutCandidate],
+        produced_candidates: list[CalloutCandidate],
+        allowed_labels: set[str] | None = None,
+    ) -> list[CalloutCandidate]:
+        if not allowed_labels:
+            return []
+
+        normalized_allowed = {normalize_label(label) for label in allowed_labels if normalize_label(label)}
+        if not normalized_allowed:
+            return []
+
+        header_cutoff = self._infer_header_cutoff(base_candidates, preview_image.width, preview_image.height)
+        accepted: list[CalloutCandidate] = []
+
+        min_side = min(preview_image.size)
+        scales = [1.0]
+        if min_side <= 1400:
+            scales.append(2.0)
+
+        for scale in scales:
+            if scale == 1.0:
+                scan_image = preview_image
+            else:
+                scan_image = preview_image.resize(
+                    (int(preview_image.width * scale), int(preview_image.height * scale)),
+                    Image.LANCZOS,
+                )
+
+            regions = self._candidate_recognizer.detect_document_text(scan_image, include_tiles=False)
+            if not regions:
+                continue
+
+            for region in regions:
+                region_label = normalize_label(region.label)
+                if not region_label or region_label not in normalized_allowed:
+                    continue
+                if region.confidence < 0.55:
+                    continue
+
+                bbox_x = region.bbox_x / scale
+                bbox_y = region.bbox_y / scale
+                bbox_width = region.bbox_width / scale
+                bbox_height = region.bbox_height / scale
+                candidate = CalloutCandidate(
+                    kind=CandidateKind.TEXT,
+                    center_x=bbox_x + bbox_width / 2,
+                    center_y=bbox_y + bbox_height / 2,
+                    bbox_x=bbox_x,
+                    bbox_y=bbox_y,
+                    bbox_width=bbox_width,
+                    bbox_height=bbox_height,
+                    score=float(max(region.confidence, 0.0) * 100.0),
+                )
+                if header_cutoff is not None and candidate.center_y <= header_cutoff:
+                    continue
+                if self._candidate_is_strongly_covered(candidate, produced_candidates):
+                    continue
+                source_tag = f"document-ocr:{region.source}@{int(scale)}x"
+                if self._should_replace_candidate_suggestion(candidate, region_label, region.confidence, source_tag):
+                    candidate.suggested_label = region_label
+                    candidate.suggested_confidence = region.confidence
+                    candidate.suggested_source = source_tag
+                if candidate.suggested_label:
+                    accepted.append(candidate)
+
+        if not accepted:
+            return []
+        return self._dedupe_composed_candidates(accepted)
+
+    def _build_low_res_missing_label_locator_candidates(
+        self,
+        preview_image: Image.Image,
+        base_candidates: list[CalloutCandidate],
+        produced_candidates: list[CalloutCandidate],
+        allowed_labels: set[str] | None = None,
+    ) -> list[CalloutCandidate]:
+        if not allowed_labels or not self._candidate_vlm_recognizer.is_enabled():
+            return []
+
+        normalized_allowed = {normalize_label(label) for label in allowed_labels if normalize_label(label)}
+        if not normalized_allowed:
+            return []
+
+        header_cutoff = self._infer_header_cutoff(base_candidates, preview_image.width, preview_image.height)
+        items = self._candidate_vlm_recognizer.locate_labels(
+            preview_image,
+            sorted(normalized_allowed),
+            heavy_sheet=True,
+        )
+        if not items:
+            return []
+
+        min_side = min(preview_image.size)
+        box_size = min(64.0, max(22.0, min_side * 0.03))
+        accepted: list[CalloutCandidate] = []
+        for item in items:
+            label = normalize_label(str(item.get("label") or ""))
+            if not label or label not in normalized_allowed:
+                continue
+            try:
+                x = float(item.get("x"))
+                y = float(item.get("y"))
+            except Exception:
+                continue
+            if not (0.0 <= x <= 1.0 and 0.0 <= y <= 1.0):
+                continue
+            confidence = float(item.get("confidence") or 0.0)
+
+            center_x = x * preview_image.width
+            center_y = y * preview_image.height
+            candidate = CalloutCandidate(
+                kind=CandidateKind.TEXT,
+                center_x=center_x,
+                center_y=center_y,
+                bbox_x=max(0.0, center_x - box_size / 2),
+                bbox_y=max(0.0, center_y - box_size / 2),
+                bbox_width=box_size,
+                bbox_height=box_size,
+                score=float(max(confidence, 0.0) * 100.0 + 30.0),
+            )
+            if header_cutoff is not None and candidate.center_y <= header_cutoff:
+                continue
+            if self._candidate_is_strongly_covered(candidate, produced_candidates):
+                continue
+
+            local_crop = self._build_candidate_ocr_crop(preview_image, candidate)
+            local_suggestion = self._candidate_recognizer.recognize(local_crop, candidate.kind.value)
+            local_label = normalize_label(local_suggestion.label)
+            if local_label and local_label in normalized_allowed:
+                candidate.suggested_label = local_label
+                candidate.suggested_confidence = local_suggestion.confidence
+                candidate.suggested_source = "vlm-locate+ocr"
+            elif confidence >= 0.78:
+                candidate.suggested_label = label
+                candidate.suggested_confidence = confidence
+                candidate.suggested_source = "vlm-locate"
+            else:
+                continue
+
+            accepted.append(candidate)
+
+        if not accepted:
+            return []
+        return self._dedupe_composed_candidates(accepted)
+
+    def _build_low_res_missing_label_text_vlm_candidates(
+        self,
+        preview_image: Image.Image,
+        base_candidates: list[CalloutCandidate],
+        produced_candidates: list[CalloutCandidate],
+        allowed_labels: set[str] | None = None,
+    ) -> list[CalloutCandidate]:
+        if not allowed_labels or not self._candidate_vlm_recognizer.is_enabled():
+            return []
+
+        header_cutoff = self._infer_header_cutoff(base_candidates, preview_image.width, preview_image.height)
+        text_candidates = [candidate for candidate in base_candidates if candidate.kind == CandidateKind.TEXT]
+        pool = [
+            candidate.model_copy(deep=True)
+            for candidate in text_candidates
+            if not self._candidate_is_strongly_covered(candidate, produced_candidates)
+            and (header_cutoff is None or candidate.center_y > header_cutoff)
+            and candidate.bbox_width <= 120
+            and candidate.bbox_height <= 48
+        ]
+        if not pool:
+            return []
+
+        accepted: list[CalloutCandidate] = []
+        limit = 36 if len(allowed_labels) <= 16 else 48
+        allowed_upper = sorted({label.upper() for label in allowed_labels if label})
+        for candidate in sorted(pool, key=self._candidate_quality, reverse=True)[:limit]:
+            local_crop = self._build_candidate_ocr_crop(preview_image, candidate)
+            local_suggestion = self._candidate_recognizer.recognize(local_crop, candidate.kind.value)
+            crop = self._build_candidate_vlm_crop(preview_image, candidate)
+            suggestion = self._candidate_vlm_recognizer.recognize(
+                crop,
+                candidate.kind.value,
+                local_label=local_suggestion.label,
+                local_confidence=local_suggestion.confidence,
+                allowed_labels=allowed_upper,
+                heavy_sheet=True,
+                use_consensus=False,
+            )
+            coerced_label = self._coerce_to_allowed_label({label.upper() for label in allowed_labels}, suggestion.label)
+            if suggestion.label and not coerced_label:
+                continue
+            if coerced_label:
+                suggestion.label = coerced_label
+            confidence = suggestion.confidence or 0.0
+            compact_numeric = self._is_compact_numeric_text_candidate(candidate)
+            if compact_numeric and confidence < 0.6:
+                continue
+            if not compact_numeric and confidence < 0.75:
+                continue
+            if self._should_replace_candidate_suggestion(candidate, suggestion.label, suggestion.confidence, suggestion.source):
+                candidate.suggested_label = suggestion.label
+                candidate.suggested_confidence = suggestion.confidence
+                candidate.suggested_source = suggestion.source
+            if candidate.suggested_label:
+                accepted.append(candidate)
+
+        if not accepted:
+            return []
+        return self._dedupe_composed_candidates(accepted)
+
     def _build_low_res_missing_label_vlm_candidates(
         self,
         preview_image: Image.Image,
@@ -1458,6 +1859,42 @@ class InMemorySessionStore:
         if not missing:
             return recovered
 
+        doc_text = self._build_low_res_missing_label_document_text_candidates(
+            preview_image,
+            base_candidates,
+            recovered,
+            allowed_labels=missing,
+        )
+        if doc_text:
+            recovered = self._dedupe_composed_candidates([*recovered, *doc_text])
+            recovered = self._prune_low_res_oversized_circle_candidates(recovered)
+            present = {
+                normalize_label(candidate.suggested_label)
+                for candidate in recovered
+                if normalize_label(candidate.suggested_label)
+            }
+            missing = normalized_vocab - present
+        if not missing:
+            return recovered
+
+        locator_candidates = self._build_low_res_missing_label_locator_candidates(
+            preview_image,
+            base_candidates,
+            recovered,
+            allowed_labels=missing,
+        )
+        if locator_candidates:
+            recovered = self._dedupe_composed_candidates([*recovered, *locator_candidates])
+            recovered = self._prune_low_res_oversized_circle_candidates(recovered)
+            present = {
+                normalize_label(candidate.suggested_label)
+                for candidate in recovered
+                if normalize_label(candidate.suggested_label)
+            }
+            missing = normalized_vocab - present
+        if not missing:
+            return recovered
+
         direct_ocr = self._build_low_res_missing_label_ocr_candidates(
             preview_image,
             base_candidates,
@@ -1466,6 +1903,45 @@ class InMemorySessionStore:
         )
         if direct_ocr:
             recovered = self._dedupe_composed_candidates([*recovered, *direct_ocr])
+            recovered = self._prune_low_res_oversized_circle_candidates(recovered)
+            present = {
+                normalize_label(candidate.suggested_label)
+                for candidate in recovered
+                if normalize_label(candidate.suggested_label)
+            }
+            missing = normalized_vocab - present
+        if not missing:
+            return recovered
+
+        relaxed_text = self._build_relaxed_text_candidates(preview_image)
+        augmented_base = [*base_candidates, *relaxed_text] if relaxed_text else base_candidates
+
+        text_ocr = self._build_low_res_missing_label_text_candidates(
+            preview_image,
+            augmented_base,
+            recovered,
+            allowed_labels=missing,
+        )
+        if text_ocr:
+            recovered = self._dedupe_composed_candidates([*recovered, *text_ocr])
+            recovered = self._prune_low_res_oversized_circle_candidates(recovered)
+            present = {
+                normalize_label(candidate.suggested_label)
+                for candidate in recovered
+                if normalize_label(candidate.suggested_label)
+            }
+            missing = normalized_vocab - present
+            if not missing:
+                return recovered
+
+        text_vlm = self._build_low_res_missing_label_text_vlm_candidates(
+            preview_image,
+            augmented_base,
+            recovered,
+            allowed_labels=missing,
+        )
+        if text_vlm:
+            recovered = self._dedupe_composed_candidates([*recovered, *text_vlm])
             recovered = self._prune_low_res_oversized_circle_candidates(recovered)
             present = {
                 normalize_label(candidate.suggested_label)
