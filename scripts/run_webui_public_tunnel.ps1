@@ -1,6 +1,6 @@
 param(
     [ValidateSet("cloudflared-named", "localhostrun")]
-    [string]$Provider = "cloudflared-named",
+    [string]$Provider = "localhostrun",
     [switch]$KeepBackendRunning
 )
 
@@ -21,7 +21,6 @@ $vercelProxyConfig = Join-Path $vercelProxyDir "vercel.json"
 $vercelProjectLink = Join-Path $repoRoot ".vercel\project.json"
 $vercelProxyProjectLink = Join-Path $vercelProxyDir ".vercel\project.json"
 $vercelProxyIgnore = Join-Path $vercelProxyDir ".vercelignore"
-$vercelStableUpstream = "https://blueprint-rec.blueprint-rec.ru"
 $localhostRunOutLog = Join-Path $smokeDir "localhostrun.out.log"
 $localhostRunErrLog = Join-Path $smokeDir "localhostrun.err.log"
 $localhostRunUrlFile = Join-Path $smokeDir "localhostrun.url.txt"
@@ -544,5 +543,3 @@ if (-not (Test-CloudflaredServiceRunning)) {
         Start-Process -FilePath $cloudflaredExe -ArgumentList "--config",$cloudflaredConfig,"tunnel","--protocol",$cloudflaredProtocol,"run","blueprint-rec" -WorkingDirectory $repoRoot -WindowStyle Hidden | Out-Null
     }
 }
-
-Sync-VercelProxyToUpstream -UpstreamUrl $vercelStableUpstream
