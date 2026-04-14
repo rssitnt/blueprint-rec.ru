@@ -504,11 +504,14 @@ class InMemorySessionStore:
                 candidate.updated_at = candidate.created_at
                 base_candidates.append(candidate)
 
+            text_header_cutoff = self._infer_effective_header_cutoff(preview_image, base_candidates)
             for region in self._candidate_recognizer.detect_document_text(preview_image):
                 review_status = CandidateReviewStatus.PENDING
                 acceptance_threshold = max(10.0, min(region.bbox_width, region.bbox_height) * 0.45)
                 center_x = region.bbox_x + region.bbox_width / 2
                 center_y = region.bbox_y + region.bbox_height / 2
+                if text_header_cutoff and center_y <= text_header_cutoff:
+                    continue
                 for marker in accepted_markers:
                     marker_distance = hypot(marker.x - center_x, marker.y - center_y)
                     if marker_distance <= acceptance_threshold:
@@ -543,13 +546,18 @@ class InMemorySessionStore:
                 base_candidates.append(candidate)
 
             min_side = min(width, height)
+            masked_preview = (
+                self._mask_top_region(preview_image, text_header_cutoff)
+                if text_header_cutoff
+                else preview_image
+            )
             low_res_circle_mode = min_side <= 1100 and len(raw_candidates) >= 180
             heavy_vlm_sheet = min_side <= 1600
             enable_vlm_vocabulary = low_res_circle_mode or heavy_vlm_sheet
             normalized_label_vocabulary: set[str] | None = None
             if enable_vlm_vocabulary:
                 label_vocabulary = self._candidate_vlm_recognizer.extract_label_vocabulary(
-                    preview_image,
+                    masked_preview,
                     max_tiles=settings.openai_vision_vocab_max_tiles,
                     heavy_sheet=heavy_vlm_sheet,
                 )
@@ -657,7 +665,7 @@ class InMemorySessionStore:
             if enable_vlm_vocabulary and label_vocabulary:
                 self._apply_label_vocabulary(candidates, label_vocabulary)
                 candidates = self._recover_missing_low_res_vocabulary_labels(
-                    preview_image,
+                    masked_preview,
                     base_candidates,
                     candidates,
                     label_vocabulary,
@@ -1562,6 +1570,94 @@ class InMemorySessionStore:
 
         return candidates
 
+    def _infer_text_header_cutoff(self, preview_image: Image.Image) -> float | None:
+        height = preview_image.height
+        width = preview_image.width
+        if height <= 0 or width <= 0:
+            return None
+
+        header_limit = height * 0.35
+        candidates = self._build_relaxed_text_candidates(preview_image)
+        if not candidates:
+            return None
+
+        header_candidates = [
+            candidate
+            for candidate in candidates
+            if candidate.center_y <= header_limit
+            and candidate.bbox_width >= 60
+            and candidate.bbox_height >= 10
+            and candidate.center_x <= width * 0.7
+        ]
+        use_density_fallback = not header_candidates
+        if len(header_candidates) == 1 and header_candidates[0].bbox_width < 140:
+            use_density_fallback = True
+
+        if not use_density_fallback:
+            cutoff = max(candidate.bbox_y + candidate.bbox_height for candidate in header_candidates) + 12
+            cutoff = min(cutoff, height * 0.45)
+            if cutoff <= 0:
+                return None
+            return cutoff
+
+        try:
+            import numpy as np  # type: ignore
+        except Exception:
+            return None
+
+        target_width = 600
+        scale = min(1.0, target_width / float(width))
+        resized = preview_image.resize(
+            (max(1, int(width * scale)), max(1, int(height * scale))),
+            Image.LANCZOS,
+        ).convert("L")
+        arr = np.array(resized)
+        if arr.size == 0:
+            return None
+        threshold = 210
+        dark = arr < threshold
+        row_density = dark.mean(axis=1)
+        max_row = int(min(arr.shape[0] * 0.45, arr.shape[0] - 1))
+        dense_rows = [idx for idx, val in enumerate(row_density[:max_row]) if val >= 0.02]
+        if not dense_rows:
+            return None
+        last_dense = max(dense_rows)
+        cutoff = (last_dense / max(1.0, scale)) + 12
+        cutoff = min(cutoff, height * 0.45)
+        if cutoff <= 0:
+            return None
+        return cutoff
+
+    def _infer_effective_header_cutoff(
+        self,
+        preview_image: Image.Image,
+        base_candidates: list[CalloutCandidate],
+    ) -> float | None:
+        text_cutoff = self._infer_text_header_cutoff(preview_image)
+
+        height = preview_image.height
+        top_circle_y = None
+        for candidate in base_candidates:
+            if candidate.kind not in {CandidateKind.CIRCLE, CandidateKind.BOX}:
+                continue
+            if top_circle_y is None or candidate.center_y < top_circle_y:
+                top_circle_y = candidate.center_y
+        shape_cutoff = None
+        if top_circle_y is not None and top_circle_y > max(120.0, height * 0.12):
+            shape_cutoff = min(top_circle_y - 24.0, height * 0.3)
+
+        cutoff = max(text_cutoff or 0.0, shape_cutoff or 0.0)
+        if cutoff <= 0:
+            return None
+        return cutoff
+
+    @staticmethod
+    def _mask_top_region(preview_image: Image.Image, cutoff: float) -> Image.Image:
+        masked = preview_image.copy()
+        draw = ImageDraw.Draw(masked)
+        draw.rectangle([0, 0, preview_image.width, cutoff], fill=(255, 255, 255))
+        return masked
+
     def _build_low_res_missing_label_document_text_candidates(
         self,
         preview_image: Image.Image,
@@ -1640,6 +1736,7 @@ class InMemorySessionStore:
         base_candidates: list[CalloutCandidate],
         produced_candidates: list[CalloutCandidate],
         allowed_labels: set[str] | None = None,
+        header_cutoff_override: float | None = None,
     ) -> list[CalloutCandidate]:
         if not allowed_labels or not self._candidate_vlm_recognizer.is_enabled():
             return []
@@ -1649,6 +1746,8 @@ class InMemorySessionStore:
             return []
 
         header_cutoff = self._infer_header_cutoff(base_candidates, preview_image.width, preview_image.height)
+        if header_cutoff_override is not None:
+            header_cutoff = max(header_cutoff or 0.0, header_cutoff_override)
         items = self._candidate_vlm_recognizer.locate_labels(
             preview_image,
             sorted(normalized_allowed),
@@ -1882,6 +1981,7 @@ class InMemorySessionStore:
             base_candidates,
             recovered,
             allowed_labels=missing,
+            header_cutoff_override=self._infer_effective_header_cutoff(preview_image, base_candidates),
         )
         if locator_candidates:
             recovered = self._dedupe_composed_candidates([*recovered, *locator_candidates])

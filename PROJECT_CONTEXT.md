@@ -223,6 +223,11 @@ Last updated: 2026-04-14
   - `C:/projects/sites/blueprint-rec-2/.codex-smoke/heavy-openrouter-page4/fallback-check.json`
 - Latest page4 run (after locator + forced vocab):
   - `C:/projects/sites/blueprint-rec-2/.codex-smoke/heavy-openrouter-page4-v8/job/page4_20260414_123841/work/pipeline/primary/page-001/markers_v3.overlay.png`
+- Header masking fix:
+  - a text-density based header cutoff is inferred and used to mask the top band for VLM vocab + locator
+  - text candidates above that cutoff are dropped
+  - verified on page4 with no header false positives:
+    - `C:/projects/sites/blueprint-rec-2/.codex-smoke/heavy-openrouter-page4-v12/job/page4_20260414_130917/work/pipeline/primary/page-001/markers_v3.overlay.png`
 - No-table status fix:
   - `C:/projects/sites/blueprint-rec-2/.codex-smoke/no-table-status-fix/final-v2.json`
 - Legacy/no-table auto-repair:
