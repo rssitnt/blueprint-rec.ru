@@ -1,6 +1,6 @@
 # Project Context
 
-Last updated: 2026-04-14
+Last updated: 2026-04-15
 
 ## Current product state
 
@@ -185,6 +185,28 @@ Last updated: 2026-04-14
 ## Public deploy notes
 
 - Domain traffic goes through Cloudflare tunnel to local frontend/backend.
+- Root cause of the latest 1033 outage:
+  - `cloudflared` Windows service exists, but it was installed incorrectly and only launches `cloudflared.exe` without `tunnel run ...`
+  - result:
+    - service shows `RUNNING`
+    - but Cloudflare reports `no active connection`
+- Current manual recovery path that worked:
+  - start tunnel explicitly:
+    - `C:\Program Files (x86)\cloudflared\cloudflared.exe tunnel --config C:\Users\qwert\.cloudflared\config.yml run 0e227ae3-823b-44d1-aae2-893111599775`
+  - then start local stack with:
+    - `C:\projects\sites\blueprint-rec-2\scripts\run_webui_public_tunnel.ps1`
+- Confirmed healthy after manual recovery:
+  - `https://blueprint-rec.blueprint-rec.ru` -> `200`
+  - `https://blueprint-rec.ru` -> `200`
+- Important limitation:
+  - this Codex session cannot modify the broken Windows service or overwrite the existing elevated scheduled task because Windows returns `Access is denied`
+  - so the permanent fix still requires an elevated repair outside this session
+- Non-admin persistence workaround added:
+  - startup file:
+    - `C:\Users\qwert\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\BlueprintRecWebUIUser.cmd`
+  - it launches:
+    - `C:\projects\sites\blueprint-rec-2\scripts\run_webui_public_tunnel.ps1`
+  - this should restart the local site + tunnel automatically after user logon even without fixing the broken service
 - Cloudflare 1033 resolved by restarting the `cloudflared` tunnel for `blueprint-rec`.
 - `cloudflared` is currently running and tunnel reports as connected (external check also succeeds), but user still reports timeouts on mobile — likely intermittent tunnel uptime, PC sleep, or network path issues.
 - Strong external diagnosis for Russia:
@@ -216,8 +238,40 @@ Last updated: 2026-04-14
 - Favicon is served from:
   - `C:/projects/sites/blueprint-rec-2/apps/web/public/favicon.ico`
 - Plain-HTML / no-style failure root cause:
-  - `next start` was serving from a broken / non-production `.next` state
+- `next start` was serving from a broken / non-production `.next` state
   - `/_next/static/*.css` and `/_next/static/*.js` returned `400`
+
+## Current timing measurements
+
+- Verified standalone live-pipeline runtimes for local test drawings:
+  - `image001.png`
+    - `18.73s`
+  - `page4.png`
+    - `90.31s`
+  - `test1.jpg`
+    - `1808.36s` (~30m 08s)
+- The PDF `katalog-zch-Impulse-100_120_150_Classic_17_07_23_web.pdf` is not all drawings.
+  - drawing pages only:
+    - `4, 6, 8, 10, 12, 14`
+  - non-drawing pages:
+    - cover, review page, contents, tables, contacts
+- Corrected measurement method for PDF:
+  - extract only drawing pages
+  - render them to PNG
+  - run the live pipeline on those PNG pages
+- Measured PDF drawing-page runtimes:
+  - `page_04.png`
+    - `110.82s`
+  - `page_06.png`
+    - `34.54s`
+  - `page_08.png`
+    - `114.59s`
+  - `page_10.png`
+    - `74.30s`
+  - `page_12.png`
+    - `97.71s`
+  - `page_14.png`
+    - `32.41s`
   - fixed by rebuilding the web app and hardening `C:/projects/sites/blueprint-rec-2/scripts/run_webui_public_tunnel.ps1`
   - the startup script now ensures a production web build exists before launching the frontend on `3010`
   - the startup script now also probes real frontend asset health, not just "port is listening"
