@@ -278,6 +278,11 @@ Last updated: 2026-04-15
     - `97.71s`
   - `page_14.png`
     - `32.41s`
+- Totals:
+  - PDF drawing pages only:
+    - `464.37s` (`7m 44.37s`)
+  - all measured drawings together:
+    - `2381.77s` (`39m 41.77s`)
   - fixed by rebuilding the web app and hardening `C:/projects/sites/blueprint-rec-2/scripts/run_webui_public_tunnel.ps1`
   - the startup script now ensures a production web build exists before launching the frontend on `3010`
   - the startup script now also probes real frontend asset health, not just "port is listening"
