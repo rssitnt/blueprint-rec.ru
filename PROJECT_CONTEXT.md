@@ -207,6 +207,12 @@ Last updated: 2026-04-15
   - it launches:
     - `C:\projects\sites\blueprint-rec-2\scripts\run_webui_public_tunnel.ps1`
   - this should restart the local site + tunnel automatically after user logon even without fixing the broken service
+  - bug found and fixed on `2026-04-15`:
+    - the startup `.cmd` file had been written incorrectly with literal `` `r`n `` text inside the file instead of real newlines
+    - because of that, Windows startup could not execute it correctly after reboot / logon
+  - current fixed file content is:
+    - `@echo off`
+    - `start "" /min powershell.exe -WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -File "C:\projects\sites\blueprint-rec-2\scripts\run_webui_public_tunnel.ps1"`
 - Cloudflare 1033 resolved by restarting the `cloudflared` tunnel for `blueprint-rec`.
 - `cloudflared` is currently running and tunnel reports as connected (external check also succeeds), but user still reports timeouts on mobile — likely intermittent tunnel uptime, PC sleep, or network path issues.
 - Strong external diagnosis for Russia:
