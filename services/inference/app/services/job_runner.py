@@ -39,6 +39,7 @@ from .result_exports import (
     write_table_csv,
 )
 from .candidate_vlm_recognizer import VisionLLMCandidateRecognizer
+from .candidate_recognizer import DrawingCandidateRecognizer
 from .page_vocabulary import normalize_label
 from .session_store import InMemorySessionStore
 
@@ -1518,6 +1519,7 @@ def _apply_truth_guided_no_table_selection(
     *,
     page_truth_instances: Mapping[int, list[dict[str, Any]]] | None,
     page_sizes_by_index: Mapping[int, tuple[int, int]] | None,
+    page_raster_paths_by_index: Mapping[int, Path] | None,
     next_row_number: int,
 ) -> tuple[list[DrawingResultRow], list[DrawingResultRow], int]:
     if not emitted_markers or not page_truth_instances:
@@ -1584,6 +1586,14 @@ def _apply_truth_guided_no_table_selection(
             next_row_number = max(next_row_number + 1, row_number + 1)
 
     for page_index, truth_items in page_truth_instances.items():
+        same_label_rows_by_page: dict[str, list[DrawingResultRow]] = {}
+        for row in rows:
+            if row.page_index != page_index:
+                continue
+            normalized = normalize_label(row.label)
+            if not normalized:
+                continue
+            same_label_rows_by_page.setdefault(normalized, []).append(row)
         for truth_item in truth_items:
             label_key = str(truth_item.get("normalized_label") or "")
             truth_key = (
@@ -1596,7 +1606,30 @@ def _apply_truth_guided_no_table_selection(
                 continue
             if float(_parse_number(truth_item.get("confidence")) or 0.0) < 0.9:
                 continue
+            if same_label_rows_by_page.get(label_key):
+                if not _truth_only_crop_confirms_label(
+                    truth_item,
+                    raster_path=(page_raster_paths_by_index or {}).get(page_index),
+                    page_width=(page_sizes_by_index or {}).get(page_index, (None, None))[0],
+                    page_height=(page_sizes_by_index or {}).get(page_index, (None, None))[1],
+                ):
+                    held_back_rows.append(
+                        _truth_only_row(
+                            truth_item,
+                            row_number=next_row_number,
+                        ).model_copy(
+                            update={
+                                "note": (
+                                    "Кандидат удержан: full-page truth предложил ещё одну точку с той же меткой, "
+                                    "но локальный crop не подтвердил её."
+                                )
+                            }
+                        )
+                    )
+                    next_row_number += 1
+                    continue
             rows.append(_truth_only_row(truth_item, row_number=next_row_number))
+            same_label_rows_by_page.setdefault(label_key, []).append(rows[-1])
             next_row_number += 1
 
     for marker_index, marker in enumerate(emitted_markers):
@@ -1624,6 +1657,11 @@ def _apply_truth_guided_no_table_selection(
         rows.append(_row_from_marker(marker, row_number=row_number, label=label))
         next_row_number = max(next_row_number + 1, row_number + 1)
 
+    rows, held_back_rows = _suppress_redundant_truth_only_rows(
+        rows,
+        held_back_rows,
+        page_sizes_by_index=page_sizes_by_index,
+    )
     rows.sort(key=lambda row: (row.page_index, row.center.y if row.center else 0.0, row.center.x if row.center else 0.0))
     return rows, held_back_rows, filtered_out_count
 
@@ -1634,6 +1672,7 @@ def _build_rows(
     *,
     page_sizes_by_index: Mapping[int, tuple[int, int]] | None = None,
     page_truth_instances: Mapping[int, list[dict[str, Any]]] | None = None,
+    page_raster_paths_by_index: Mapping[int, Path] | None = None,
 ) -> tuple[list[DrawingResultRow], list[DrawingResultRow], list[str], list[str], int, int]:
     sorted_markers = sorted(markers, key=_marker_sort_key)
     if not expected_labels:
@@ -1708,6 +1747,7 @@ def _build_rows(
             held_back_rows,
             page_truth_instances=page_truth_instances,
             page_sizes_by_index=page_sizes_by_index,
+            page_raster_paths_by_index=page_raster_paths_by_index,
             next_row_number=len(sorted_markers) + 1,
         )
         filtered_out_count += truth_filtered_out
@@ -1916,12 +1956,18 @@ def build_result_from_legacy_output(
             all_markers.append(marker)
 
     page_sizes_by_index = {artifact.page_index: (artifact.width, artifact.height) for artifact in page_artifacts}
+    page_raster_paths_by_index = {
+        artifact.page_index: artifact.raster_path
+        for artifact in page_artifacts
+        if artifact.raster_path is not None
+    }
     page_truth_instances = _build_no_table_truth_instances(page_artifacts) if not expected_labels else {}
     rows, held_back_rows, missing_labels, extra_detected_labels, filtered_out_count, discarded_count = _build_rows(
         all_markers,
         expected_labels,
         page_sizes_by_index=page_sizes_by_index,
         page_truth_instances=page_truth_instances,
+        page_raster_paths_by_index=page_raster_paths_by_index,
     )
     summary = _compute_summary(
         rows,
@@ -1986,6 +2032,148 @@ def _truth_only_row(truth_item: Mapping[str, Any], *, row_number: int) -> Drawin
         note="Точка поставлена по full-page truth, локальный детектор не дал надёжного центра.",
         source_kind="vlm_locator",
     )
+
+
+def _truth_only_duplicate_radius_px(page_width: int | None, page_height: int | None) -> float:
+    base = 96.0
+    if page_width and page_height:
+        base = max(base, min(page_width, page_height) * 0.08)
+    return base
+
+
+def _truth_only_crop_confirms_label(
+    truth_item: Mapping[str, Any],
+    *,
+    raster_path: Path | None,
+    page_width: int | None,
+    page_height: int | None,
+) -> bool:
+    if raster_path is None or not raster_path.is_file():
+        return False
+
+    label = str(truth_item.get("label") or "").strip()
+    normalized_label = normalize_label(label)
+    if not normalized_label:
+        return False
+
+    x = float(_parse_number(truth_item.get("x")) or 0.0)
+    y = float(_parse_number(truth_item.get("y")) or 0.0)
+    if x <= 0 or y <= 0:
+        return False
+
+    try:
+        with Image.open(raster_path) as source_image:
+            image = ImageOps.exif_transpose(source_image).convert("RGB")
+    except Exception:
+        return False
+
+    min_side = min(image.size)
+    crop_radius = max(84, int(min_side * 0.07))
+    if len(label) >= 3:
+        crop_radius = max(crop_radius, 110)
+
+    left = max(0, int(round(x - crop_radius)))
+    top = max(0, int(round(y - crop_radius)))
+    right = min(image.width, int(round(x + crop_radius)))
+    bottom = min(image.height, int(round(y + crop_radius)))
+    if right - left < 24 or bottom - top < 24:
+        return False
+
+    crop = image.crop((left, top, right, bottom))
+    local_recognizer = DrawingCandidateRecognizer()
+    local = local_recognizer.recognize(crop, "text")
+    if normalize_label(local.label) == normalized_label and (local.confidence or 0.0) >= 0.72:
+        return True
+
+    vlm_recognizer = VisionLLMCandidateRecognizer()
+    if not vlm_recognizer.is_enabled():
+        return False
+    vlm = vlm_recognizer.recognize(
+        crop,
+        "text",
+        allowed_labels=[label],
+        use_consensus=False,
+        heavy_sheet=bool(min_side <= CANONICAL_MIN_SIDE),
+    )
+    return normalize_label(vlm.label) == normalized_label and (vlm.confidence or 0.0) >= 0.82
+
+
+def _suppress_redundant_truth_only_rows(
+    rows: list[DrawingResultRow],
+    held_back_rows: list[DrawingResultRow],
+    *,
+    page_sizes_by_index: Mapping[int, tuple[int, int]] | None,
+) -> tuple[list[DrawingResultRow], list[DrawingResultRow]]:
+    if not rows:
+        return rows, held_back_rows
+
+    kept_rows: list[DrawingResultRow] = []
+    extra_held_back = list(held_back_rows)
+    by_page_and_label: dict[tuple[int, str], list[DrawingResultRow]] = {}
+    for row in rows:
+        normalized = normalize_label(row.label)
+        if not normalized:
+            kept_rows.append(row)
+            continue
+        by_page_and_label.setdefault((row.page_index, normalized), []).append(row)
+
+    for group_rows in by_page_and_label.values():
+        stable_rows = [
+            row
+            for row in group_rows
+            if not (row.status == DrawingResultRowStatus.UNCERTAIN and row.source_kind == "vlm_locator")
+        ]
+        truth_only_rows = [
+            row
+            for row in group_rows
+            if row.status == DrawingResultRowStatus.UNCERTAIN and row.source_kind == "vlm_locator"
+        ]
+        if not truth_only_rows:
+            kept_rows.extend(group_rows)
+            continue
+
+        page_width, page_height = (page_sizes_by_index or {}).get(group_rows[0].page_index, (None, None))
+        duplicate_radius = _truth_only_duplicate_radius_px(page_width, page_height)
+        kept_group = list(stable_rows)
+        for truth_row in truth_only_rows:
+            truth_center = truth_row.center
+            if truth_center is None:
+                extra_held_back.append(
+                    truth_row.model_copy(
+                        update={
+                            "note": "Кандидат удержан: full-page truth дал дублирующую точку без локального подтверждения."
+                        }
+                    )
+                )
+                continue
+
+            duplicate_peer = next(
+                (
+                    peer
+                    for peer in stable_rows
+                    if peer.center is not None
+                    and hypot(peer.center.x - truth_center.x, peer.center.y - truth_center.y) <= duplicate_radius
+                ),
+                None,
+            )
+            if duplicate_peer is not None:
+                extra_held_back.append(
+                    truth_row.model_copy(
+                        update={
+                            "note": (
+                                "Кандидат удержан: full-page truth дал вторую точку слишком близко к уже найденной "
+                                "локальной метке."
+                            )
+                        }
+                    )
+                )
+                continue
+            kept_group.append(truth_row)
+        kept_rows.extend(kept_group)
+
+    kept_rows.sort(key=lambda row: (row.page_index, row.row, row.label))
+    extra_held_back.sort(key=lambda row: (row.page_index, row.row, row.label))
+    return kept_rows, extra_held_back
 def _build_pipeline_failure_result(
     *,
     job: DrawingJob,

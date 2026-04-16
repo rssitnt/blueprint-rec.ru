@@ -129,13 +129,25 @@ Last updated: 2026-04-16
   - the function could return `None`, which then crashed degraded fallback checks in the live job path
   - fixed in:
     - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/job_runner.py`
+- New verification rule on `2026-04-16`:
+  - old `page-001.overlay.png` artifacts are raw legacy OCR overlays and cannot be trusted as the final picture of where the algorithm landed
+  - final visual checks now use overlays rendered directly from `artifacts/result.json`
+  - helper added:
+    - `C:/projects/sites/blueprint-rec-2/scripts/render_result_overlay.py`
 - Current no-table truth-guided behavior:
   - full-page VLM truth now chooses which duplicate instance is the real one
   - matched rows now keep the local detector center, but take the canonical truth label text
   - truth-only points are still allowed when local detection has no usable center at all
   - this avoids a bad regression where full-page truth label coordinates were sometimes less precise than local OCR centers
+- New duplicate-control fix on `2026-04-16`:
+  - second same-label truth-only points are no longer accepted blindly
+  - if full-page truth proposes another copy of an already-seen label, the system now:
+    - suppresses it if it lands almost on top of an already-found local point
+    - otherwise re-checks a local crop around that place
+    - keeps it only if the crop confirms the same label
+  - this reduced obvious false duplicate points on dense benchmark sheets like `test1.jpg`
 - Visual benchmark check now matters more than raw counts:
-  - confirmed by direct image inspection after fresh live runs, not just saved old overlays
+  - confirmed by direct image inspection after fresh live runs, using final overlays rendered from `result.json`, not raw legacy overlays
   - fresh verified overlays:
     - `page4.png`
     - `image001.png`
@@ -145,12 +157,12 @@ Last updated: 2026-04-16
   - current visual state:
     - `page4.png`: visually good
     - `image001.png`: visually good
-    - `test1.jpg`: visually much cleaner than the old noisy 43/43 run; main callouts land plausibly on the real labels
+    - `test1.jpg`: visually much cleaner than the old noisy run; obvious false duplicate points like extra `7/8/22/41` were removed
     - `page_06.png`: visually good
     - `page_12.png`: visually good
   - remaining practical gap:
-    - some dense sheets still finish with several `UNCERTAIN` truth-only points
-    - quality is now acceptable by hit-location on the checked benchmarks, but the next improvement should reduce review load, not chase row-count cosmetics
+    - some dense sheets still finish with several `UNCERTAIN` truth-only points that are visually plausible but still not locally proven
+    - next improvement should keep reducing review-only points on dense exploded views without throwing away real duplicate labels
 
 ## Important backend fixes already present
 
