@@ -551,7 +551,28 @@ Last updated: 2026-04-16
 
 ## Current priorities
 
-1. Improve heavy-sheet recognition quality on dense exploded-view drawings.
-   - `page4` still misses visible labels `5` and `10`; model routing is improved, but the current internal low-res route still under-localizes these two positions.
+1. Keep improving dense-sheet localization by real hit quality, not by raw label counts.
+   - latest generic fix:
+     - strong circular callout geometry can now confirm a truth-guided point locally
+     - narrow circle-crop OCR/VLM retry added for noisy dense groups
+   - files:
+     - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/job_runner.py`
+     - `C:/projects/sites/blueprint-rec-2/services/inference/tests/test_job_runner_truth_localization.py`
+   - tests:
+     - `pytest services\\inference\\tests\\test_job_runner_truth_localization.py -q`
+     - `9 passed`
+   - latest visually checked runs:
+     - `test1.jpg`
+       - `C:/projects/sites/blueprint-rec-2/.codex-smoke/live-verify/test1_20260416_circleconfirm_v3/test1_20260416_185302`
+       - `53 rows`, `0 non-found`
+       - visually checked final overlay: all benchmark points land correctly, including `7`, `30A`, `29B`
+     - `page4.png`
+       - `C:/projects/sites/blueprint-rec-2/.codex-smoke/live-verify/page4_20260416_circleconfirm/page4_20260416_190422`
+       - `17 rows`, `0 non-found`
+       - visually checked final overlay: good
+     - `image001.png`
+       - `C:/projects/sites/blueprint-rec-2/.codex-smoke/live-verify/image001_20260416_circleconfirm/image001_20260416_190422`
+       - `3 rows`, `0 non-found`
+       - visually checked final overlay: good
 2. Keep old jobs and batches self-healing so the UI does not show stale broken history.
 3. Keep project context files compact and clean for future agents.

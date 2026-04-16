@@ -10,7 +10,7 @@ import subprocess
 import sys
 from collections import Counter
 from dataclasses import dataclass
-from math import hypot
+from math import cos, hypot, sin, tau
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
@@ -2082,6 +2082,147 @@ def _targeted_label_match_score(candidate_label: str, target_label: str) -> floa
     return 0.0
 
 
+def _mean_darkness(values: list[int]) -> float:
+    if not values:
+        return 0.0
+    return sum(255 - value for value in values) / (len(values) * 255.0)
+
+
+def _sample_circle_pixels(gray_image: Image.Image, center_x: float, center_y: float, radius: int, *, samples: int = 64) -> list[int]:
+    pixels: list[int] = []
+    if radius <= 0:
+        return pixels
+    for index in range(samples):
+        angle = tau * index / float(samples)
+        sample_x = int(round(center_x + cos(angle) * radius))
+        sample_y = int(round(center_y + sin(angle) * radius))
+        if 0 <= sample_x < gray_image.width and 0 <= sample_y < gray_image.height:
+            pixels.append(int(gray_image.getpixel((sample_x, sample_y))))
+    return pixels
+
+
+def _sample_disk_pixels(gray_image: Image.Image, center_x: float, center_y: float, radius: int, *, step: int = 2) -> list[int]:
+    pixels: list[int] = []
+    if radius <= 0:
+        return pixels
+    radius_sq = radius * radius
+    for dx in range(-radius, radius + 1, step):
+        for dy in range(-radius, radius + 1, step):
+            if dx * dx + dy * dy > radius_sq:
+                continue
+            sample_x = int(round(center_x + dx))
+            sample_y = int(round(center_y + dy))
+            if 0 <= sample_x < gray_image.width and 0 <= sample_y < gray_image.height:
+                pixels.append(int(gray_image.getpixel((sample_x, sample_y))))
+    return pixels
+
+
+def _find_circle_callout_anchor(
+    image: Image.Image,
+    center_x: float,
+    center_y: float,
+) -> tuple[float, float, int, float] | None:
+    gray_image = ImageOps.grayscale(image)
+    best_candidate: tuple[float, float, int, float, float, float] | None = None
+
+    for offset_x in range(-12, 13, 2):
+        for offset_y in range(-12, 13, 2):
+            candidate_x = center_x + offset_x
+            candidate_y = center_y + offset_y
+            for radius in range(12, 34, 2):
+                ring_pixels = _sample_circle_pixels(gray_image, candidate_x, candidate_y, radius)
+                outer_pixels = _sample_circle_pixels(gray_image, candidate_x, candidate_y, radius + 5)
+                inner_pixels = _sample_disk_pixels(gray_image, candidate_x, candidate_y, max(3, int(round(radius * 0.45))))
+                if len(ring_pixels) < 40 or not inner_pixels or not outer_pixels:
+                    continue
+
+                ring_darkness = _mean_darkness(ring_pixels)
+                outer_darkness = _mean_darkness(outer_pixels)
+                inner_darkness = _mean_darkness(inner_pixels)
+                dark_fraction = sum(1 for value in ring_pixels if value < 180) / float(len(ring_pixels))
+                score = (
+                    ring_darkness * 1.4
+                    + dark_fraction * 0.9
+                    - inner_darkness * 0.25
+                    - outer_darkness * 0.35
+                )
+                if best_candidate is None or score > best_candidate[3]:
+                    best_candidate = (
+                        candidate_x,
+                        candidate_y,
+                        radius,
+                        score,
+                        ring_darkness,
+                        dark_fraction,
+                    )
+
+    if best_candidate is None:
+        return None
+    candidate_x, candidate_y, radius, score, ring_darkness, dark_fraction = best_candidate
+    if score < 0.82 or ring_darkness < 0.42 or dark_fraction < 0.52:
+        return None
+    return candidate_x, candidate_y, radius, score
+
+
+def _refine_truth_only_row_from_circle_crop(
+    truth_item: Mapping[str, Any],
+    *,
+    image: Image.Image,
+    label: str,
+    normalized_label: str,
+    center_x: float,
+    center_y: float,
+    radius: int,
+    row_number: int,
+    min_side: int,
+    local_recognizer: DrawingCandidateRecognizer,
+) -> DrawingResultRow | None:
+    crop_padding = max(12, int(round(radius * 0.85)))
+    left = max(0, int(round(center_x - radius - crop_padding)))
+    top = max(0, int(round(center_y - radius - crop_padding)))
+    right = min(image.width, int(round(center_x + radius + crop_padding)))
+    bottom = min(image.height, int(round(center_y + radius + crop_padding)))
+    if right - left < 24 or bottom - top < 24:
+        return None
+
+    crop = image.crop((left, top, right, bottom))
+    local = local_recognizer.recognize(crop, "text")
+    if normalize_label(local.label) == normalized_label and (local.confidence or 0.0) >= 0.66:
+        return _truth_only_row(truth_item, row_number=row_number).model_copy(
+            update={
+                "center": ResultPoint(x=round(center_x, 2), y=round(center_y, 2)),
+                "top_left": ResultPoint(x=round(center_x, 2), y=round(center_y, 2)),
+                "status": DrawingResultRowStatus.FOUND,
+                "note": "Точка поставлена по full-page truth; локальный OCR подтвердил метку в узком crop самой круговой выноски.",
+                "source_kind": "vlm_locator_circle_confirmed",
+                "final_score": max(float(_parse_number(truth_item.get("confidence")) or 0.0), float(local.confidence or 0.0)),
+            }
+        )
+
+    vlm_recognizer = VisionLLMCandidateRecognizer()
+    if not vlm_recognizer.is_enabled():
+        return None
+    vlm = vlm_recognizer.recognize(
+        crop,
+        "text",
+        allowed_labels=[label],
+        use_consensus=False,
+        heavy_sheet=bool(min_side <= CANONICAL_MIN_SIDE),
+    )
+    if normalize_label(vlm.label) == normalized_label and (vlm.confidence or 0.0) >= 0.8:
+        return _truth_only_row(truth_item, row_number=row_number).model_copy(
+            update={
+                "center": ResultPoint(x=round(center_x, 2), y=round(center_y, 2)),
+                "top_left": ResultPoint(x=round(center_x, 2), y=round(center_y, 2)),
+                "status": DrawingResultRowStatus.FOUND,
+                "note": "Точка поставлена по full-page truth; локальная VLM-проверка подтвердила метку в узком crop самой круговой выноски.",
+                "source_kind": "vlm_locator_circle_confirmed",
+                "final_score": max(float(_parse_number(truth_item.get("confidence")) or 0.0), float(vlm.confidence or 0.0)),
+            }
+        )
+    return None
+
+
 def _refine_truth_only_row_from_local_crop(
     truth_item: Mapping[str, Any],
     *,
@@ -2153,9 +2294,28 @@ def _refine_truth_only_row_from_local_crop(
     if best_region is not None:
         left, top, region, abs_center_x, abs_center_y, match_score = best_region
         truth_row = _truth_only_row(truth_item, row_number=row_number)
+        circle_anchor = None
+        if match_score < 0.999:
+            circle_anchor = _find_circle_callout_anchor(image, abs_center_x, abs_center_y)
+        final_center_x = circle_anchor[0] if circle_anchor is not None else abs_center_x
+        final_center_y = circle_anchor[1] if circle_anchor is not None else abs_center_y
+        final_status = (
+            DrawingResultRowStatus.FOUND
+            if match_score >= 0.999 or circle_anchor is not None
+            else DrawingResultRowStatus.UNCERTAIN
+        )
+        final_note = (
+            "Точка поставлена по full-page truth и уточнена локальным OCR рядом с меткой."
+            if match_score >= 0.999
+            else (
+                "Точка поставлена по full-page truth и уточнена локальным OCR с учётом типичной OCR-путаницы в суффиксе; круговая выноска подтверждена локально."
+                if circle_anchor is not None
+                else "Точка поставлена по full-page truth и уточнена локальным OCR с учётом типичной OCR-путаницы в суффиксе."
+            )
+        )
         return truth_row.model_copy(
             update={
-                "center": ResultPoint(x=round(abs_center_x, 2), y=round(abs_center_y, 2)),
+                "center": ResultPoint(x=round(final_center_x, 2), y=round(final_center_y, 2)),
                 "top_left": ResultPoint(x=round(left + region.bbox_x, 2), y=round(top + region.bbox_y, 2)),
                 "bbox": ResultBoundingBox(
                     x=round(left + region.bbox_x, 2),
@@ -2164,16 +2324,8 @@ def _refine_truth_only_row_from_local_crop(
                     h=round(region.bbox_height, 2),
                 ),
                 "final_score": max(float(truth_row.final_score or 0.0), float(region.confidence or 0.0)),
-                "status": (
-                    DrawingResultRowStatus.FOUND
-                    if match_score >= 0.999
-                    else DrawingResultRowStatus.UNCERTAIN
-                ),
-                "note": (
-                    "Точка поставлена по full-page truth и уточнена локальным OCR рядом с меткой."
-                    if match_score >= 0.999
-                    else "Точка поставлена по full-page truth и уточнена локальным OCR с учётом типичной OCR-путаницы в суффиксе."
-                ),
+                "status": final_status,
+                "note": final_note,
                 "source_kind": "vlm_locator_refined",
             }
         )
@@ -2251,32 +2403,84 @@ def _refine_truth_only_row_from_local_crop(
     crop = image.crop((left, top, right, bottom))
     local = local_recognizer.recognize(crop, "text")
     if normalize_label(local.label) == normalized_label and (local.confidence or 0.0) >= 0.72:
-        return _truth_only_row(truth_item, row_number=row_number).model_copy(
-            update={
-                "note": "Точка поставлена по full-page truth; локальный OCR подтвердил метку рядом, но не дал bbox.",
-                "source_kind": "vlm_locator_confirmed",
-                "final_score": max(float(_parse_number(truth_item.get('confidence')) or 0.0), float(local.confidence or 0.0)),
-            }
-        )
+        circle_anchor = _find_circle_callout_anchor(image, x, y)
+        updates: dict[str, Any] = {
+            "note": "Точка поставлена по full-page truth; локальный OCR подтвердил метку рядом, но не дал bbox.",
+            "source_kind": "vlm_locator_confirmed",
+            "final_score": max(float(_parse_number(truth_item.get('confidence')) or 0.0), float(local.confidence or 0.0)),
+        }
+        if circle_anchor is not None:
+            updates.update(
+                {
+                    "center": ResultPoint(x=round(circle_anchor[0], 2), y=round(circle_anchor[1], 2)),
+                    "top_left": ResultPoint(x=round(circle_anchor[0], 2), y=round(circle_anchor[1], 2)),
+                    "status": DrawingResultRowStatus.FOUND,
+                    "note": "Точка поставлена по full-page truth; локальный OCR подтвердил метку рядом, круговая выноска подтверждена локально.",
+                    "source_kind": "vlm_locator_circle_confirmed",
+                }
+            )
+        return _truth_only_row(truth_item, row_number=row_number).model_copy(update=updates)
 
     vlm_recognizer = VisionLLMCandidateRecognizer()
-    if not vlm_recognizer.is_enabled():
-        return None
-    vlm = vlm_recognizer.recognize(
-        crop,
-        "text",
-        allowed_labels=[label],
-        use_consensus=False,
-        heavy_sheet=bool(min_side <= CANONICAL_MIN_SIDE),
-    )
-    if normalize_label(vlm.label) == normalized_label and (vlm.confidence or 0.0) >= 0.82:
-        return _truth_only_row(truth_item, row_number=row_number).model_copy(
-            update={
+    if vlm_recognizer.is_enabled():
+        vlm = vlm_recognizer.recognize(
+            crop,
+            "text",
+            allowed_labels=[label],
+            use_consensus=False,
+            heavy_sheet=bool(min_side <= CANONICAL_MIN_SIDE),
+        )
+        if normalize_label(vlm.label) == normalized_label and (vlm.confidence or 0.0) >= 0.82:
+            circle_anchor = _find_circle_callout_anchor(image, x, y)
+            updates = {
                 "note": "Точка поставлена по full-page truth; локальная VLM-проверка подтвердила метку рядом.",
                 "source_kind": "vlm_locator_confirmed",
                 "final_score": max(float(_parse_number(truth_item.get('confidence')) or 0.0), float(vlm.confidence or 0.0)),
             }
+            if circle_anchor is not None:
+                updates.update(
+                    {
+                        "center": ResultPoint(x=round(circle_anchor[0], 2), y=round(circle_anchor[1], 2)),
+                        "top_left": ResultPoint(x=round(circle_anchor[0], 2), y=round(circle_anchor[1], 2)),
+                        "status": DrawingResultRowStatus.FOUND,
+                        "note": "Точка поставлена по full-page truth; локальная VLM-проверка подтвердила метку рядом, круговая выноска подтверждена локально.",
+                        "source_kind": "vlm_locator_circle_confirmed",
+                    }
+                )
+            return _truth_only_row(truth_item, row_number=row_number).model_copy(update=updates)
+    circle_anchor = _find_circle_callout_anchor(image, x, y)
+    if circle_anchor is not None:
+        circle_row = _refine_truth_only_row_from_circle_crop(
+            truth_item,
+            image=image,
+            label=label,
+            normalized_label=normalized_label,
+            center_x=circle_anchor[0],
+            center_y=circle_anchor[1],
+            radius=circle_anchor[2],
+            row_number=row_number,
+            min_side=min_side,
+            local_recognizer=local_recognizer,
         )
+        if circle_row is not None:
+            return circle_row
+        if circle_anchor[3] >= 1.55:
+            return _truth_only_row(truth_item, row_number=row_number).model_copy(
+                update={
+                    "center": ResultPoint(x=round(circle_anchor[0], 2), y=round(circle_anchor[1], 2)),
+                    "top_left": ResultPoint(x=round(circle_anchor[0] - circle_anchor[2], 2), y=round(circle_anchor[1] - circle_anchor[2], 2)),
+                    "bbox": ResultBoundingBox(
+                        x=round(circle_anchor[0] - circle_anchor[2], 2),
+                        y=round(circle_anchor[1] - circle_anchor[2], 2),
+                        w=round(circle_anchor[2] * 2.0, 2),
+                        h=round(circle_anchor[2] * 2.0, 2),
+                    ),
+                    "status": DrawingResultRowStatus.FOUND,
+                    "note": "Точка поставлена по full-page truth; очень сильная геометрия круговой выноски подтверждена локально.",
+                    "source_kind": "vlm_locator_circle_confirmed",
+                    "final_score": max(float(_parse_number(truth_item.get('confidence')) or 0.0), min(0.98, 0.78 + circle_anchor[3] * 0.1)),
+                }
+            )
     return None
 
 
