@@ -94,6 +94,21 @@ Last updated: 2026-04-15
     - on `test1.jpg` this raised the final unique labels from `25` to `27`
     - newly recovered labels include `21`, `29A`, `29B`
     - still missing after the latest pass: `4, 5, 6, 8, 10, 11, 13, 14, 15, 17, 20, 24, 31, 37, 38, 42`
+- Stability fix completed for equivalent inputs of the same drawing:
+  - root cause:
+    - early top-of-page masking was too aggressive on PDF-rendered pages
+    - real first-row callouts like `3` and `4` were being dropped before recovery
+  - fix:
+    - header cutoff cap lowered from `22%` to `19%` of page height
+    - masked-preview vocabulary bug already fixed earlier now works together with the lower cap
+  - verified on the same sheet in two forms:
+    - `C:/projects/sites/blueprint-rec-2/tmp/page4_verify_canonical/page4.canonical.png`
+    - `C:/projects/sites/blueprint-rec-2/tmp/page4_verify_render/prepared-page-005.png`
+  - both now return the same full label set:
+    - `1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14-1, 14-2, 14-3, 14-4(1), 14-4(2)`
+  - measured full `_build_candidates(...)` time after the fix:
+    - canonical PNG: about `263s`
+    - PDF render: about `143s`
 
 ## Important backend fixes already present
 

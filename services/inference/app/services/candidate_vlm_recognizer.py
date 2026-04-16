@@ -47,13 +47,31 @@ class VisionLLMCandidateRecognizer:
         if not provider_calls:
             return set()
 
-        payload_image = self._prepare_vocabulary_image(image)
-        if payload_image is None:
+        payload_images = self._prepare_vocabulary_images(image, heavy_sheet=heavy_sheet)
+        if not payload_images:
             return set()
 
-        _, primary_call = provider_calls[0]
         prompt = self._build_vocabulary_prompt()
-        return set(primary_call(payload_image, prompt, heavy_sheet=heavy_sheet))
+        collected_sets: list[set[str]] = []
+        for provider_name, provider_call in provider_calls:
+            for variant_index, payload_image in enumerate(payload_images):
+                labels = set(provider_call(payload_image, prompt, heavy_sheet=heavy_sheet))
+                if labels:
+                    collected_sets.append(labels)
+                # Vocabulary recall matters more than single-pass purity here:
+                # downstream localization will still have to prove the label on the drawing.
+                if provider_name == "openrouter" and heavy_sheet and variant_index == 0:
+                    retry_labels = set(provider_call(payload_image, prompt, heavy_sheet=heavy_sheet))
+                    if retry_labels:
+                        collected_sets.append(retry_labels)
+
+        if not collected_sets:
+            return set()
+
+        merged: set[str] = set()
+        for labels in collected_sets:
+            merged.update(labels)
+        return merged
 
     def locate_labels(
         self,
@@ -65,8 +83,8 @@ class VisionLLMCandidateRecognizer:
         if not labels or not self._openrouter_enabled():
             return []
 
-        payload_image = self._prepare_vocabulary_image(image)
-        if payload_image is None:
+        payload_images = self._prepare_vocabulary_images(image, heavy_sheet=heavy_sheet)
+        if not payload_images:
             return []
 
         label_list = ", ".join(sorted({label for label in labels if label}))
@@ -76,44 +94,50 @@ class VisionLLMCandidateRecognizer:
             f"{label_list}. "
             "Return JSON only: {\"items\":[{\"label\":\"5\",\"x\":0-1,\"y\":0-1,\"confidence\":0-1}]}. "
             "x and y are normalized coordinates of the label center relative to the full image. "
+            "Single-digit callouts are important; find them too. "
             "If a label is not found, omit it. Do not guess."
         )
 
-        output_text, _ = self._openrouter_chat_json(
-            payload_image=payload_image,
-            system_prompt="Return only valid JSON with a top-level 'items' array.",
-            user_prompt=prompt,
-            heavy_sheet=heavy_sheet,
-        )
-        match = re.search(r"\{.*\}", str(output_text), re.DOTALL)
-        raw_json = match.group(0) if match else str(output_text)
-        try:
-            payload = json.loads(raw_json)
-        except Exception:
-            return []
-
-        items = payload.get("items") or []
-        resolved: list[dict[str, float | str]] = []
         allowed = {label.strip() for label in labels if label}
-        for item in items:
-            if not isinstance(item, dict):
-                continue
-            label = str(item.get("label") or "").strip()
-            if not label or label not in allowed:
-                continue
+        best_by_label: dict[str, dict[str, float | str]] = {}
+
+        for payload_image in payload_images:
+            output_text, _ = self._openrouter_chat_json(
+                payload_image=payload_image,
+                system_prompt="Return only valid JSON with a top-level 'items' array.",
+                user_prompt=prompt,
+                heavy_sheet=heavy_sheet,
+            )
+            match = re.search(r"\{.*\}", str(output_text), re.DOTALL)
+            raw_json = match.group(0) if match else str(output_text)
             try:
-                x = float(item.get("x"))
-                y = float(item.get("y"))
+                payload = json.loads(raw_json)
             except Exception:
                 continue
-            if not (0.0 <= x <= 1.0 and 0.0 <= y <= 1.0):
-                continue
-            try:
-                confidence = float(item.get("confidence", 0.0))
-            except Exception:
-                confidence = 0.0
-            resolved.append({"label": label, "x": x, "y": y, "confidence": confidence})
-        return resolved
+
+            items = payload.get("items") or []
+            for item in items:
+                if not isinstance(item, dict):
+                    continue
+                label = str(item.get("label") or "").strip()
+                if not label or label not in allowed:
+                    continue
+                try:
+                    x = float(item.get("x"))
+                    y = float(item.get("y"))
+                except Exception:
+                    continue
+                if not (0.0 <= x <= 1.0 and 0.0 <= y <= 1.0):
+                    continue
+                try:
+                    confidence = float(item.get("confidence", 0.0))
+                except Exception:
+                    confidence = 0.0
+                existing = best_by_label.get(label)
+                if existing is None or confidence > float(existing.get("confidence", 0.0)):
+                    best_by_label[label] = {"label": label, "x": x, "y": y, "confidence": confidence}
+
+        return list(best_by_label.values())
 
     def recognize(
         self,
@@ -565,6 +589,18 @@ class VisionLLMCandidateRecognizer:
             resolved.append((index, label, confidence))
         return resolved
 
+    @classmethod
+    def _prepare_vocabulary_images(cls, image: Image.Image, *, heavy_sheet: bool) -> list[Image.Image]:
+        base = cls._prepare_vocabulary_image(image)
+        if base is None:
+            return []
+        variants = [base]
+        if heavy_sheet:
+            boosted = cls._prepare_vocabulary_inkboost_image(base)
+            if boosted is not None:
+                variants.append(boosted)
+        return variants
+
     @staticmethod
     def _prepare_vocabulary_image(image: Image.Image) -> Image.Image | None:
         width, height = image.size
@@ -597,11 +633,24 @@ class VisionLLMCandidateRecognizer:
         return sharpened.convert("RGB")
 
     @staticmethod
+    def _prepare_vocabulary_inkboost_image(image: Image.Image) -> Image.Image | None:
+        width, height = image.size
+        if width <= 0 or height <= 0:
+            return None
+        gray = ImageOps.grayscale(image.convert("RGB"))
+        auto = ImageOps.autocontrast(gray, cutoff=1)
+        inverted = ImageOps.invert(auto)
+        boosted = inverted.filter(ImageFilter.MaxFilter(3)).filter(ImageFilter.UnsharpMask(radius=1.0, percent=180, threshold=1))
+        restored = ImageOps.invert(boosted)
+        return restored.convert("RGB")
+
+    @staticmethod
     def _build_vocabulary_prompt() -> str:
         return (
             "You are looking at a technical drawing. "
             "List every callout label that is visible in this drawing. "
             "Return JSON only in this exact shape: {\"labels\":[\"1\",\"14-1\",\"29A\",...]} "
+            "Single-digit callouts are important; include them too. "
             "Only include labels that are actually visible; do NOT guess missing numbers. "
             "Exclude page numbers or non-callout text."
         )

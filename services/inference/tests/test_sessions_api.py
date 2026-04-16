@@ -2,11 +2,13 @@ from __future__ import annotations
 
 from io import BytesIO
 from pathlib import Path
+from types import SimpleNamespace
 import sys
 import zipfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+import pytest
 from fastapi.testclient import TestClient
 from openpyxl import load_workbook
 from PIL import Image, ImageDraw
@@ -14,7 +16,7 @@ from PIL import Image, ImageDraw
 from app.api import sessions as sessions_api
 from app.core.config import settings
 from app.main import create_app
-from app.models.schemas import Actor, CalloutCandidate, CandidateAssociation, CandidateKind, Marker, MarkerPointType, MarkerStatus
+from app.models.schemas import AnnotationSession, Actor, CalloutCandidate, CandidateAssociation, CandidateKind, Marker, MarkerPointType, MarkerStatus
 from app.services.candidate_association import AssociationBuildConfig, CandidateAssociationBuilder
 from app.services.candidate_detector import DrawingCandidateDetector, RawCandidate
 from app.services.candidate_recognizer import CandidateSuggestion, DocumentTextRegion, DrawingCandidateRecognizer
@@ -217,6 +219,477 @@ def test_clear_markers_command(tmp_path, monkeypatch):
     assert cleared["summary"]["totalMarkers"] == 0
     assert cleared["summary"]["humanCorrected"] == 0
     assert cleared["actionLog"][-1]["type"] == "markers_cleared"
+
+
+def test_footer_page_counter_is_filtered_as_non_callout():
+    candidate = CalloutCandidate(
+        bbox_x=85.5,
+        bbox_y=1580.33,
+        bbox_width=14.0,
+        bbox_height=17.84,
+        center_x=92.5,
+        center_y=1589.25,
+        kind=CandidateKind.TEXT,
+        score=263.7,
+        suggested_label="4",
+        suggested_confidence=0.99,
+        suggested_source="tile-sharp-0-1124|cluster-2",
+    )
+
+    assert InMemorySessionStore._is_probable_footer_text_candidate(
+        candidate,
+        neighbor_count=3,
+        image_width=1191,
+        image_height=1684,
+    )
+
+
+def test_bottom_callout_number_is_not_treated_as_footer():
+    candidate = CalloutCandidate(
+        bbox_x=660.32,
+        bbox_y=1359.5,
+        bbox_width=89.26,
+        bbox_height=34.4,
+        center_x=704.95,
+        center_y=1376.7,
+        kind=CandidateKind.TEXT,
+        score=260.0,
+        suggested_label="14",
+        suggested_confidence=0.99,
+        suggested_source="tile-sharp-1-1024|cluster-1",
+    )
+
+    assert not InMemorySessionStore._is_probable_footer_text_candidate(
+        candidate,
+        neighbor_count=1,
+        image_width=1191,
+        image_height=1684,
+    )
+
+
+def test_final_text_vlm_does_not_invent_complex_label_from_blank_candidate():
+    store = InMemorySessionStore()
+    candidate = CalloutCandidate(
+        bbox_x=100,
+        bbox_y=100,
+        bbox_width=24,
+        bbox_height=24,
+        center_x=112,
+        center_y=112,
+        kind=CandidateKind.TEXT,
+        score=120,
+        suggested_label=None,
+        suggested_confidence=None,
+        suggested_source="page-sharp|cluster-1",
+    )
+
+    assert not store._should_replace_candidate_suggestion(
+        candidate,
+        new_label="14-1",
+        new_confidence=0.99,
+        new_source="openrouter-vlm:google/gemini-3.1-pro-preview",
+    )
+
+
+def test_targeted_locator_pure_vlm_fallback_restricted_to_simple_numeric_labels():
+    store = InMemorySessionStore()
+    preview = Image.new("RGB", (1600, 2262), color=(255, 255, 255))
+
+    class StubVlm:
+        def is_enabled(self):
+            return True
+
+        def locate_labels(self, image, labels, heavy_sheet=False):
+            return [{"label": labels[0], "x": 0.5, "y": 0.5, "confidence": 0.95}]
+
+        def recognize(self, *args, **kwargs):
+            return CandidateSuggestion(label=None, confidence=0.0, source=None)
+
+    class StubOcr:
+        def detect_document_text(self, *args, **kwargs):
+            return []
+
+        def recognize(self, *args, **kwargs):
+            return CandidateSuggestion(label=None, confidence=0.0, source=None)
+
+    store._candidate_vlm_recognizer = StubVlm()
+    store._candidate_recognizer = StubOcr()
+
+    compound = store._build_targeted_missing_label_locator_candidates(
+        preview,
+        [],
+        [],
+        allowed_labels={"14-1"},
+    )
+    numeric = store._build_targeted_missing_label_locator_candidates(
+        preview,
+        [],
+        [],
+        allowed_labels={"9"},
+    )
+
+    assert compound == []
+    assert len(numeric) == 1
+    assert numeric[0].suggested_label == "9"
+
+
+def test_targeted_only_recovery_skips_broad_multi_label_passes_for_normal_sheet():
+    store = InMemorySessionStore()
+    preview = Image.new("RGB", (1200, 1600), color=(255, 255, 255))
+    base_candidate = CalloutCandidate(
+        bbox_x=180,
+        bbox_y=390,
+        bbox_width=40,
+        bbox_height=20,
+        center_x=200,
+        center_y=400,
+        kind=CandidateKind.TEXT,
+        score=200,
+        crop_url="/storage/demo/base-text.png",
+        suggested_label=None,
+        suggested_confidence=None,
+        suggested_source=None,
+    )
+    recovered_candidate = CalloutCandidate(
+        bbox_x=628,
+        bbox_y=808,
+        bbox_width=24,
+        bbox_height=24,
+        center_x=640,
+        center_y=820,
+        kind=CandidateKind.CIRCLE,
+        score=260,
+        crop_url="/storage/demo/cand-8.png",
+        suggested_label="8",
+        suggested_confidence=0.97,
+        suggested_source="targeted-ocr",
+    )
+
+    store._build_low_res_missing_label_document_text_candidates = lambda *args, **kwargs: []
+    store._build_low_res_missing_label_locator_candidates = lambda *args, **kwargs: []
+    store._build_targeted_missing_label_locator_candidates = lambda *args, **kwargs: []
+    store._recover_missing_labels_per_target = lambda *args, **kwargs: [recovered_candidate]
+    store._build_low_res_missing_label_ocr_candidates = lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("broad ocr should not run"))
+    store._build_relaxed_text_candidates = lambda *args, **kwargs: []
+    store._build_low_res_missing_label_text_candidates = lambda *args, **kwargs: []
+    store._build_low_res_missing_label_text_vlm_candidates = lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("text vlm should not run"))
+    store._build_low_res_missing_label_vlm_candidates = lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("broad vlm should not run"))
+    store._build_low_res_letter_tile_candidates = lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("letter tile should not run"))
+    store._build_low_res_context_tile_candidates = lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("context tile should not run"))
+    store._build_low_res_sequence_tile_candidates = lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("sequence tile should not run"))
+
+    result = store._recover_missing_low_res_vocabulary_labels(
+        preview,
+        [base_candidate],
+        [],
+        {"8"},
+        prefer_targeted_only=True,
+    )
+
+    assert [candidate.suggested_label for candidate in result if candidate.suggested_label] == ["8"]
+
+
+def test_select_best_single_target_candidate_returns_only_top_match():
+    store = InMemorySessionStore()
+    low = CalloutCandidate(
+        bbox_x=88,
+        bbox_y=88,
+        bbox_width=24,
+        bbox_height=24,
+        center_x=100,
+        center_y=100,
+        kind=CandidateKind.CIRCLE,
+        score=180,
+        crop_url="/storage/demo/cand-low.png",
+        suggested_label="9",
+        suggested_confidence=0.82,
+        suggested_source="circle3x",
+    )
+    high = CalloutCandidate(
+        bbox_x=128,
+        bbox_y=88,
+        bbox_width=24,
+        bbox_height=24,
+        center_x=140,
+        center_y=100,
+        kind=CandidateKind.CIRCLE,
+        score=220,
+        crop_url="/storage/demo/cand-high.png",
+        suggested_label="9",
+        suggested_confidence=0.96,
+        suggested_source="targeted-ocr",
+    )
+
+    selected = store._select_best_single_target_candidates([low, high], "9")
+
+    assert len(selected) == 1
+    assert selected[0].candidate_id == high.candidate_id
+
+
+def test_build_candidates_uses_full_preview_for_vocabulary_and_recovery(tmp_path, monkeypatch):
+    store = InMemorySessionStore()
+    document_path = tmp_path / "page.png"
+    image = Image.new("RGB", (1200, 1600), color=(255, 255, 255))
+    image.putpixel((0, 0), (17, 33, 65))
+    image.save(document_path)
+
+    session = AnnotationSession(title="demo")
+    raw_circle = RawCandidate(
+        bbox_x=640,
+        bbox_y=820,
+        bbox_width=30,
+        bbox_height=30,
+        center_x=655,
+        center_y=835,
+        score=0.9,
+        kind="circle",
+    )
+
+    monkeypatch.setattr(store._candidate_detector, "detect", lambda *_args, **_kwargs: [raw_circle])
+    monkeypatch.setattr(store._candidate_recognizer, "detect_document_text", lambda *_args, **_kwargs: [])
+    monkeypatch.setattr(store, "_infer_effective_header_cutoff", lambda *_args, **_kwargs: 540.0)
+    monkeypatch.setattr(
+        store,
+        "_mask_top_region",
+        lambda preview_image, cutoff: Image.new("RGB", preview_image.size, color=(0, 0, 0)),
+    )
+    monkeypatch.setattr(store, "_compose_candidates", lambda *_args, **_kwargs: ([], []))
+    monkeypatch.setattr(store, "_refine_final_candidates_with_ocr", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(store, "_refine_final_candidates_with_vlm", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(store, "_apply_label_vocabulary", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(store, "_mark_candidates_against_existing_markers", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(store, "_assign_candidate_conflicts", lambda *_args, **_kwargs: None)
+
+    calls: dict[str, tuple[int, int, int] | None] = {"vocab_pixel": None, "recovery_pixel": None}
+
+    def fake_extract_label_vocabulary(preview_image, *args, **kwargs):
+        calls["vocab_pixel"] = preview_image.getpixel((0, 0))
+        return {"1", "2", "3"}
+
+    def fake_recover(preview_image, *args, **kwargs):
+        calls["recovery_pixel"] = preview_image.getpixel((0, 0))
+        return []
+
+    monkeypatch.setattr(store._candidate_vlm_recognizer, "extract_label_vocabulary", fake_extract_label_vocabulary)
+    monkeypatch.setattr(store, "_recover_missing_low_res_vocabulary_labels", fake_recover)
+
+    _, _, label_vocabulary = store._build_candidates(session, document_path)
+
+    assert label_vocabulary == {"1", "2", "3"}
+    assert calls["vocab_pixel"] == (17, 33, 65)
+    assert calls["recovery_pixel"] == (17, 33, 65)
+
+
+def test_recover_missing_labels_per_target_tries_text_path_before_tiles():
+    store = InMemorySessionStore()
+    preview = Image.new("RGB", (1200, 1600), color=(255, 255, 255))
+    recovered_candidate = CalloutCandidate(
+        bbox_x=628,
+        bbox_y=808,
+        bbox_width=24,
+        bbox_height=24,
+        center_x=640,
+        center_y=820,
+        kind=CandidateKind.TEXT,
+        score=260,
+        crop_url="/storage/demo/cand-8.png",
+        suggested_label="8",
+        suggested_confidence=0.97,
+        suggested_source="targeted-text-ocr",
+    )
+
+    store._build_relaxed_text_candidates = lambda *args, **kwargs: []
+    store._build_low_res_missing_label_text_candidates = lambda *args, **kwargs: [recovered_candidate]
+    store._build_low_res_missing_label_text_vlm_candidates = lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("text vlm should not run"))
+    store._build_low_res_missing_label_ocr_candidates = lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("circle ocr should not run"))
+    store._build_low_res_missing_label_vlm_candidates = lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("circle vlm should not run"))
+    store._build_low_res_letter_tile_candidates = lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("letter tile should not run"))
+    store._build_low_res_context_tile_candidates = lambda *args, **kwargs: (_ for _ in ()).throw(AssertionError("context tile should not run"))
+
+    result = store._recover_missing_labels_per_target(preview, [], [], {"8"})
+
+    assert [candidate.suggested_label for candidate in result if candidate.suggested_label] == ["8"]
+
+
+def test_missing_label_text_vlm_candidates_do_not_leak_existing_labels(monkeypatch):
+    store = InMemorySessionStore()
+    preview = Image.new("RGB", (1200, 1600), color=(255, 255, 255))
+    text_candidate = CalloutCandidate(
+        bbox_x=198,
+        bbox_y=148,
+        bbox_width=24,
+        bbox_height=24,
+        center_x=210,
+        center_y=160,
+        kind=CandidateKind.TEXT,
+        score=208,
+        crop_url="/storage/demo/text-13.png",
+        suggested_label="13",
+        suggested_confidence=0.92,
+        suggested_source="ocr",
+    )
+
+    monkeypatch.setattr(store, "_candidate_is_strongly_covered", lambda *args, **kwargs: False)
+    monkeypatch.setattr(store, "_infer_header_cutoff", lambda *args, **kwargs: None)
+    monkeypatch.setattr(store, "_build_candidate_ocr_crop", lambda *args, **kwargs: preview.crop((0, 0, 64, 64)))
+    monkeypatch.setattr(store, "_build_candidate_vlm_crop", lambda *args, **kwargs: preview.crop((0, 0, 64, 64)))
+    monkeypatch.setattr(store._candidate_recognizer, "recognize", lambda *args, **kwargs: CandidateSuggestion(label=None, confidence=0.0, source=None))
+    monkeypatch.setattr(store._candidate_vlm_recognizer, "is_enabled", lambda: True)
+    monkeypatch.setattr(store._candidate_vlm_recognizer, "recognize", lambda *args, **kwargs: CandidateSuggestion(label=None, confidence=0.0, source=None))
+
+    result = store._build_low_res_missing_label_text_vlm_candidates(
+        preview,
+        [text_candidate],
+        [],
+        allowed_labels={"8"},
+    )
+
+    assert result == []
+
+
+def test_locate_labels_uses_best_result_across_image_variants(monkeypatch):
+    recognizer = VisionLLMCandidateRecognizer()
+    preview = Image.new("RGB", (1200, 1600), color=(255, 255, 255))
+    variant_a = Image.new("RGB", (1200, 1600), color=(10, 10, 10))
+    variant_b = Image.new("RGB", (1200, 1600), color=(20, 20, 20))
+
+    monkeypatch.setattr(recognizer, "_openrouter_enabled", lambda: True)
+    monkeypatch.setattr(recognizer, "_prepare_vocabulary_images", lambda image, heavy_sheet=False: [variant_a, variant_b])
+
+    def fake_chat(payload_image, **kwargs):
+        if payload_image is variant_a:
+            return ('{"items":[{"label":"3","x":0.1,"y":0.2,"confidence":0.51}]}', "model-a")
+        return ('{"items":[{"label":"3","x":0.4,"y":0.6,"confidence":0.93}]}', "model-b")
+
+    monkeypatch.setattr(recognizer, "_openrouter_chat_json", fake_chat)
+
+    result = recognizer.locate_labels(preview, ["3"], heavy_sheet=True)
+
+    assert result == [{"label": "3", "x": 0.4, "y": 0.6, "confidence": 0.93}]
+
+
+def test_cap_header_cutoff_limits_over_aggressive_top_mask():
+    assert InMemorySessionStore._cap_header_cutoff(542.88, 1600) == 304.0
+    assert InMemorySessionStore._cap_header_cutoff(120.0, 1600) == 120.0
+    assert InMemorySessionStore._cap_header_cutoff(None, 1600) is None
+
+
+def test_cap_header_cutoff_keeps_first_real_callout_row_on_tall_pages():
+    # On the benchmark PDF render, labels 3 and 4 sit around y=443..476.
+    # A 22% cap masked them out; the lower cap must preserve that row.
+    assert InMemorySessionStore._cap_header_cutoff(542.88, 2262) == pytest.approx(429.78)
+
+
+def test_build_candidates_keeps_first_real_callout_row_after_header_cap(tmp_path, monkeypatch):
+    store = InMemorySessionStore()
+    document_path = tmp_path / "page.png"
+    Image.new("RGB", (1600, 2262), color=(255, 255, 255)).save(document_path)
+    session = AnnotationSession(title="demo")
+
+    monkeypatch.setattr(store._candidate_detector, "detect", lambda *_args, **_kwargs: [])
+    monkeypatch.setattr(
+        store._candidate_recognizer,
+        "detect_document_text",
+        lambda *_args, **_kwargs: [
+            DocumentTextRegion(
+                bbox_x=118.2,
+                bbox_y=427.0,
+                bbox_width=24.0,
+                bbox_height=31.4,
+                label="3",
+                confidence=0.99,
+                source="page-sharp|cluster-2",
+            ),
+            DocumentTextRegion(
+                bbox_x=117.0,
+                bbox_y=459.5,
+                bbox_width=27.3,
+                bbox_height=33.1,
+                label="4",
+                confidence=0.99,
+                source="page-sharp|cluster-2",
+            ),
+        ],
+    )
+    monkeypatch.setattr(store, "_infer_effective_header_cutoff", lambda *_args, **_kwargs: 542.88)
+    monkeypatch.setattr(store._candidate_vlm_recognizer, "extract_label_vocabulary", lambda *_args, **_kwargs: set())
+    monkeypatch.setattr(store, "_recover_missing_low_res_vocabulary_labels", lambda *_args, **_kwargs: [])
+    monkeypatch.setattr(store, "_refine_final_candidates_with_ocr", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(store, "_refine_final_candidates_with_vlm", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(store, "_apply_label_vocabulary", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(store, "_mark_candidates_against_existing_markers", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(store, "_assign_candidate_conflicts", lambda *_args, **_kwargs: None)
+
+    captured: dict[str, list[str]] = {}
+
+    def fake_compose(_session_id, _preview_image, base_candidates):
+        captured["labels"] = sorted(
+            {
+                candidate.suggested_label
+                for candidate in base_candidates
+                if candidate.suggested_label
+            }
+        )
+        return [], []
+
+    monkeypatch.setattr(store, "_compose_candidates", fake_compose)
+
+    store._build_candidates(session, document_path)
+
+    assert captured["labels"] == ["3", "4"]
+
+
+def test_vocabulary_focus_crop_removes_header_and_footer_bands():
+    store = InMemorySessionStore()
+    preview = Image.new("RGB", (1200, 1600), color=(255, 255, 255))
+    header_text = CalloutCandidate(
+        bbox_x=120,
+        bbox_y=120,
+        bbox_width=140,
+        bbox_height=40,
+        center_x=190,
+        center_y=140,
+        kind=CandidateKind.TEXT,
+        score=200,
+        crop_url="/storage/demo/header.png",
+        suggested_label="impulse",
+        suggested_confidence=0.99,
+        suggested_source="doc-text",
+    )
+    drawing_shape = CalloutCandidate(
+        bbox_x=180,
+        bbox_y=360,
+        bbox_width=760,
+        bbox_height=920,
+        center_x=560,
+        center_y=820,
+        kind=CandidateKind.BOX,
+        score=220,
+        crop_url="/storage/demo/body.png",
+        suggested_label=None,
+        suggested_confidence=None,
+        suggested_source=None,
+    )
+    footer_text = CalloutCandidate(
+        bbox_x=40,
+        bbox_y=1538,
+        bbox_width=16,
+        bbox_height=18,
+        center_x=48,
+        center_y=1547,
+        kind=CandidateKind.TEXT,
+        score=180,
+        crop_url="/storage/demo/footer.png",
+        suggested_label="4",
+        suggested_confidence=0.99,
+        suggested_source="doc-text",
+    )
+
+    crop = store._build_vocabulary_focus_crop(preview, [header_text, drawing_shape, footer_text], header_cutoff=220)
+
+    assert crop is not None
+    assert crop.size[0] < preview.size[0]
+    assert crop.size[1] < preview.size[1]
 
 
 def test_delete_session_removes_it_and_its_files(tmp_path, monkeypatch):

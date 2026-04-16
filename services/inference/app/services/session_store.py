@@ -504,7 +504,10 @@ class InMemorySessionStore:
                 candidate.updated_at = candidate.created_at
                 base_candidates.append(candidate)
 
-            text_header_cutoff = self._infer_effective_header_cutoff(preview_image, base_candidates)
+            text_header_cutoff = self._cap_header_cutoff(
+                self._infer_effective_header_cutoff(preview_image, base_candidates),
+                height,
+            )
             for region in self._candidate_recognizer.detect_document_text(preview_image):
                 review_status = CandidateReviewStatus.PENDING
                 acceptance_threshold = max(10.0, min(region.bbox_width, region.bbox_height) * 0.45)
@@ -546,21 +549,29 @@ class InMemorySessionStore:
                 base_candidates.append(candidate)
 
             min_side = min(width, height)
-            masked_preview = (
-                self._mask_top_region(preview_image, text_header_cutoff)
-                if text_header_cutoff
-                else preview_image
-            )
             low_res_circle_mode = min_side <= 1100 and len(raw_candidates) >= 180
             heavy_vlm_sheet = min_side <= 1600
             enable_vlm_vocabulary = low_res_circle_mode or heavy_vlm_sheet
             normalized_label_vocabulary: set[str] | None = None
             if enable_vlm_vocabulary:
                 label_vocabulary = self._candidate_vlm_recognizer.extract_label_vocabulary(
-                    masked_preview,
+                    preview_image,
                     max_tiles=settings.openai_vision_vocab_max_tiles,
                     heavy_sheet=heavy_vlm_sheet,
                 )
+                focus_crop = self._build_vocabulary_focus_crop(
+                    preview_image,
+                    base_candidates,
+                    text_header_cutoff,
+                )
+                if focus_crop is not None:
+                    focused_vocabulary = self._candidate_vlm_recognizer.extract_label_vocabulary(
+                        focus_crop,
+                        max_tiles=settings.openai_vision_vocab_max_tiles,
+                        heavy_sheet=heavy_vlm_sheet,
+                    )
+                    if focused_vocabulary:
+                        label_vocabulary = set(label_vocabulary or set()) | set(focused_vocabulary)
                 if label_vocabulary:
                     normalized_label_vocabulary = {normalize_label(label) for label in label_vocabulary}
             candidates, candidate_associations = self._compose_candidates(session.session_id, preview_image, base_candidates)
@@ -665,10 +676,11 @@ class InMemorySessionStore:
             if enable_vlm_vocabulary and label_vocabulary:
                 self._apply_label_vocabulary(candidates, label_vocabulary)
                 candidates = self._recover_missing_low_res_vocabulary_labels(
-                    masked_preview,
+                    preview_image,
                     base_candidates,
                     candidates,
                     label_vocabulary,
+                    prefer_targeted_only=not low_res_circle_mode,
                 )
                 self._apply_label_vocabulary(candidates, label_vocabulary)
             self._mark_candidates_against_existing_markers(candidates, accepted_markers)
@@ -809,7 +821,10 @@ class InMemorySessionStore:
         produced_candidates: list[CalloutCandidate],
         allowed_labels: set[str] | None = None,
     ) -> list[CalloutCandidate]:
-        header_cutoff = self._infer_header_cutoff(base_candidates, preview_image.width, preview_image.height)
+        header_cutoff = self._cap_header_cutoff(
+            self._infer_effective_header_cutoff(preview_image, base_candidates),
+            preview_image.height,
+        )
         fallback_pool = [
             candidate
             for candidate in base_candidates
@@ -864,7 +879,10 @@ class InMemorySessionStore:
         produced_candidates: list[CalloutCandidate],
         allowed_labels: set[str] | None = None,
     ) -> list[CalloutCandidate]:
-        header_cutoff = self._infer_header_cutoff(base_candidates, preview_image.width, preview_image.height)
+        header_cutoff = self._cap_header_cutoff(
+            self._infer_effective_header_cutoff(preview_image, base_candidates),
+            preview_image.height,
+        )
         pool = [
             candidate
             for candidate in base_candidates
@@ -946,7 +964,7 @@ class InMemorySessionStore:
         if not self._candidate_vlm_recognizer.is_enabled():
             return [], []
 
-        header_cutoff = self._infer_header_cutoff(base_candidates, preview_image.width, preview_image.height)
+        header_cutoff = self._infer_effective_header_cutoff(preview_image, base_candidates)
         pool = [
             candidate.model_copy(deep=True)
             for candidate in base_candidates
@@ -1046,7 +1064,7 @@ class InMemorySessionStore:
         if not self._candidate_vlm_recognizer.is_enabled():
             return [], []
 
-        header_cutoff = self._infer_header_cutoff(base_candidates, preview_image.width, preview_image.height)
+        header_cutoff = self._infer_effective_header_cutoff(preview_image, base_candidates)
         coverage_candidates = [
             candidate
             for candidate in produced_candidates
@@ -1119,7 +1137,7 @@ class InMemorySessionStore:
         if not self._candidate_vlm_recognizer.is_enabled():
             return [], []
 
-        header_cutoff = self._infer_header_cutoff(base_candidates, preview_image.width, preview_image.height)
+        header_cutoff = self._infer_effective_header_cutoff(preview_image, base_candidates)
         pool = [
             candidate.model_copy(deep=True)
             for candidate in base_candidates
@@ -1347,7 +1365,7 @@ class InMemorySessionStore:
         if not allowed_labels:
             return []
 
-        header_cutoff = self._infer_header_cutoff(base_candidates, preview_image.width, preview_image.height)
+        header_cutoff = self._infer_effective_header_cutoff(preview_image, base_candidates)
         pool = [
             candidate.model_copy(deep=True)
             for candidate in base_candidates
@@ -1391,7 +1409,7 @@ class InMemorySessionStore:
         if not allowed_labels:
             return []
 
-        header_cutoff = self._infer_header_cutoff(base_candidates, preview_image.width, preview_image.height)
+        header_cutoff = self._infer_effective_header_cutoff(preview_image, base_candidates)
         text_candidates = [candidate for candidate in base_candidates if candidate.kind == CandidateKind.TEXT]
         pool = [
             candidate.model_copy(deep=True)
@@ -1403,6 +1421,10 @@ class InMemorySessionStore:
         ]
         if not pool:
             return []
+        for candidate in pool:
+            candidate.suggested_label = None
+            candidate.suggested_confidence = None
+            candidate.suggested_source = None
 
         accepted: list[CalloutCandidate] = []
         limit = 160 if len(allowed_labels) <= 24 else 220
@@ -1577,53 +1599,72 @@ class InMemorySessionStore:
             return None
 
         header_limit = height * 0.35
-        candidates = self._build_relaxed_text_candidates(preview_image)
-        if not candidates:
+        regions = self._candidate_recognizer.detect_document_text(preview_image, include_tiles=False)
+        if not regions:
             return None
 
-        header_candidates = [
-            candidate
-            for candidate in candidates
-            if candidate.center_y <= header_limit
-            and candidate.bbox_width >= 60
-            and candidate.bbox_height >= 10
-            and candidate.center_x <= width * 0.7
+        header_min_width = max(120.0, width * 0.18)
+        header_min_height = max(16.0, height * 0.008)
+        header_regions = [
+            region
+            for region in regions
+            if (region.bbox_y + region.bbox_height / 2) <= header_limit
+            and region.bbox_width >= header_min_width
+            and region.bbox_height >= header_min_height
+            and (region.bbox_x + region.bbox_width) >= width * 0.18
+            and (region.bbox_x + region.bbox_width / 2) <= width * 0.78
         ]
-        use_density_fallback = not header_candidates
-        if len(header_candidates) == 1 and header_candidates[0].bbox_width < 140:
-            use_density_fallback = True
-
-        if not use_density_fallback:
-            cutoff = max(candidate.bbox_y + candidate.bbox_height for candidate in header_candidates) + 12
-            cutoff = min(cutoff, height * 0.45)
-            if cutoff <= 0:
-                return None
-            return cutoff
-
-        try:
-            import numpy as np  # type: ignore
-        except Exception:
+        if not header_regions:
             return None
 
-        target_width = 600
-        scale = min(1.0, target_width / float(width))
-        resized = preview_image.resize(
-            (max(1, int(width * scale)), max(1, int(height * scale))),
-            Image.LANCZOS,
-        ).convert("L")
-        arr = np.array(resized)
-        if arr.size == 0:
+        rows: list[dict[str, float]] = []
+        for region in sorted(header_regions, key=lambda item: item.bbox_y + item.bbox_height / 2):
+            center_y = region.bbox_y + region.bbox_height / 2
+            placed = False
+            for row in rows:
+                row_gate = max(region.bbox_height, row["max_h"]) * 1.2
+                if abs(center_y - row["center_y"]) <= row_gate:
+                    row["count"] += 1
+                    row["left"] = min(row["left"], region.bbox_x)
+                    row["right"] = max(row["right"], region.bbox_x + region.bbox_width)
+                    row["bottom"] = max(row["bottom"], region.bbox_y + region.bbox_height)
+                    row["center_y"] = (row["center_y"] * (row["count"] - 1) + center_y) / row["count"]
+                    row["max_h"] = max(row["max_h"], region.bbox_height)
+                    placed = True
+                    break
+            if not placed:
+                rows.append(
+                    {
+                        "count": 1.0,
+                        "left": region.bbox_x,
+                        "right": region.bbox_x + region.bbox_width,
+                        "bottom": region.bbox_y + region.bbox_height,
+                        "center_y": center_y,
+                        "max_h": region.bbox_height,
+                    }
+                )
+
+        qualified_rows = [
+            row
+            for row in rows
+            if (row["right"] - row["left"]) >= width * 0.22
+        ]
+        if not qualified_rows:
             return None
-        threshold = 210
-        dark = arr < threshold
-        row_density = dark.mean(axis=1)
-        max_row = int(min(arr.shape[0] * 0.45, arr.shape[0] - 1))
-        dense_rows = [idx for idx, val in enumerate(row_density[:max_row]) if val >= 0.02]
-        if not dense_rows:
-            return None
-        last_dense = max(dense_rows)
-        cutoff = (last_dense / max(1.0, scale)) + 12
-        cutoff = min(cutoff, height * 0.45)
+
+        qualified_rows.sort(key=lambda item: item["center_y"])
+        contiguous_rows = [qualified_rows[0]]
+        for row in qualified_rows[1:]:
+            previous = contiguous_rows[-1]
+            gap = row["center_y"] - previous["bottom"]
+            max_gap = max(42.0, previous["max_h"] * 1.6, row["max_h"] * 1.6)
+            if gap > max_gap:
+                break
+            contiguous_rows.append(row)
+
+        dense_bottom = max(row["bottom"] for row in contiguous_rows)
+        cutoff = dense_bottom + max(14.0, contiguous_rows[-1]["max_h"] * 0.35)
+        cutoff = min(cutoff, height * 0.24)
         if cutoff <= 0:
             return None
         return cutoff
@@ -1652,6 +1693,14 @@ class InMemorySessionStore:
         return cutoff
 
     @staticmethod
+    def _cap_header_cutoff(cutoff: float | None, image_height: int) -> float | None:
+        if cutoff is None:
+            return None
+        # Keep the header mask conservative so PDF/rendering differences do not
+        # erase the first real callout row on otherwise equivalent drawings.
+        return min(cutoff, max(160.0, image_height * 0.19))
+
+    @staticmethod
     def _mask_top_region(preview_image: Image.Image, cutoff: float) -> Image.Image:
         masked = preview_image.copy()
         draw = ImageDraw.Draw(masked)
@@ -1672,7 +1721,7 @@ class InMemorySessionStore:
         if not normalized_allowed:
             return []
 
-        header_cutoff = self._infer_header_cutoff(base_candidates, preview_image.width, preview_image.height)
+        header_cutoff = self._infer_effective_header_cutoff(preview_image, base_candidates)
         accepted: list[CalloutCandidate] = []
 
         min_side = min(preview_image.size)
@@ -1745,9 +1794,12 @@ class InMemorySessionStore:
         if not normalized_allowed:
             return []
 
-        header_cutoff = self._infer_header_cutoff(base_candidates, preview_image.width, preview_image.height)
+        header_cutoff = self._cap_header_cutoff(
+            self._infer_effective_header_cutoff(preview_image, base_candidates),
+            preview_image.height,
+        )
         if header_cutoff_override is not None:
-            header_cutoff = max(header_cutoff or 0.0, header_cutoff_override)
+            header_cutoff = max(header_cutoff or 0.0, self._cap_header_cutoff(header_cutoff_override, preview_image.height) or 0.0)
         items = self._candidate_vlm_recognizer.locate_labels(
             preview_image,
             sorted(normalized_allowed),
@@ -1809,6 +1861,129 @@ class InMemorySessionStore:
             return []
         return self._dedupe_composed_candidates(accepted)
 
+    def _build_targeted_missing_label_locator_candidates(
+        self,
+        preview_image: Image.Image,
+        base_candidates: list[CalloutCandidate],
+        produced_candidates: list[CalloutCandidate],
+        allowed_labels: set[str] | None = None,
+        header_cutoff_override: float | None = None,
+    ) -> list[CalloutCandidate]:
+        if not allowed_labels or not self._candidate_vlm_recognizer.is_enabled():
+            return []
+
+        normalized_allowed = sorted({normalize_label(label) for label in allowed_labels if normalize_label(label)})
+        if not normalized_allowed:
+            return []
+
+        header_cutoff = self._cap_header_cutoff(
+            self._infer_effective_header_cutoff(preview_image, base_candidates),
+            preview_image.height,
+        )
+        if header_cutoff_override is not None:
+            header_cutoff = max(header_cutoff or 0.0, self._cap_header_cutoff(header_cutoff_override, preview_image.height) or 0.0)
+
+        min_side = min(preview_image.size)
+        base_box_size = min(96.0, max(28.0, min_side * 0.032))
+        candidate_box_sizes = [
+            base_box_size,
+            min(112.0, base_box_size * 1.35),
+            min(136.0, base_box_size * 1.75),
+        ]
+        accepted: list[CalloutCandidate] = []
+
+        for label in normalized_allowed:
+            covered_pool = [*produced_candidates, *accepted]
+            if any(
+                normalize_label(candidate.suggested_label) == label
+                for candidate in covered_pool
+            ):
+                continue
+
+            items = self._candidate_vlm_recognizer.locate_labels(
+                preview_image,
+                [label],
+                heavy_sheet=True,
+            )
+            if not items:
+                continue
+
+            items = sorted(items, key=lambda item: float(item.get("confidence") or 0.0), reverse=True)[:2]
+            matched_candidate: CalloutCandidate | None = None
+            for item in items:
+                try:
+                    x = float(item.get("x"))
+                    y = float(item.get("y"))
+                    locate_confidence = float(item.get("confidence") or 0.0)
+                except Exception:
+                    continue
+                if not (0.0 <= x <= 1.0 and 0.0 <= y <= 1.0):
+                    continue
+
+                center_x = x * preview_image.width
+                center_y = y * preview_image.height
+                if header_cutoff is not None and center_y <= header_cutoff:
+                    continue
+
+                for box_size in candidate_box_sizes:
+                    candidate = CalloutCandidate(
+                        kind=CandidateKind.TEXT,
+                        center_x=center_x,
+                        center_y=center_y,
+                        bbox_x=max(0.0, center_x - box_size / 2),
+                        bbox_y=max(0.0, center_y - box_size / 2),
+                        bbox_width=min(box_size, preview_image.width),
+                        bbox_height=min(box_size, preview_image.height),
+                        score=float(max(locate_confidence, 0.0) * 100.0 + 40.0),
+                    )
+                    if self._candidate_is_strongly_covered(candidate, covered_pool):
+                        continue
+
+                    local_crop = self._build_candidate_ocr_crop(preview_image, candidate)
+                    local_suggestion = self._candidate_recognizer.recognize(local_crop, candidate.kind.value)
+                    local_label = normalize_label(local_suggestion.label)
+                    if local_label == label and (local_suggestion.confidence or 0.0) >= 0.52:
+                        candidate.suggested_label = label
+                        candidate.suggested_confidence = local_suggestion.confidence
+                        candidate.suggested_source = f"vlm-locate-target+ocr@{int(round(box_size))}"
+                        matched_candidate = candidate
+                        break
+
+                    vlm_crop = self._build_candidate_vlm_crop(preview_image, candidate)
+                    suggestion = self._candidate_vlm_recognizer.recognize(
+                        vlm_crop,
+                        candidate.kind.value,
+                        local_label=local_suggestion.label,
+                        local_confidence=local_suggestion.confidence,
+                        allowed_labels=[label.upper()],
+                        heavy_sheet=True,
+                        use_consensus=False,
+                    )
+                    suggestion_label = normalize_label(suggestion.label)
+                    if suggestion_label == label and (suggestion.confidence or 0.0) >= 0.55:
+                        candidate.suggested_label = label
+                        candidate.suggested_confidence = suggestion.confidence
+                        candidate.suggested_source = suggestion.source or f"vlm-locate-target@{int(round(box_size))}"
+                        matched_candidate = candidate
+                        break
+
+                    if locate_confidence >= 0.9 and label.isdigit() and len(label) <= 2:
+                        candidate.suggested_label = label
+                        candidate.suggested_confidence = locate_confidence
+                        candidate.suggested_source = f"vlm-locate-target@{int(round(box_size))}"
+                        matched_candidate = candidate
+                        break
+
+                if matched_candidate is not None:
+                    break
+
+            if matched_candidate is not None:
+                accepted.append(matched_candidate)
+
+        if not accepted:
+            return []
+        return self._dedupe_composed_candidates(accepted)
+
     def _build_low_res_missing_label_text_vlm_candidates(
         self,
         preview_image: Image.Image,
@@ -1819,7 +1994,10 @@ class InMemorySessionStore:
         if not allowed_labels or not self._candidate_vlm_recognizer.is_enabled():
             return []
 
-        header_cutoff = self._infer_header_cutoff(base_candidates, preview_image.width, preview_image.height)
+        header_cutoff = self._cap_header_cutoff(
+            self._infer_effective_header_cutoff(preview_image, base_candidates),
+            preview_image.height,
+        )
         text_candidates = [candidate for candidate in base_candidates if candidate.kind == CandidateKind.TEXT]
         pool = [
             candidate.model_copy(deep=True)
@@ -1831,6 +2009,10 @@ class InMemorySessionStore:
         ]
         if not pool:
             return []
+        for candidate in pool:
+            candidate.suggested_label = None
+            candidate.suggested_confidence = None
+            candidate.suggested_source = None
 
         accepted: list[CalloutCandidate] = []
         limit = 36 if len(allowed_labels) <= 16 else 48
@@ -1883,7 +2065,10 @@ class InMemorySessionStore:
         if not targeted_labels:
             return []
 
-        header_cutoff = self._infer_header_cutoff(base_candidates, preview_image.width, preview_image.height)
+        header_cutoff = self._cap_header_cutoff(
+            self._infer_effective_header_cutoff(preview_image, base_candidates),
+            preview_image.height,
+        )
         coverage_candidates = [
             candidate
             for candidate in produced_candidates
@@ -1942,6 +2127,8 @@ class InMemorySessionStore:
         base_candidates: list[CalloutCandidate],
         candidates: list[CalloutCandidate],
         vocabulary: set[str],
+        *,
+        prefer_targeted_only: bool = False,
     ) -> list[CalloutCandidate]:
         normalized_vocab = {normalize_label(label) for label in vocabulary if normalize_label(label)}
         if not normalized_vocab:
@@ -1995,6 +2182,80 @@ class InMemorySessionStore:
         if not missing:
             return recovered
 
+        targeted_locator_candidates = self._build_targeted_missing_label_locator_candidates(
+            preview_image,
+            base_candidates,
+            recovered,
+            allowed_labels=missing,
+            header_cutoff_override=self._infer_effective_header_cutoff(preview_image, base_candidates),
+        )
+        if targeted_locator_candidates:
+            recovered = self._dedupe_composed_candidates([*recovered, *targeted_locator_candidates])
+            recovered = self._prune_low_res_oversized_circle_candidates(recovered)
+            present = {
+                normalize_label(candidate.suggested_label)
+                for candidate in recovered
+                if normalize_label(candidate.suggested_label)
+            }
+            missing = normalized_vocab - present
+        if not missing:
+            return recovered
+
+        relaxed_text = self._build_relaxed_text_candidates(preview_image)
+        augmented_base = [*base_candidates, *relaxed_text] if relaxed_text else base_candidates
+
+        text_ocr = self._build_low_res_missing_label_text_candidates(
+            preview_image,
+            augmented_base,
+            recovered,
+            allowed_labels=missing,
+        )
+        if text_ocr:
+            recovered = self._dedupe_composed_candidates([*recovered, *text_ocr])
+            recovered = self._prune_low_res_oversized_circle_candidates(recovered)
+            present = {
+                normalize_label(candidate.suggested_label)
+                for candidate in recovered
+                if normalize_label(candidate.suggested_label)
+            }
+            missing = normalized_vocab - present
+            if not missing:
+                return recovered
+
+        if prefer_targeted_only and 0 < len(missing) <= 20:
+            if 1 < len(missing) <= 6:
+                text_vlm = self._build_low_res_missing_label_text_vlm_candidates(
+                    preview_image,
+                    augmented_base,
+                    recovered,
+                    allowed_labels=missing,
+                )
+                if text_vlm:
+                    recovered = self._dedupe_composed_candidates([*recovered, *text_vlm])
+                    recovered = self._prune_low_res_oversized_circle_candidates(recovered)
+                    present = {
+                        normalize_label(candidate.suggested_label)
+                        for candidate in recovered
+                        if normalize_label(candidate.suggested_label)
+                    }
+                    missing = normalized_vocab - present
+                    if not missing:
+                        return recovered
+            recovered = self._recover_missing_labels_per_target(
+                preview_image,
+                augmented_base,
+                recovered,
+                missing,
+            )
+            present = {
+                normalize_label(candidate.suggested_label)
+                for candidate in recovered
+                if normalize_label(candidate.suggested_label)
+            }
+            missing = normalized_vocab - present
+            recovered = self._dedupe_composed_candidates([*baseline_candidates, *recovered])
+            return self._prune_low_res_oversized_circle_candidates(recovered)
+
         direct_ocr = self._build_low_res_missing_label_ocr_candidates(
             preview_image,
             base_candidates,
@@ -2012,9 +2273,6 @@ class InMemorySessionStore:
             missing = normalized_vocab - present
         if not missing:
             return recovered
-
-        relaxed_text = self._build_relaxed_text_candidates(preview_image)
-        augmented_base = [*base_candidates, *relaxed_text] if relaxed_text else base_candidates
 
         text_ocr = self._build_low_res_missing_label_text_candidates(
             preview_image,
@@ -2177,6 +2435,138 @@ class InMemorySessionStore:
 
         recovered = self._dedupe_composed_candidates([*baseline_candidates, *recovered])
         return self._prune_low_res_oversized_circle_candidates(recovered)
+
+    def _recover_missing_labels_per_target(
+        self,
+        preview_image: Image.Image,
+        base_candidates: list[CalloutCandidate],
+        recovered: list[CalloutCandidate],
+        missing: set[str],
+    ) -> list[CalloutCandidate]:
+        relaxed_text = self._build_relaxed_text_candidates(preview_image)
+        augmented_base = [*base_candidates, *relaxed_text] if relaxed_text else base_candidates
+
+        for target_label in sorted(missing):
+            single_target = {target_label}
+
+            targeted_text_ocr = self._select_best_single_target_candidates(
+                self._build_low_res_missing_label_text_candidates(
+                    preview_image,
+                    augmented_base,
+                    recovered,
+                    allowed_labels=single_target,
+                ),
+                target_label,
+            )
+            if targeted_text_ocr:
+                recovered = self._dedupe_composed_candidates([*recovered, *targeted_text_ocr])
+                recovered = self._prune_low_res_oversized_circle_candidates(recovered)
+            present = {
+                normalize_label(candidate.suggested_label)
+                for candidate in recovered
+                if normalize_label(candidate.suggested_label)
+            }
+            if target_label in present:
+                continue
+
+            targeted_ocr = self._select_best_single_target_candidates(
+                self._build_low_res_missing_label_ocr_candidates(
+                    preview_image,
+                    base_candidates,
+                    recovered,
+                    allowed_labels=single_target,
+                ),
+                target_label,
+            )
+            if targeted_ocr:
+                recovered = self._dedupe_composed_candidates([*recovered, *targeted_ocr])
+                recovered = self._prune_low_res_oversized_circle_candidates(recovered)
+            present = {
+                normalize_label(candidate.suggested_label)
+                for candidate in recovered
+                if normalize_label(candidate.suggested_label)
+            }
+            if target_label in present:
+                continue
+
+            targeted_vlm = self._select_best_single_target_candidates(
+                self._build_low_res_missing_label_vlm_candidates(
+                    preview_image,
+                    base_candidates,
+                    recovered,
+                    allowed_labels=single_target,
+                ),
+                target_label,
+            )
+            if targeted_vlm:
+                recovered = self._dedupe_composed_candidates([*recovered, *targeted_vlm])
+                recovered = self._prune_low_res_oversized_circle_candidates(recovered)
+            present = {
+                normalize_label(candidate.suggested_label)
+                for candidate in recovered
+                if normalize_label(candidate.suggested_label)
+            }
+            if target_label in present:
+                continue
+
+            targeted_letter_tile, targeted_reviewed = self._build_low_res_letter_tile_candidates(
+                preview_image,
+                base_candidates,
+                recovered,
+                allowed_labels=single_target,
+            )
+            targeted_letter_tile = self._select_best_single_target_candidates(targeted_letter_tile, target_label)
+            if targeted_letter_tile:
+                recovered = self._prune_low_res_candidates_after_tile_review(
+                    recovered,
+                    targeted_letter_tile,
+                    targeted_reviewed,
+                )
+                recovered = self._dedupe_composed_candidates([*recovered, *targeted_letter_tile])
+                recovered = self._prune_low_res_oversized_circle_candidates(recovered)
+            present = {
+                normalize_label(candidate.suggested_label)
+                for candidate in recovered
+                if normalize_label(candidate.suggested_label)
+            }
+            if target_label in present:
+                continue
+
+            targeted_context_tile, targeted_context_reviewed = self._build_low_res_context_tile_candidates(
+                preview_image,
+                base_candidates,
+                recovered,
+                allowed_labels=single_target,
+            )
+            targeted_context_tile = self._select_best_single_target_candidates(targeted_context_tile, target_label)
+            if targeted_context_tile:
+                recovered = self._prune_low_res_candidates_after_tile_review(
+                    recovered,
+                    targeted_context_tile,
+                    targeted_context_reviewed,
+                )
+                recovered = self._dedupe_composed_candidates([*recovered, *targeted_context_tile])
+                recovered = self._prune_low_res_oversized_circle_candidates(recovered)
+
+        return recovered
+
+    def _select_best_single_target_candidates(
+        self,
+        candidates: list[CalloutCandidate],
+        target_label: str,
+    ) -> list[CalloutCandidate]:
+        if not candidates:
+            return []
+        normalized_target = normalize_label(target_label)
+        matching = [
+            candidate
+            for candidate in candidates
+            if normalize_label(candidate.suggested_label) == normalized_target
+        ]
+        if not matching:
+            return []
+        best = max(matching, key=self._candidate_quality)
+        return [best]
 
     @staticmethod
     def _dedupe_nearby_equal_labels(candidates: list[CalloutCandidate], max_distance: float = 48.0) -> list[CalloutCandidate]:
@@ -2823,7 +3213,10 @@ class InMemorySessionStore:
             candidate.candidate_id: self._text_neighbor_count(candidate, texts)
             for candidate in texts
         }
-        header_cutoff = self._infer_header_cutoff(base_candidates, preview_image.width, preview_image.height)
+        header_cutoff = self._cap_header_cutoff(
+            self._infer_effective_header_cutoff(preview_image, base_candidates),
+            preview_image.height,
+        )
         topology_observations = self._leader_topology.analyze(preview_image, [*circles, *boxes], header_cutoff)
         self._apply_topology_observations([*circles, *boxes], topology_observations)
         candidate_associations = self._build_candidate_associations(
@@ -2934,7 +3327,9 @@ class InMemorySessionStore:
             if self._should_keep_circle_candidate(circle_candidate, header_cutoff):
                 produced.append(circle_candidate)
 
-        return self._dedupe_composed_candidates(produced), candidate_associations
+        produced = self._dedupe_composed_candidates(produced)
+        produced = self._prune_shape_only_duplicates_by_label(produced)
+        return produced, candidate_associations
 
     def _build_candidate_associations(
         self,
@@ -3316,9 +3711,9 @@ class InMemorySessionStore:
         label = candidate.suggested_label or ""
         if not label.isdigit() or len(label) > 2:
             return False
-        if candidate.center_y < image_height * 0.93:
-            return False
-        if neighbor_count > 1:
+        # Page counters and footer badges are often tiny edge digits that OCR
+        # reads perfectly. They should never survive as drawing callouts.
+        if candidate.center_y < image_height * 0.92:
             return False
 
         near_left_edge = candidate.center_x <= image_width * 0.18
@@ -3327,7 +3722,17 @@ class InMemorySessionStore:
         if not (near_left_edge or near_center or near_right_edge):
             return False
 
-        return candidate.bbox_height <= 24 and candidate.bbox_width <= max(22.0, candidate.bbox_height * 1.4)
+        if candidate.bbox_height > max(24.0, image_height * 0.018):
+            return False
+        if candidate.bbox_width > max(22.0, candidate.bbox_height * 1.45):
+            return False
+
+        very_bottom = candidate.center_y >= image_height * 0.94 or (
+            candidate.bbox_y + candidate.bbox_height >= image_height * 0.952
+        )
+        edge_footer = near_left_edge or near_right_edge
+        isolated_footer = neighbor_count <= 2
+        return very_bottom and (edge_footer or (near_center and isolated_footer))
 
     @staticmethod
     def _should_keep_box_candidate(candidate: CalloutCandidate, header_cutoff: float | None) -> bool:
@@ -3491,6 +3896,51 @@ class InMemorySessionStore:
         deduped.sort(key=lambda item: (item.center_y, item.center_x))
         return deduped
 
+    @classmethod
+    def _prune_shape_only_duplicates_by_label(cls, candidates: list[CalloutCandidate]) -> list[CalloutCandidate]:
+        grouped: dict[str, list[CalloutCandidate]] = {}
+        for candidate in candidates:
+            normalized = normalize_label(candidate.suggested_label)
+            if not normalized:
+                continue
+            grouped.setdefault(normalized, []).append(candidate)
+
+        rejected_ids: set[str] = set()
+        for group in grouped.values():
+            if len(group) < 2:
+                continue
+            textual_evidence = [
+                candidate
+                for candidate in group
+                if cls._candidate_has_textual_label_evidence(candidate)
+                and (candidate.suggested_confidence or 0.0) >= 0.9
+            ]
+            if not textual_evidence:
+                continue
+            for candidate in group:
+                if cls._candidate_has_textual_label_evidence(candidate):
+                    continue
+                if candidate.kind not in {CandidateKind.CIRCLE, CandidateKind.BOX}:
+                    continue
+                if any(
+                    candidate.candidate_id != other.candidate_id
+                    and cls._candidate_quality(other) >= cls._candidate_quality(candidate) - 0.02
+                    for other in textual_evidence
+                ):
+                    rejected_ids.add(candidate.candidate_id)
+
+        if not rejected_ids:
+            return candidates
+
+        pruned: list[CalloutCandidate] = []
+        for candidate in candidates:
+            if candidate.candidate_id in rejected_ids:
+                candidate.review_status = CandidateReviewStatus.REJECTED
+                candidate.updated_at = datetime.utcnow()
+                continue
+            pruned.append(candidate)
+        return pruned
+
     @staticmethod
     def _candidate_quality(candidate: CalloutCandidate) -> float:
         confidence = candidate.suggested_confidence or 0.0
@@ -3517,6 +3967,39 @@ class InMemorySessionStore:
         return confidence * 0.58 + score_component * 0.19 + kind_bonus + label_bonus + source_bonus + topology_bonus
 
     @staticmethod
+    def _candidate_has_textual_label_evidence(candidate: CalloutCandidate) -> bool:
+        source = (candidate.suggested_source or "").lower()
+        if candidate.kind == CandidateKind.TEXT:
+            return True
+        return (
+            source.startswith("document-ocr:")
+            or source.startswith("tile-")
+            or source.startswith("vlm-locate")
+            or "+circle" in source
+            or "+box" in source
+        )
+
+    @classmethod
+    def _auto_marker_priority(cls, candidate: CalloutCandidate) -> tuple[float, float, float, float]:
+        confidence = candidate.suggested_confidence or 0.0
+        topology = candidate.topology_score or 0.0
+        quality = cls._candidate_quality(candidate)
+        support_bonus = 0.0
+        if cls._candidate_has_textual_label_evidence(candidate):
+            support_bonus += 0.22
+        elif candidate.kind in {CandidateKind.CIRCLE, CandidateKind.BOX}:
+            support_bonus -= 0.14
+        label = (candidate.suggested_label or "").strip()
+        if label.isdigit() and len(label) == 1 and candidate.kind in {CandidateKind.CIRCLE, CandidateKind.BOX}:
+            support_bonus -= 0.1
+        return (
+            quality + support_bonus,
+            confidence,
+            topology,
+            candidate.score,
+        )
+
+    @staticmethod
     def _apply_topology_observations(candidates: list[CalloutCandidate], observations: dict[str, object]) -> None:
         for candidate in candidates:
             observation = observations.get(candidate.candidate_id)
@@ -3529,21 +4012,23 @@ class InMemorySessionStore:
 
     def _build_auto_markers(self, session: AnnotationSession) -> tuple[list[Marker], int, int, int]:
         marker_groups: dict[str, list[CalloutCandidate]] = {}
+        pending_by_label: dict[str, list[CalloutCandidate]] = {}
         for candidate in session.candidates:
             if candidate.review_status != CandidateReviewStatus.PENDING or not candidate.suggested_label:
                 continue
             group_key = candidate.conflict_group or candidate.candidate_id
             marker_groups.setdefault(group_key, []).append(candidate)
+            pending_by_label.setdefault(normalize_label(candidate.suggested_label), []).append(candidate)
 
         auto_markers: list[Marker] = []
         auto_accepted = 0
         auto_review = 0
 
         for grouped_candidates in marker_groups.values():
-            ranked = sorted(grouped_candidates, key=self._candidate_quality, reverse=True)
+            ranked = sorted(grouped_candidates, key=self._auto_marker_priority, reverse=True)
             top_candidate = ranked[0]
-            top_quality = self._candidate_quality(top_candidate)
-            second_quality = self._candidate_quality(ranked[1]) if len(ranked) > 1 else 0.0
+            top_quality = self._auto_marker_priority(top_candidate)[0]
+            second_quality = self._auto_marker_priority(ranked[1])[0] if len(ranked) > 1 else 0.0
             has_candidate_ambiguity = self._candidate_has_pipeline_conflict(
                 top_candidate,
                 session.pipeline_conflicts,
@@ -3556,6 +4041,23 @@ class InMemorySessionStore:
 
             if top_quality < 0.34:
                 continue
+
+            same_label_candidates = pending_by_label.get(normalize_label(top_candidate.suggested_label), [])
+            if top_candidate.kind in {CandidateKind.CIRCLE, CandidateKind.BOX} and not self._candidate_has_textual_label_evidence(top_candidate):
+                stronger_textual_peer = next(
+                    (
+                        candidate
+                        for candidate in same_label_candidates
+                        if candidate.candidate_id != top_candidate.candidate_id
+                        and self._candidate_has_textual_label_evidence(candidate)
+                        and self._auto_marker_priority(candidate)[0] >= top_quality - 0.02
+                    ),
+                    None,
+                )
+                if stronger_textual_peer is not None:
+                    top_candidate.review_status = CandidateReviewStatus.REJECTED
+                    top_candidate.updated_at = datetime.utcnow()
+                    continue
 
             resolved_conflict = len(ranked) == 1 or top_quality >= second_quality + 0.08
             marker_status = (
@@ -3659,6 +4161,60 @@ class InMemorySessionStore:
         right = min(image.width, int(bbox_x + bbox_width + margin))
         bottom = min(image.height, int(bbox_y + bbox_height + margin))
         return image.crop((left, top, right, bottom))
+
+    def _build_vocabulary_focus_crop(
+        self,
+        preview_image: Image.Image,
+        base_candidates: list[CalloutCandidate],
+        header_cutoff: float | None,
+    ) -> Image.Image | None:
+        if not base_candidates:
+            return None
+
+        text_candidates = [candidate for candidate in base_candidates if candidate.kind == CandidateKind.TEXT]
+        text_neighbor_counts = {
+            candidate.candidate_id: self._text_neighbor_count(candidate, text_candidates)
+            for candidate in text_candidates
+        }
+
+        filtered: list[CalloutCandidate] = []
+        bottom_guard = preview_image.height * 0.96
+        for candidate in base_candidates:
+            if header_cutoff is not None and candidate.center_y <= header_cutoff:
+                continue
+            if candidate.center_y >= bottom_guard:
+                continue
+            if (
+                candidate.kind == CandidateKind.TEXT
+                and self._is_probable_footer_text_candidate(
+                    candidate,
+                    text_neighbor_counts.get(candidate.candidate_id, 0),
+                    preview_image.width,
+                    preview_image.height,
+                )
+            ):
+                continue
+            filtered.append(candidate)
+
+        if not filtered:
+            return None
+
+        pad = max(36, int(min(preview_image.width, preview_image.height) * 0.03))
+        left = max(0, int(min(candidate.bbox_x for candidate in filtered) - pad))
+        top = max(0, int(min(candidate.bbox_y for candidate in filtered) - pad))
+        right = min(
+            preview_image.width,
+            int(max(candidate.bbox_x + candidate.bbox_width for candidate in filtered) + pad),
+        )
+        bottom = min(
+            preview_image.height,
+            int(max(candidate.bbox_y + candidate.bbox_height for candidate in filtered) + pad),
+        )
+        if right - left < preview_image.width * 0.35 or bottom - top < preview_image.height * 0.25:
+            return None
+        if (right - left) * (bottom - top) >= preview_image.width * preview_image.height * 0.96:
+            return None
+        return preview_image.crop((left, top, right, bottom))
 
     def _build_candidate_ocr_crop(
         self,
@@ -3861,6 +4417,21 @@ class InMemorySessionStore:
         current_label = (candidate.suggested_label or "").strip().upper()
         proposed_label = (new_label or "").strip().upper()
         proposed_confidence = new_confidence or 0.0
+        normalized_new_source = (new_source or "").lower()
+
+        if candidate.kind == CandidateKind.TEXT and normalized_new_source.startswith(
+            ("openrouter-vlm:", "openai-vlm:", "gemini-vlm:")
+        ):
+            proposed_complex = "-" in proposed_label or any(char.isalpha() for char in proposed_label)
+            current_complex = "-" in current_label or any(char.isalpha() for char in current_label)
+            if proposed_complex and not current_complex:
+                if not current_label:
+                    return False
+                if not (
+                    proposed_label.startswith(current_label)
+                    or current_label.startswith(proposed_label)
+                ):
+                    return False
 
         if candidate.kind in {CandidateKind.CIRCLE, CandidateKind.BOX} and current_label and proposed_label:
             diameter = min(candidate.bbox_width, candidate.bbox_height)
