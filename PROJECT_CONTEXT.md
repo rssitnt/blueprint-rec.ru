@@ -1,6 +1,6 @@
 # Project Context
 
-Last updated: 2026-04-15
+Last updated: 2026-04-16
 
 ## Current product state
 
@@ -124,6 +124,33 @@ Last updated: 2026-04-15
   - verified after the fix:
     - one full run: `43/43`, includes `9`, does not invent bare `29`
     - second full run: `43/43`, includes `9`, does not invent bare `29`
+- New root fix on `2026-04-16`:
+  - `build_result_from_legacy_output(...)` had been accidentally broken during truth-guided edits
+  - the function could return `None`, which then crashed degraded fallback checks in the live job path
+  - fixed in:
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/job_runner.py`
+- Current no-table truth-guided behavior:
+  - full-page VLM truth now chooses which duplicate instance is the real one
+  - matched rows now keep the local detector center, but take the canonical truth label text
+  - truth-only points are still allowed when local detection has no usable center at all
+  - this avoids a bad regression where full-page truth label coordinates were sometimes less precise than local OCR centers
+- Visual benchmark check now matters more than raw counts:
+  - confirmed by direct image inspection after fresh live runs, not just saved old overlays
+  - fresh verified overlays:
+    - `page4.png`
+    - `image001.png`
+    - `test1.jpg`
+    - `page_06.png`
+    - `page_12.png`
+  - current visual state:
+    - `page4.png`: visually good
+    - `image001.png`: visually good
+    - `test1.jpg`: visually much cleaner than the old noisy 43/43 run; main callouts land plausibly on the real labels
+    - `page_06.png`: visually good
+    - `page_12.png`: visually good
+  - remaining practical gap:
+    - some dense sheets still finish with several `UNCERTAIN` truth-only points
+    - quality is now acceptable by hit-location on the checked benchmarks, but the next improvement should reduce review load, not chase row-count cosmetics
 
 ## Important backend fixes already present
 

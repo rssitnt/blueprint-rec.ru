@@ -139,6 +139,52 @@ class VisionLLMCandidateRecognizer:
 
         return list(best_by_label.values())
 
+    def extract_label_instances(
+        self,
+        image: Image.Image,
+        *,
+        heavy_sheet: bool = False,
+    ) -> list[dict[str, float | str]]:
+        if not self._openrouter_enabled():
+            return []
+
+        payload_images = self._prepare_vocabulary_images(image, heavy_sheet=heavy_sheet)
+        if not payload_images:
+            return []
+
+        prompt = (
+            "You are looking at one technical drawing page. "
+            "List every visible callout label instance on the page. "
+            "If the same label appears in multiple different places, return it multiple times. "
+            "Ignore logos, titles, section numbers, table text, and page numbers. "
+            "Return JSON only: "
+            "{\"items\":[{\"label\":\"40\",\"x\":0-1,\"y\":0-1,\"confidence\":0-1}]}. "
+            "x and y are normalized coordinates of the center of the printed label text itself on the full page. "
+            "Single-digit callouts matter. Do not guess missing labels."
+        )
+
+        collected: list[dict[str, float | str]] = []
+        for variant_index, payload_image in enumerate(payload_images):
+            output_text, _ = self._openrouter_chat_json(
+                payload_image=payload_image,
+                system_prompt="Return only valid JSON with a top-level 'items' array.",
+                user_prompt=prompt,
+                heavy_sheet=heavy_sheet,
+            )
+            collected.extend(self._parse_label_instances(output_text))
+            if heavy_sheet and variant_index == 0:
+                retry_text, _ = self._openrouter_chat_json(
+                    payload_image=payload_image,
+                    system_prompt="Return only valid JSON with a top-level 'items' array.",
+                    user_prompt=prompt,
+                    heavy_sheet=heavy_sheet,
+                )
+                collected.extend(self._parse_label_instances(retry_text))
+
+        if not collected:
+            return []
+        return self._merge_label_instances(collected)
+
     def recognize(
         self,
         crop: Image.Image,
@@ -588,6 +634,68 @@ class VisionLLMCandidateRecognizer:
             confidence = max(0.0, min(1.0, round(confidence, 4)))
             resolved.append((index, label, confidence))
         return resolved
+
+    def _parse_label_instances(self, output_text: str | None) -> list[dict[str, float | str]]:
+        if not output_text:
+            return []
+
+        match = re.search(r"\{.*\}", str(output_text), re.DOTALL)
+        raw_json = match.group(0) if match else str(output_text)
+        try:
+            payload = json.loads(raw_json)
+        except Exception:
+            return []
+
+        items = payload.get("items")
+        if not isinstance(items, list):
+            return []
+
+        resolved: list[dict[str, float | str]] = []
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            label = self._normalize_label(item.get("label"))
+            if not label:
+                continue
+            try:
+                x = float(item.get("x"))
+                y = float(item.get("y"))
+            except Exception:
+                continue
+            if not (0.0 <= x <= 1.0 and 0.0 <= y <= 1.0):
+                continue
+            try:
+                confidence = float(item.get("confidence", 0.0))
+            except Exception:
+                confidence = 0.0
+            confidence = max(0.0, min(1.0, round(confidence, 4)))
+            resolved.append({"label": label, "x": x, "y": y, "confidence": confidence})
+        return resolved
+
+    @staticmethod
+    def _merge_label_instances(items: list[dict[str, float | str]]) -> list[dict[str, float | str]]:
+        merged: list[dict[str, float | str]] = []
+        for item in sorted(items, key=lambda value: float(value.get("confidence", 0.0)), reverse=True):
+            label = str(item.get("label") or "").strip()
+            if not label:
+                continue
+            x = float(item.get("x", 0.0))
+            y = float(item.get("y", 0.0))
+            existing_index = next(
+                (
+                    index
+                    for index, existing in enumerate(merged)
+                    if str(existing.get("label") or "").strip() == label
+                    and ((float(existing.get("x", 0.0)) - x) ** 2 + (float(existing.get("y", 0.0)) - y) ** 2) ** 0.5 <= 0.06
+                ),
+                None,
+            )
+            if existing_index is None:
+                merged.append(item)
+                continue
+            if float(item.get("confidence", 0.0)) > float(merged[existing_index].get("confidence", 0.0)):
+                merged[existing_index] = item
+        return merged
 
     @classmethod
     def _prepare_vocabulary_images(cls, image: Image.Image, *, heavy_sheet: bool) -> list[Image.Image]:

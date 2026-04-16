@@ -10,12 +10,13 @@ import subprocess
 import sys
 from collections import Counter
 from dataclasses import dataclass
+from math import hypot
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
 import pypdfium2 as pdfium
 from openpyxl import Workbook, load_workbook
-from PIL import Image, UnidentifiedImageError
+from PIL import Image, ImageOps, UnidentifiedImageError
 
 from ..core.config import settings
 from ..models.job_schemas import (
@@ -37,12 +38,16 @@ from .result_exports import (
     write_result_zip,
     write_table_csv,
 )
+from .candidate_vlm_recognizer import VisionLLMCandidateRecognizer
+from .page_vocabulary import normalize_label
 from .session_store import InMemorySessionStore
 
 
 LABEL_CONFIDENCE_THRESHOLD = 0.70
 SAFE_NAME_RE = re.compile(r"[^A-Za-z0-9._-]+")
 NEAR_TIE_NOTE_TOKEN = "OCR near-tie ambiguity"
+CANONICAL_MIN_SIDE = 1600
+MAX_AUTOCONTRAST_CUTOFF = 1.0
 
 
 @dataclass(frozen=True)
@@ -77,6 +82,7 @@ class JobPageArtifact:
     source_json_path: Path | None
     width: int
     height: int
+    raster_path: Path | None = None
 
 
 @dataclass(frozen=True)
@@ -252,15 +258,51 @@ def prepare_labels_for_legacy_pipeline(labels_source: Path | None, work_dir: Pat
     return write_labels_xlsx(labels, labels_xlsx_path), labels
 
 
+def _canonicalize_drawing_image(image: Image.Image) -> Image.Image:
+    normalized = ImageOps.exif_transpose(image)
+    if normalized.mode not in {"RGB", "L"}:
+        normalized = normalized.convert("RGBA" if "A" in normalized.getbands() else "RGB")
+    if "A" in normalized.getbands():
+        background = Image.new("RGBA", normalized.size, (255, 255, 255, 255))
+        background.alpha_composite(normalized.convert("RGBA"))
+        normalized = background.convert("RGB")
+    else:
+        normalized = normalized.convert("RGB")
+
+    # Keep the pipeline deterministic across PDF renders and uploaded rasters.
+    grayscale = ImageOps.autocontrast(
+        normalized.convert("L"),
+        cutoff=MAX_AUTOCONTRAST_CUTOFF,
+        preserve_tone=True,
+    )
+    width, height = grayscale.size
+    min_side = min(width, height)
+    if min_side <= 0:
+        raise RuntimeError("Пустое изображение после нормализации.")
+    if min_side != CANONICAL_MIN_SIDE:
+        scale = CANONICAL_MIN_SIDE / float(min_side)
+        resized_size = (
+            max(1, int(round(width * scale))),
+            max(1, int(round(height * scale))),
+        )
+        grayscale = grayscale.resize(resized_size, Image.Resampling.LANCZOS)
+    return grayscale.convert("RGB")
+
+
+def _save_canonical_image(image: Image.Image, out_path: Path) -> tuple[Path, int, int]:
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    canonical = _canonicalize_drawing_image(image)
+    canonical.save(out_path, format="PNG")
+    width, height = canonical.size
+    return out_path, width, height
+
+
 def normalize_image_to_png(src_path: Path, out_path: Path) -> tuple[Path, int, int]:
     try:
         with Image.open(src_path) as image:
-            normalized = image.convert("RGB")
-            normalized.save(out_path, format="PNG")
-            width, height = normalized.size
+            return _save_canonical_image(image, out_path)
     except UnidentifiedImageError as exc:
         raise RuntimeError(f"Не удалось открыть изображение: {src_path.name}") from exc
-    return out_path, width, height
 
 
 def rasterize_pdf_pages(src_path: Path, out_dir: Path, scale: float = 2.0) -> list[PreparedDrawingPage]:
@@ -276,8 +318,7 @@ def rasterize_pdf_pages(src_path: Path, out_dir: Path, scale: float = 2.0) -> li
             bitmap = page.render(scale=scale)
             image = bitmap.to_pil().convert("RGB")
             out_path = out_dir / f"prepared-page-{page_index + 1:03d}.png"
-            image.save(out_path, format="PNG")
-            width, height = image.size
+            out_path, width, height = _save_canonical_image(image, out_path)
             prepared_pages.append(
                 PreparedDrawingPage(
                     page_index=page_index,
@@ -350,7 +391,25 @@ def _internal_candidate_quality(candidate: Any) -> tuple[float, float, float]:
     confidence = float(_parse_number(getattr(candidate, "suggested_confidence", None)) or 0.0)
     topology = float(_parse_number(getattr(candidate, "topology_score", None)) or 0.0)
     score = float(_parse_number(getattr(candidate, "score", None)) or 0.0)
-    return (confidence, topology, score)
+    kind = str(getattr(getattr(candidate, "kind", None), "value", getattr(candidate, "kind", "")) or "").strip().lower()
+    source = str(getattr(candidate, "suggested_source", "") or "").strip().lower()
+    label = str(getattr(candidate, "suggested_label", "") or "").strip()
+    evidence_bonus = 0.0
+    if kind == "text":
+        evidence_bonus += 0.24
+    if (
+        source.startswith("document-ocr:")
+        or source.startswith("tile-")
+        or source.startswith("vlm-locate")
+        or "+circle" in source
+        or "+box" in source
+    ):
+        evidence_bonus += 0.18
+    if kind in {"circle", "box"} and not evidence_bonus:
+        evidence_bonus -= 0.16
+    if label.isdigit() and len(label) == 1 and kind in {"circle", "box"}:
+        evidence_bonus -= 0.08
+    return (confidence + evidence_bonus, topology, score)
 
 
 def _build_internal_conflict_index(session: Any) -> dict[str, list[str]]:
@@ -1345,15 +1404,240 @@ def _compute_degraded_recognition_reason(
     return reason
 
 
+def _normalize_truth_instances(
+    raw_items: list[dict[str, float | str]],
+    *,
+    page_index: int,
+    page_width: int,
+    page_height: int,
+) -> list[dict[str, Any]]:
+    normalized: list[dict[str, Any]] = []
+    for item in raw_items:
+        label = str(item.get("label") or "").strip()
+        if not label:
+            continue
+        try:
+            x_norm = float(item.get("x"))
+            y_norm = float(item.get("y"))
+            confidence = float(item.get("confidence", 0.0))
+        except Exception:
+            continue
+        if not (0.0 <= x_norm <= 1.0 and 0.0 <= y_norm <= 1.0):
+            continue
+        normalized.append(
+            {
+                "label": label,
+                "normalized_label": normalize_label(label),
+                "page_index": page_index,
+                "x": x_norm * page_width,
+                "y": y_norm * page_height,
+                "confidence": max(0.0, min(1.0, confidence)),
+            }
+        )
+    return normalized
+
+
+def _build_no_table_truth_instances(
+    page_artifacts: list[JobPageArtifact] | None,
+) -> dict[int, list[dict[str, Any]]]:
+    if not page_artifacts:
+        return {}
+
+    recognizer = VisionLLMCandidateRecognizer()
+    if not recognizer.is_enabled():
+        return {}
+
+    truth_by_page: dict[int, list[dict[str, Any]]] = {}
+    for artifact in page_artifacts:
+        if artifact.raster_path is None or not artifact.raster_path.is_file():
+            continue
+        try:
+            with Image.open(artifact.raster_path) as page_image:
+                preview = ImageOps.exif_transpose(page_image).convert("RGB")
+        except Exception:
+            continue
+        heavy_sheet = min(preview.size) <= CANONICAL_MIN_SIDE
+        raw_items = recognizer.extract_label_instances(preview, heavy_sheet=heavy_sheet)
+        if not raw_items:
+            continue
+        normalized = _normalize_truth_instances(
+            raw_items,
+            page_index=artifact.page_index,
+            page_width=artifact.width,
+            page_height=artifact.height,
+        )
+        if normalized:
+            truth_by_page[artifact.page_index] = normalized
+    return truth_by_page
+
+
+def _truth_match_radius_px(
+    marker: Mapping[str, Any],
+    *,
+    page_width: int | None,
+    page_height: int | None,
+) -> float:
+    bbox = marker.get("bbox")
+    width = 0.0
+    height = 0.0
+    if isinstance(bbox, Mapping):
+        width = float(_parse_number(bbox.get("w")) or 0.0)
+        height = float(_parse_number(bbox.get("h")) or 0.0)
+    page_floor = 28.0
+    if page_width and page_height:
+        page_floor = max(page_floor, min(page_width, page_height) * 0.045)
+    return max(page_floor, max(width, height) * 1.9)
+
+
+def _match_marker_to_truth_instance(
+    marker: Mapping[str, Any],
+    truth_item: Mapping[str, Any],
+    *,
+    page_width: int | None,
+    page_height: int | None,
+) -> float | None:
+    center = marker.get("center")
+    if not isinstance(center, Mapping):
+        return None
+    marker_x = float(_parse_number(center.get("x")) or 0.0)
+    marker_y = float(_parse_number(center.get("y")) or 0.0)
+    truth_x = float(_parse_number(truth_item.get("x")) or 0.0)
+    truth_y = float(_parse_number(truth_item.get("y")) or 0.0)
+    distance = hypot(marker_x - truth_x, marker_y - truth_y)
+    radius = _truth_match_radius_px(marker, page_width=page_width, page_height=page_height)
+    if distance > radius:
+        return None
+    marker_score = _score_for_marker(marker) or 0.0
+    truth_confidence = float(_parse_number(truth_item.get("confidence")) or 0.0)
+    return marker_score + truth_confidence * 0.08 - (distance / max(radius, 1.0)) * 0.22
+
+
+def _apply_truth_guided_no_table_selection(
+    emitted_markers: list[dict[str, Any]],
+    held_back_rows: list[DrawingResultRow],
+    *,
+    page_truth_instances: Mapping[int, list[dict[str, Any]]] | None,
+    page_sizes_by_index: Mapping[int, tuple[int, int]] | None,
+    next_row_number: int,
+) -> tuple[list[DrawingResultRow], list[DrawingResultRow], int]:
+    if not emitted_markers or not page_truth_instances:
+        rows = []
+        for marker in emitted_markers:
+            label = str(marker.get("label") or "").strip()
+            row_number = int(marker.get("row") or next_row_number)
+            rows.append(_row_from_marker(marker, row_number=row_number, label=label))
+            next_row_number = max(next_row_number + 1, row_number + 1)
+        return rows, held_back_rows, 0
+
+    truth_labels_by_page: dict[int, set[str]] = {}
+    for page_index, items in page_truth_instances.items():
+        truth_labels_by_page[page_index] = {str(item.get("normalized_label") or "") for item in items if str(item.get("normalized_label") or "")}
+
+    selected_ids: set[int] = set()
+    matched_truth_keys: set[tuple[int, str, float, float]] = set()
+    rows: list[DrawingResultRow] = []
+    filtered_out_count = 0
+    markers_by_page_and_label: dict[tuple[int, str], list[tuple[int, dict[str, Any]]]] = {}
+    for marker_index, marker in enumerate(emitted_markers):
+        page_index = int(_parse_number(marker.get("_page_index")) or 0)
+        label_key = normalize_label(marker.get("label"))
+        if not label_key:
+            continue
+        markers_by_page_and_label.setdefault((page_index, label_key), []).append((marker_index, marker))
+
+    for page_index, truth_items in page_truth_instances.items():
+        page_width, page_height = (page_sizes_by_index or {}).get(page_index, (None, None))
+        for truth_item in sorted(truth_items, key=lambda item: float(item.get("confidence", 0.0)), reverse=True):
+            label_key = str(truth_item.get("normalized_label") or "")
+            candidates = [
+                (marker_index, marker)
+                for marker_index, marker in markers_by_page_and_label.get((page_index, label_key), [])
+                if marker_index not in selected_ids
+            ]
+            best: tuple[int, dict[str, Any], float] | None = None
+            for marker_index, marker in candidates:
+                match_score = _match_marker_to_truth_instance(
+                    marker,
+                    truth_item,
+                    page_width=page_width,
+                    page_height=page_height,
+                )
+                if match_score is None:
+                    continue
+                if best is None or match_score > best[2]:
+                    best = (marker_index, marker, match_score)
+            if best is None:
+                continue
+            marker_index, marker, _ = best
+            selected_ids.add(marker_index)
+            matched_truth_keys.add(
+                (
+                    page_index,
+                    label_key,
+                    float(_parse_number(truth_item.get("x")) or 0.0),
+                    float(_parse_number(truth_item.get("y")) or 0.0),
+                )
+            )
+            label = str(truth_item.get("label") or marker.get("label") or "").strip()
+            row_number = int(marker.get("row") or next_row_number)
+            rows.append(_row_from_marker(marker, row_number=row_number, label=label))
+            next_row_number = max(next_row_number + 1, row_number + 1)
+
+    for page_index, truth_items in page_truth_instances.items():
+        for truth_item in truth_items:
+            label_key = str(truth_item.get("normalized_label") or "")
+            truth_key = (
+                page_index,
+                label_key,
+                float(_parse_number(truth_item.get("x")) or 0.0),
+                float(_parse_number(truth_item.get("y")) or 0.0),
+            )
+            if truth_key in matched_truth_keys:
+                continue
+            if float(_parse_number(truth_item.get("confidence")) or 0.0) < 0.9:
+                continue
+            rows.append(_truth_only_row(truth_item, row_number=next_row_number))
+            next_row_number += 1
+
+    for marker_index, marker in enumerate(emitted_markers):
+        if marker_index in selected_ids:
+            continue
+        label = str(marker.get("label") or "").strip()
+        if not label:
+            continue
+        page_index = int(_parse_number(marker.get("_page_index")) or 0)
+        label_key = normalize_label(label)
+        truth_labels = truth_labels_by_page.get(page_index, set())
+        if label_key in truth_labels:
+            filtered_out_count += 1
+            held_back_rows.append(
+                _held_back_row_from_marker(
+                    marker,
+                    row_number=int(marker.get("row") or next_row_number),
+                    label=label,
+                    reason="Кандидат удержан: full-page truth нашёл для этой метки другое, более точное место.",
+                )
+            )
+            next_row_number += 1
+            continue
+        row_number = int(marker.get("row") or next_row_number)
+        rows.append(_row_from_marker(marker, row_number=row_number, label=label))
+        next_row_number = max(next_row_number + 1, row_number + 1)
+
+    rows.sort(key=lambda row: (row.page_index, row.center.y if row.center else 0.0, row.center.x if row.center else 0.0))
+    return rows, held_back_rows, filtered_out_count
+
+
 def _build_rows(
     markers: list[dict[str, Any]],
     expected_labels: list[str],
     *,
     page_sizes_by_index: Mapping[int, tuple[int, int]] | None = None,
+    page_truth_instances: Mapping[int, list[dict[str, Any]]] | None = None,
 ) -> tuple[list[DrawingResultRow], list[DrawingResultRow], list[str], list[str], int, int]:
     sorted_markers = sorted(markers, key=_marker_sort_key)
     if not expected_labels:
-        rows = []
+        emitted_markers: list[dict[str, Any]] = []
         held_back_rows: list[DrawingResultRow] = []
         filtered_out_count = 0
         discarded_count = 0
@@ -1418,8 +1702,15 @@ def _build_rows(
                     )
                 )
                 continue
-            row_number = int(marker.get("row") or index)
-            rows.append(_row_from_marker(marker, row_number=row_number, label=label))
+            emitted_markers.append(marker)
+        rows, held_back_rows, truth_filtered_out = _apply_truth_guided_no_table_selection(
+            emitted_markers,
+            held_back_rows,
+            page_truth_instances=page_truth_instances,
+            page_sizes_by_index=page_sizes_by_index,
+            next_row_number=len(sorted_markers) + 1,
+        )
+        filtered_out_count += truth_filtered_out
         return rows, held_back_rows, [], [], filtered_out_count, discarded_count
 
     def _marker_label_key(value: Any) -> str | None:
@@ -1625,10 +1916,12 @@ def build_result_from_legacy_output(
             all_markers.append(marker)
 
     page_sizes_by_index = {artifact.page_index: (artifact.width, artifact.height) for artifact in page_artifacts}
+    page_truth_instances = _build_no_table_truth_instances(page_artifacts) if not expected_labels else {}
     rows, held_back_rows, missing_labels, extra_detected_labels, filtered_out_count, discarded_count = _build_rows(
         all_markers,
         expected_labels,
         page_sizes_by_index=page_sizes_by_index,
+        page_truth_instances=page_truth_instances,
     )
     summary = _compute_summary(
         rows,
@@ -1674,6 +1967,25 @@ def build_result_from_legacy_output(
     )
 
 
+def _truth_only_row(truth_item: Mapping[str, Any], *, row_number: int) -> DrawingResultRow:
+    x = float(_parse_number(truth_item.get("x")) or 0.0)
+    y = float(_parse_number(truth_item.get("y")) or 0.0)
+    confidence = float(_parse_number(truth_item.get("confidence")) or 0.0)
+    page_index = int(_parse_number(truth_item.get("page_index")) or 0)
+    label = str(truth_item.get("label") or "").strip()
+    point = ResultPoint(x=x, y=y)
+    return DrawingResultRow(
+        row=row_number,
+        label=label,
+        page_index=page_index,
+        center=point,
+        top_left=point,
+        bbox=None,
+        final_score=max(0.0, min(1.0, confidence)),
+        status=DrawingResultRowStatus.UNCERTAIN,
+        note="Точка поставлена по full-page truth, локальный детектор не дал надёжного центра.",
+        source_kind="vlm_locator",
+    )
 def _build_pipeline_failure_result(
     *,
     job: DrawingJob,
@@ -2066,6 +2378,7 @@ def run_job_pipeline(job_dir: Path, job: DrawingJob) -> JobRunOutput:
                     source_json_path=page_source_json_artifact_path,
                     width=prepared_page.width,
                     height=prepared_page.height,
+                    raster_path=prepared_page.raster_path,
                 )
             )
             combined_source_payload["pages"].append(
@@ -2111,6 +2424,7 @@ def run_job_pipeline(job_dir: Path, job: DrawingJob) -> JobRunOutput:
                 source_json_path=None,
                 width=page.width,
                 height=page.height,
+                raster_path=page.raster_path,
             )
             for page in prepared_pages
         ]
