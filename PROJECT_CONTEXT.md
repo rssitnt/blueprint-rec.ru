@@ -163,6 +163,14 @@ Last updated: 2026-04-16
         - `29B`
     - `page_06.png`:
       - remaining uncertain `8` is now locally anchored too
+- Status semantics fix on `2026-04-16`:
+  - if a full-page truth point is refined all the way to an exact local OCR bbox, it is no longer kept in `UNCERTAIN`
+  - new rule:
+    - exact local bbox refinement -> `FOUND`
+    - suffix-confusion refinement like `29B <- 298` -> still `UNCERTAIN`
+    - confirmation without bbox -> still `UNCERTAIN`
+  - practical effect:
+    - review now better reflects actual geometry quality instead of over-reporting already-landed points as "спорные"
 - New suffix-confusion fix on `2026-04-16`:
   - dense sheets exposed a common OCR case where suffix labels like `29B` were read locally as `298`
   - fix in:
@@ -176,6 +184,15 @@ Last updated: 2026-04-16
   - verified on fresh `test1.jpg` run:
     - `29B` is no longer left as a coarse truth-only point
     - final overlay shows it anchored on the actual lower `29B` callout
+- Rejected experiment on `2026-04-16`:
+  - tried merging unresolved truth-only rows with nearby `held-back` local candidates
+  - local benefit:
+    - it could pull `7` and `30A` out of review on `test1.jpg`
+  - global downside:
+    - it also reintroduced false duplicate rows and noisy same-label echoes on dense sheets
+  - result:
+    - this path was reverted completely
+    - do not reuse it as a generic fix
 - Rejected experiment on `2026-04-16`:
   - blindly extending the local refinement crop radius further outward did recover one more label (`24`) on `test1.jpg`
   - but it also created new false local anchors and duplicate noise on the same sheet
@@ -194,8 +211,20 @@ Last updated: 2026-04-16
     - `test1.jpg`: visually much cleaner than the old noisy run; obvious false duplicate points like extra `7/8/22/41` were removed, and most remaining uncertain points now sit on locally anchored text instead of raw truth coordinates
     - `page_06.png`: visually good; leftover uncertain `8` is now locally anchored
     - `page_12.png`: visually good
+  - latest stable heavy-sheet checkpoint after the status fix:
+    - preserved run:
+      - `C:/projects/sites/blueprint-rec-2/.codex-smoke/live-verify/test1_20260416_statusfix/test1_20260416_170915`
+    - summary:
+      - `53` rows
+      - `50` found
+      - `3` uncertain
+    - the remaining uncertain labels on `test1.jpg` are:
+      - `30A`
+      - `7`
+      - `29B`
+    - all three were manually rechecked on crops and visually land on the actual callout circles; they remain in review only because the current generic local proof is still weaker than desired
   - remaining practical gap:
-    - dense sheet `test1.jpg` still has at least one coarse leftover (`24`) without local bbox in the clean branch
+    - dense sheet `test1.jpg` still has a few truth-guided points that visually land correctly but do not yet have a strong enough generic local proof to be promoted out of review
     - separate from geometry quality, `page_12.png` still needs a dedicated timing investigation if it starts hanging again; latest preserved `300s` and `600s` smoke runs completed successfully
 
 ## Important backend fixes already present

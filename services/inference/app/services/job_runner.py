@@ -2164,6 +2164,11 @@ def _refine_truth_only_row_from_local_crop(
                     h=round(region.bbox_height, 2),
                 ),
                 "final_score": max(float(truth_row.final_score or 0.0), float(region.confidence or 0.0)),
+                "status": (
+                    DrawingResultRowStatus.FOUND
+                    if match_score >= 0.999
+                    else DrawingResultRowStatus.UNCERTAIN
+                ),
                 "note": (
                     "Точка поставлена по full-page truth и уточнена локальным OCR рядом с меткой."
                     if match_score >= 0.999
@@ -2175,6 +2180,66 @@ def _refine_truth_only_row_from_local_crop(
 
     if require_local_match:
         return None
+
+    extended_exact_region = None
+    extended_exact_score = None
+    for crop_radius in [280, 340]:
+        left = max(0, int(round(x - crop_radius)))
+        top = max(0, int(round(y - crop_radius)))
+        right = min(image.width, int(round(x + crop_radius)))
+        bottom = min(image.height, int(round(y + crop_radius)))
+        if right - left < 24 or bottom - top < 24:
+            continue
+        crop = image.crop((left, top, right, bottom))
+        local = local_recognizer.recognize(crop, "text")
+        vlm_recognizer = VisionLLMCandidateRecognizer()
+        vlm_confirmed = False
+        if normalize_label(local.label) == normalized_label and (local.confidence or 0.0) >= 0.72:
+            vlm_confirmed = True
+        elif vlm_recognizer.is_enabled():
+            vlm = vlm_recognizer.recognize(
+                crop,
+                "text",
+                allowed_labels=[label],
+                use_consensus=False,
+                heavy_sheet=bool(min_side <= CANONICAL_MIN_SIDE),
+            )
+            vlm_confirmed = normalize_label(vlm.label) == normalized_label and (vlm.confidence or 0.0) >= 0.82
+        if not vlm_confirmed:
+            continue
+
+        regions = local_recognizer.detect_document_text(crop, include_tiles=True)
+        for region in regions:
+            if _targeted_label_match_score(region.label, label) < 0.999:
+                continue
+            if float(region.confidence or 0.0) < 0.72:
+                continue
+            abs_center_x = left + region.bbox_x + region.bbox_width / 2.0
+            abs_center_y = top + region.bbox_y + region.bbox_height / 2.0
+            distance = hypot(abs_center_x - x, abs_center_y - y)
+            score = float(region.confidence or 0.0) - (distance / max(crop_radius * 7.0, 1.0))
+            if extended_exact_region is None or extended_exact_score is None or score > extended_exact_score:
+                extended_exact_region = (left, top, region, abs_center_x, abs_center_y)
+                extended_exact_score = score
+        if extended_exact_region is not None:
+            left, top, region, abs_center_x, abs_center_y = extended_exact_region
+            truth_row = _truth_only_row(truth_item, row_number=row_number)
+            return truth_row.model_copy(
+                update={
+                    "center": ResultPoint(x=round(abs_center_x, 2), y=round(abs_center_y, 2)),
+                    "top_left": ResultPoint(x=round(left + region.bbox_x, 2), y=round(top + region.bbox_y, 2)),
+                    "bbox": ResultBoundingBox(
+                        x=round(left + region.bbox_x, 2),
+                        y=round(top + region.bbox_y, 2),
+                        w=round(region.bbox_width, 2),
+                        h=round(region.bbox_height, 2),
+                    ),
+                    "final_score": max(float(_parse_number(truth_item.get("confidence")) or 0.0), float(region.confidence or 0.0)),
+                    "status": DrawingResultRowStatus.FOUND,
+                    "note": "Точка поставлена по full-page truth и уточнена локальным OCR в расширенном локальном окне.",
+                    "source_kind": "vlm_locator_refined",
+                }
+            )
 
     left = max(0, int(round(x - 140)))
     top = max(0, int(round(y - 140)))
