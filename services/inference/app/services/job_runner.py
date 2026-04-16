@@ -1606,13 +1606,16 @@ def _apply_truth_guided_no_table_selection(
                 continue
             if float(_parse_number(truth_item.get("confidence")) or 0.0) < 0.9:
                 continue
+            refined_truth_row = _refine_truth_only_row_from_local_crop(
+                truth_item,
+                raster_path=(page_raster_paths_by_index or {}).get(page_index),
+                page_width=(page_sizes_by_index or {}).get(page_index, (None, None))[0],
+                page_height=(page_sizes_by_index or {}).get(page_index, (None, None))[1],
+                row_number=next_row_number,
+                require_local_match=bool(same_label_rows_by_page.get(label_key)),
+            )
             if same_label_rows_by_page.get(label_key):
-                if not _truth_only_crop_confirms_label(
-                    truth_item,
-                    raster_path=(page_raster_paths_by_index or {}).get(page_index),
-                    page_width=(page_sizes_by_index or {}).get(page_index, (None, None))[0],
-                    page_height=(page_sizes_by_index or {}).get(page_index, (None, None))[1],
-                ):
+                if refined_truth_row is None:
                     held_back_rows.append(
                         _truth_only_row(
                             truth_item,
@@ -1628,7 +1631,7 @@ def _apply_truth_guided_no_table_selection(
                     )
                     next_row_number += 1
                     continue
-            rows.append(_truth_only_row(truth_item, row_number=next_row_number))
+            rows.append(refined_truth_row or _truth_only_row(truth_item, row_number=next_row_number))
             same_label_rows_by_page.setdefault(label_key, []).append(rows[-1])
             next_row_number += 1
 
@@ -2041,53 +2044,113 @@ def _truth_only_duplicate_radius_px(page_width: int | None, page_height: int | N
     return base
 
 
-def _truth_only_crop_confirms_label(
+def _refine_truth_only_row_from_local_crop(
     truth_item: Mapping[str, Any],
     *,
     raster_path: Path | None,
     page_width: int | None,
     page_height: int | None,
-) -> bool:
+    row_number: int,
+    require_local_match: bool,
+) -> DrawingResultRow | None:
     if raster_path is None or not raster_path.is_file():
-        return False
+        return None
 
     label = str(truth_item.get("label") or "").strip()
     normalized_label = normalize_label(label)
     if not normalized_label:
-        return False
+        return None
 
     x = float(_parse_number(truth_item.get("x")) or 0.0)
     y = float(_parse_number(truth_item.get("y")) or 0.0)
     if x <= 0 or y <= 0:
-        return False
+        return None
 
     try:
         with Image.open(raster_path) as source_image:
             image = ImageOps.exif_transpose(source_image).convert("RGB")
     except Exception:
-        return False
-
-    min_side = min(image.size)
-    crop_radius = max(84, int(min_side * 0.07))
+        return None
+    local_recognizer = DrawingCandidateRecognizer()
+    search_radii = [120, 160, 220]
     if len(label) >= 3:
-        crop_radius = max(crop_radius, 110)
+        search_radii = [160, 220, 280]
 
-    left = max(0, int(round(x - crop_radius)))
-    top = max(0, int(round(y - crop_radius)))
-    right = min(image.width, int(round(x + crop_radius)))
-    bottom = min(image.height, int(round(y + crop_radius)))
+    best_region = None
+    best_region_score = None
+    min_side = min(image.size)
+    for crop_radius in search_radii:
+        left = max(0, int(round(x - crop_radius)))
+        top = max(0, int(round(y - crop_radius)))
+        right = min(image.width, int(round(x + crop_radius)))
+        bottom = min(image.height, int(round(y + crop_radius)))
+        if right - left < 24 or bottom - top < 24:
+            continue
+
+        crop = image.crop((left, top, right, bottom))
+        regions = local_recognizer.detect_document_text(crop, include_tiles=True)
+        exact_regions = [
+            region
+            for region in regions
+            if normalize_label(region.label) == normalized_label and (region.confidence or 0.0) >= 0.7
+        ]
+        if not exact_regions:
+            continue
+
+        for region in exact_regions:
+            abs_center_x = left + region.bbox_x + region.bbox_width / 2.0
+            abs_center_y = top + region.bbox_y + region.bbox_height / 2.0
+            distance = hypot(abs_center_x - x, abs_center_y - y)
+            score = float(region.confidence or 0.0) - (distance / max(crop_radius * 6.0, 1.0))
+            if best_region is None or best_region_score is None or score > best_region_score:
+                best_region = (left, top, region, abs_center_x, abs_center_y)
+                best_region_score = score
+        if best_region is not None and best_region_score is not None and best_region_score >= 0.55:
+            break
+
+    if best_region is not None:
+        left, top, region, abs_center_x, abs_center_y = best_region
+        truth_row = _truth_only_row(truth_item, row_number=row_number)
+        return truth_row.model_copy(
+            update={
+                "center": ResultPoint(x=round(abs_center_x, 2), y=round(abs_center_y, 2)),
+                "top_left": ResultPoint(x=round(left + region.bbox_x, 2), y=round(top + region.bbox_y, 2)),
+                "bbox": ResultBoundingBox(
+                    x=round(left + region.bbox_x, 2),
+                    y=round(top + region.bbox_y, 2),
+                    w=round(region.bbox_width, 2),
+                    h=round(region.bbox_height, 2),
+                ),
+                "final_score": max(float(truth_row.final_score or 0.0), float(region.confidence or 0.0)),
+                "note": "Точка поставлена по full-page truth и уточнена локальным OCR рядом с меткой.",
+                "source_kind": "vlm_locator_refined",
+            }
+        )
+
+    if require_local_match:
+        return None
+
+    left = max(0, int(round(x - 140)))
+    top = max(0, int(round(y - 140)))
+    right = min(image.width, int(round(x + 140)))
+    bottom = min(image.height, int(round(y + 140)))
     if right - left < 24 or bottom - top < 24:
-        return False
+        return None
 
     crop = image.crop((left, top, right, bottom))
-    local_recognizer = DrawingCandidateRecognizer()
     local = local_recognizer.recognize(crop, "text")
     if normalize_label(local.label) == normalized_label and (local.confidence or 0.0) >= 0.72:
-        return True
+        return _truth_only_row(truth_item, row_number=row_number).model_copy(
+            update={
+                "note": "Точка поставлена по full-page truth; локальный OCR подтвердил метку рядом, но не дал bbox.",
+                "source_kind": "vlm_locator_confirmed",
+                "final_score": max(float(_parse_number(truth_item.get('confidence')) or 0.0), float(local.confidence or 0.0)),
+            }
+        )
 
     vlm_recognizer = VisionLLMCandidateRecognizer()
     if not vlm_recognizer.is_enabled():
-        return False
+        return None
     vlm = vlm_recognizer.recognize(
         crop,
         "text",
@@ -2095,7 +2158,15 @@ def _truth_only_crop_confirms_label(
         use_consensus=False,
         heavy_sheet=bool(min_side <= CANONICAL_MIN_SIDE),
     )
-    return normalize_label(vlm.label) == normalized_label and (vlm.confidence or 0.0) >= 0.82
+    if normalize_label(vlm.label) == normalized_label and (vlm.confidence or 0.0) >= 0.82:
+        return _truth_only_row(truth_item, row_number=row_number).model_copy(
+            update={
+                "note": "Точка поставлена по full-page truth; локальная VLM-проверка подтвердила метку рядом.",
+                "source_kind": "vlm_locator_confirmed",
+                "final_score": max(float(_parse_number(truth_item.get('confidence')) or 0.0), float(vlm.confidence or 0.0)),
+            }
+        )
+    return None
 
 
 def _suppress_redundant_truth_only_rows(

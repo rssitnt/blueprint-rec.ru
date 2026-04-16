@@ -146,6 +146,23 @@ Last updated: 2026-04-16
     - otherwise re-checks a local crop around that place
     - keeps it only if the crop confirms the same label
   - this reduced obvious false duplicate points on dense benchmark sheets like `test1.jpg`
+- New local-anchor fix on `2026-04-16`:
+  - many remaining `UNCERTAIN` points were not actually "missing"; local page OCR could already see the exact label nearby, but the pipeline still kept the coarse full-page truth coordinate
+  - fix in:
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/job_runner.py`
+  - new behavior:
+    - truth-only rows now try to snap onto a local text bbox around the truth point
+    - search radius expands in steps instead of using one fixed crop
+    - if an exact local text region is found, final row keeps truth label but uses local bbox and local center
+    - only if no local region is found does the row stay as a coarse truth-only point
+  - result on fresh visual reruns:
+    - `test1.jpg`:
+      - many old coarse truth-only points became locally anchored:
+        - `5, 13, 9, 10, 15, 17, 3, 39, 18, 24, 25, 29A, 33, 42, 34, 31, 36`
+      - one obvious coarse leftover still remains:
+        - `29B`
+    - `page_06.png`:
+      - remaining uncertain `8` is now locally anchored too
 - Visual benchmark check now matters more than raw counts:
   - confirmed by direct image inspection after fresh live runs, using final overlays rendered from `result.json`, not raw legacy overlays
   - fresh verified overlays:
@@ -157,12 +174,12 @@ Last updated: 2026-04-16
   - current visual state:
     - `page4.png`: visually good
     - `image001.png`: visually good
-    - `test1.jpg`: visually much cleaner than the old noisy run; obvious false duplicate points like extra `7/8/22/41` were removed
-    - `page_06.png`: visually good
+    - `test1.jpg`: visually much cleaner than the old noisy run; obvious false duplicate points like extra `7/8/22/41` were removed, and most remaining uncertain points now sit on locally anchored text instead of raw truth coordinates
+    - `page_06.png`: visually good; leftover uncertain `8` is now locally anchored
     - `page_12.png`: visually good
   - remaining practical gap:
-    - some dense sheets still finish with several `UNCERTAIN` truth-only points that are visually plausible but still not locally proven
-    - next improvement should keep reducing review-only points on dense exploded views without throwing away real duplicate labels
+    - dense sheet `test1.jpg` still has one coarse leftover (`29B`) without local bbox
+    - separate from geometry quality, `page_12.png` can still hang for a very long time on fresh reruns; this is a performance / timeout issue, not a new visual-hit regression
 
 ## Important backend fixes already present
 
