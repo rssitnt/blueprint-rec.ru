@@ -674,6 +674,7 @@ class InMemorySessionStore:
                 allowed_labels=normalized_label_vocabulary,
             )
             if enable_vlm_vocabulary and label_vocabulary:
+                label_vocabulary = self._stabilize_explicit_vocabulary(label_vocabulary, candidates)
                 self._apply_label_vocabulary(candidates, label_vocabulary)
                 candidates = self._recover_missing_low_res_vocabulary_labels(
                     preview_image,
@@ -1275,6 +1276,65 @@ class InMemorySessionStore:
                 candidate.suggested_confidence = None
                 candidate.suggested_source = None
                 candidate.updated_at = datetime.utcnow()
+
+    @staticmethod
+    def _candidate_can_rescue_explicit_vocabulary(candidate: CalloutCandidate) -> bool:
+        label = normalize_label(candidate.suggested_label)
+        confidence = candidate.suggested_confidence or 0.0
+        if not label or candidate.review_status == CandidateReviewStatus.REJECTED:
+            return False
+
+        source = (candidate.suggested_source or "").lower()
+        if source.startswith("openrouter-vlm:") or source.startswith("openai-vlm:"):
+            return False
+        if source.startswith("tile-vlm-consensus:") or source.startswith("tile-vlm:") or source.startswith("tile-openrouter-vlm:"):
+            return False
+
+        cluster_match = re.search(r"\|cluster-(\d+)", source)
+        cluster_support = int(cluster_match.group(1)) if cluster_match else 1
+        local_text_source = (
+            source.startswith("page-")
+            or source.startswith("tile-")
+            or source.startswith("document-ocr:")
+            or source.startswith("vlm-locate+ocr")
+        )
+
+        if candidate.kind == CandidateKind.TEXT and local_text_source:
+            if label.isdigit():
+                return confidence >= 0.98 and cluster_support >= 2
+            return False
+        if candidate.kind in {CandidateKind.CIRCLE, CandidateKind.BOX}:
+            if label.isdigit():
+                return confidence >= 0.985
+            return False
+        return False
+
+    @classmethod
+    def _stabilize_explicit_vocabulary(
+        cls,
+        vocabulary: set[str],
+        candidates: list[CalloutCandidate],
+    ) -> set[str]:
+        stabilized = {label for label in vocabulary if normalize_label(label)}
+        normalized_stabilized = {normalize_label(label) for label in stabilized if normalize_label(label)}
+        for candidate in candidates:
+            if not cls._candidate_can_rescue_explicit_vocabulary(candidate):
+                continue
+            normalized = normalize_label(candidate.suggested_label)
+            if not normalized:
+                continue
+            if normalized.isdigit():
+                if any(
+                    item.startswith(normalized)
+                    and len(item) > len(normalized)
+                    and not item[len(normalized)].isdigit()
+                    for item in normalized_stabilized
+                ):
+                    continue
+            if candidate.suggested_label:
+                stabilized.add(candidate.suggested_label)
+                normalized_stabilized.add(normalized)
+        return stabilized
 
     @staticmethod
     def _label_allowed(allowed_labels: set[str] | None, label: str | None) -> bool:

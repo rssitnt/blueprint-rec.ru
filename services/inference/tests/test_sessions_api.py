@@ -639,6 +639,70 @@ def test_build_candidates_keeps_first_real_callout_row_after_header_cap(tmp_path
     assert captured["labels"] == ["3", "4"]
 
 
+def test_stabilize_explicit_vocabulary_keeps_strong_local_numeric_label():
+    candidate = CalloutCandidate(
+        bbox_x=118.2,
+        bbox_y=427.0,
+        bbox_width=24.0,
+        bbox_height=31.4,
+        center_x=130.2,
+        center_y=442.7,
+        kind=CandidateKind.TEXT,
+        score=240.0,
+        crop_url="/storage/demo/9.png",
+        suggested_label="9",
+        suggested_confidence=0.99,
+        suggested_source="page-sharp|cluster-2",
+    )
+
+    stabilized = InMemorySessionStore._stabilize_explicit_vocabulary({"1", "2"}, [candidate])
+
+    assert stabilized == {"1", "2", "9"}
+
+
+def test_apply_label_vocabulary_keeps_rescued_local_numeric_label():
+    candidate = CalloutCandidate(
+        bbox_x=118.2,
+        bbox_y=427.0,
+        bbox_width=24.0,
+        bbox_height=31.4,
+        center_x=130.2,
+        center_y=442.7,
+        kind=CandidateKind.TEXT,
+        score=240.0,
+        crop_url="/storage/demo/9.png",
+        suggested_label="9",
+        suggested_confidence=0.99,
+        suggested_source="page-sharp|cluster-2",
+    )
+
+    vocabulary = InMemorySessionStore._stabilize_explicit_vocabulary({"1", "2"}, [candidate])
+    InMemorySessionStore._apply_label_vocabulary([candidate], vocabulary)
+
+    assert candidate.suggested_label == "9"
+
+
+def test_stabilize_explicit_vocabulary_does_not_rescue_bare_number_if_suffix_variants_exist():
+    candidate = CalloutCandidate(
+        bbox_x=118.2,
+        bbox_y=427.0,
+        bbox_width=24.0,
+        bbox_height=31.4,
+        center_x=130.2,
+        center_y=442.7,
+        kind=CandidateKind.TEXT,
+        score=240.0,
+        crop_url="/storage/demo/29.png",
+        suggested_label="29",
+        suggested_confidence=0.99,
+        suggested_source="page-sharp|cluster-2",
+    )
+
+    stabilized = InMemorySessionStore._stabilize_explicit_vocabulary({"29a", "29b"}, [candidate])
+
+    assert stabilized == {"29a", "29b"}
+
+
 def test_vocabulary_focus_crop_removes_header_and_footer_bands():
     store = InMemorySessionStore()
     preview = Image.new("RGB", (1200, 1600), color=(255, 255, 255))

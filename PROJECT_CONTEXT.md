@@ -109,6 +109,21 @@ Last updated: 2026-04-15
   - measured full `_build_candidates(...)` time after the fix:
     - canonical PNG: about `263s`
     - PDF render: about `143s`
+- Heavy-sheet stability improved on `C:/projects/sites/blueprint-rec-2/blueprints-test/test1.jpg`:
+  - current heavy benchmark result:
+    - full set `43/43`
+    - labels:
+      - `1..42` plus `29A`, `29B`, `30A`
+  - important stabilization change:
+    - explicit VLM vocabulary is still primary truth
+    - but now a very strong local numeric page-OCR label can rescue itself from being wiped by a one-off VLM omission
+  - protection is intentionally narrow:
+    - rescue applies only to simple numeric labels
+    - requires very high confidence and repeated OCR support
+    - bare numeric labels are not allowed to override more specific truth variants like `29A/29B`
+  - verified after the fix:
+    - one full run: `43/43`, includes `9`, does not invent bare `29`
+    - second full run: `43/43`, includes `9`, does not invent bare `29`
 
 ## Important backend fixes already present
 
