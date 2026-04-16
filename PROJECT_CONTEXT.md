@@ -163,6 +163,23 @@ Last updated: 2026-04-16
         - `29B`
     - `page_06.png`:
       - remaining uncertain `8` is now locally anchored too
+- New suffix-confusion fix on `2026-04-16`:
+  - dense sheets exposed a common OCR case where suffix labels like `29B` were read locally as `298`
+  - fix in:
+    - `C:/projects/sites/blueprint-rec-2/services/inference/app/services/job_runner.py`
+  - new behavior:
+    - truth-guided local refinement now accepts a narrow target-aware suffix confusion match
+    - example:
+      - target `29B`
+      - local OCR region `298`
+      - now treated as the same local anchor only inside truth-guided refinement
+  - verified on fresh `test1.jpg` run:
+    - `29B` is no longer left as a coarse truth-only point
+    - final overlay shows it anchored on the actual lower `29B` callout
+- Rejected experiment on `2026-04-16`:
+  - blindly extending the local refinement crop radius further outward did recover one more label (`24`) on `test1.jpg`
+  - but it also created new false local anchors and duplicate noise on the same sheet
+  - that change was reverted and is intentionally not kept
 - Visual benchmark check now matters more than raw counts:
   - confirmed by direct image inspection after fresh live runs, using final overlays rendered from `result.json`, not raw legacy overlays
   - fresh verified overlays:
@@ -178,8 +195,8 @@ Last updated: 2026-04-16
     - `page_06.png`: visually good; leftover uncertain `8` is now locally anchored
     - `page_12.png`: visually good
   - remaining practical gap:
-    - dense sheet `test1.jpg` still has one coarse leftover (`29B`) without local bbox
-    - separate from geometry quality, `page_12.png` can still hang for a very long time on fresh reruns; this is a performance / timeout issue, not a new visual-hit regression
+    - dense sheet `test1.jpg` still has at least one coarse leftover (`24`) without local bbox in the clean branch
+    - separate from geometry quality, `page_12.png` still needs a dedicated timing investigation if it starts hanging again; latest preserved `300s` and `600s` smoke runs completed successfully
 
 ## Important backend fixes already present
 

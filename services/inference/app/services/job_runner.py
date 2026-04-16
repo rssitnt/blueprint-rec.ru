@@ -49,6 +49,18 @@ SAFE_NAME_RE = re.compile(r"[^A-Za-z0-9._-]+")
 NEAR_TIE_NOTE_TOKEN = "OCR near-tie ambiguity"
 CANONICAL_MIN_SIDE = 1600
 MAX_AUTOCONTRAST_CUTOFF = 1.0
+SUFFIX_CONFUSION_EQUIVALENTS: dict[str, set[str]] = {
+    "A": {"4"},
+    "B": {"8"},
+    "E": {"3"},
+    "G": {"6"},
+    "I": {"1", "L"},
+    "L": {"1", "I"},
+    "O": {"0", "Q", "D"},
+    "Q": {"0", "O"},
+    "S": {"5"},
+    "Z": {"2"},
+}
 
 
 @dataclass(frozen=True)
@@ -2044,6 +2056,32 @@ def _truth_only_duplicate_radius_px(page_width: int | None, page_height: int | N
     return base
 
 
+def _targeted_label_match_score(candidate_label: str, target_label: str) -> float:
+    candidate = str(candidate_label or "").strip().upper().translate(str.maketrans({"А": "A", "В": "B", "Е": "E", "К": "K", "М": "M", "Н": "H", "О": "O", "Р": "P", "С": "C", "Т": "T", "У": "Y", "Х": "X"}))
+    target = str(target_label or "").strip().upper().translate(str.maketrans({"А": "A", "В": "B", "Е": "E", "К": "K", "М": "M", "Н": "H", "О": "O", "Р": "P", "С": "C", "Т": "T", "У": "Y", "Х": "X"}))
+    if not candidate or not target:
+        return 0.0
+    if candidate == target:
+        return 1.0
+    if len(candidate) != len(target):
+        return 0.0
+    if len(target) < 2:
+        return 0.0
+    if candidate[:-1] != target[:-1]:
+        return 0.0
+    target_suffix = target[-1]
+    candidate_suffix = candidate[-1]
+    if candidate_suffix == target_suffix:
+        return 1.0
+    equivalents = SUFFIX_CONFUSION_EQUIVALENTS.get(target_suffix, set())
+    if candidate_suffix in equivalents:
+        return 0.93
+    reverse_equivalents = SUFFIX_CONFUSION_EQUIVALENTS.get(candidate_suffix, set())
+    if target_suffix in reverse_equivalents:
+        return 0.88
+    return 0.0
+
+
 def _refine_truth_only_row_from_local_crop(
     truth_item: Mapping[str, Any],
     *,
@@ -2089,27 +2127,31 @@ def _refine_truth_only_row_from_local_crop(
 
         crop = image.crop((left, top, right, bottom))
         regions = local_recognizer.detect_document_text(crop, include_tiles=True)
-        exact_regions = [
-            region
-            for region in regions
-            if normalize_label(region.label) == normalized_label and (region.confidence or 0.0) >= 0.7
-        ]
-        if not exact_regions:
+        matched_regions: list[tuple[float, Any]] = []
+        for region in regions:
+            match_score = _targeted_label_match_score(region.label, label)
+            if match_score <= 0.0:
+                continue
+            region_confidence = float(region.confidence or 0.0)
+            if region_confidence < 0.7 and match_score < 1.0:
+                continue
+            matched_regions.append((match_score, region))
+        if not matched_regions:
             continue
 
-        for region in exact_regions:
+        for match_score, region in matched_regions:
             abs_center_x = left + region.bbox_x + region.bbox_width / 2.0
             abs_center_y = top + region.bbox_y + region.bbox_height / 2.0
             distance = hypot(abs_center_x - x, abs_center_y - y)
-            score = float(region.confidence or 0.0) - (distance / max(crop_radius * 6.0, 1.0))
+            score = float(region.confidence or 0.0) + (match_score - 1.0) * 0.2 - (distance / max(crop_radius * 6.0, 1.0))
             if best_region is None or best_region_score is None or score > best_region_score:
-                best_region = (left, top, region, abs_center_x, abs_center_y)
+                best_region = (left, top, region, abs_center_x, abs_center_y, match_score)
                 best_region_score = score
         if best_region is not None and best_region_score is not None and best_region_score >= 0.55:
             break
 
     if best_region is not None:
-        left, top, region, abs_center_x, abs_center_y = best_region
+        left, top, region, abs_center_x, abs_center_y, match_score = best_region
         truth_row = _truth_only_row(truth_item, row_number=row_number)
         return truth_row.model_copy(
             update={
@@ -2122,7 +2164,11 @@ def _refine_truth_only_row_from_local_crop(
                     h=round(region.bbox_height, 2),
                 ),
                 "final_score": max(float(truth_row.final_score or 0.0), float(region.confidence or 0.0)),
-                "note": "Точка поставлена по full-page truth и уточнена локальным OCR рядом с меткой.",
+                "note": (
+                    "Точка поставлена по full-page truth и уточнена локальным OCR рядом с меткой."
+                    if match_score >= 0.999
+                    else "Точка поставлена по full-page truth и уточнена локальным OCR с учётом типичной OCR-путаницы в суффиксе."
+                ),
                 "source_kind": "vlm_locator_refined",
             }
         )
